@@ -1,4 +1,3 @@
-// src/components/hospitality/ItemRow.jsx
 import { useEffect } from "react";
 import { TableRow, TableCell, IconButton } from "@mui/material";
 import { useWatch, useFormContext } from "react-hook-form";

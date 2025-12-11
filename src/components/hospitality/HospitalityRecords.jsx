@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import {
   Box,
@@ -25,13 +25,15 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import hospitalityApi from "../api/hospitalityApi";
-import HospitalityRecordsToolBar from "../components/hospitality/HospitalityRecordsToolbar";
-import HospitalityRecordDialog from "../components/hospitality/HospitalityRecordsDialog";
-import HospitalityRecordsTable from "../components/hospitality/HospitalityRecordsTable";
+import hospitalityApi from "../../api/hospitalityApi";
+import HospitalityRecordsToolBar from "./HospitalityRecordsToolbar";
+import HospitalityRecordDialog from "./HospitalityRecordsDialog";
+import HospitalityRecordsTable from "./HospitalityRecordsTable";
 
-import { MasterDataProvider } from "../context/MasterDataContext";
-import { downloadBlob } from "../utils/downloadBlob";
+import { MasterDataProvider } from "../../context/MasterDataContext";
+import { downloadBlob } from "../../utils/downloadBlob";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import moduleRoutes from "../../constants/moduleRoutes";
 const emptyRecord = {
   id: null,
   receptionDate: "2025-12-30",
@@ -56,19 +58,25 @@ const emptyRecord = {
 };
 
 export default function HospitalityRecords() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [records, setRecords] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
-  const [draftFilters, setDraftFilters] = useState({
-    receptionDateFrom: "",
-    receptionDateTo: "",
+  const [draftFilters, setDraftFilters] = useState(() => {
+    const from = searchParams.get("invoiceNumberFrom") ?? "";
+    const to = searchParams.get("invoiceNumberTo") ?? "";
+    return {
+      receptionDateFrom: "",
+      receptionDateTo: "",
+      invoiceNumberFrom: from,
+      invoiceNumberTo: to,
+      counterpartyId: null,
+    };
   });
+  const [filters, setFilters] = useState(draftFilters);
   const [page, setPage] = useState(0);
-  const [filters, setFilters] = useState({
-    receptionDateFrom: "",
-    receptionDateTo: "",
-  });
 
   const handleExport = async () => {
     try {
@@ -91,15 +99,21 @@ export default function HospitalityRecords() {
   };
 
   const handleSearch = () => {
-    setFilters(draftFilters);
+    setFilters({ ...draftFilters });
     setPage(0);
   };
 
   const handleClear = () => {
-    const empty = { receptionDateFrom: "", receptionDateTo: "" };
+    const empty = {
+      receptionDateFrom: "",
+      receptionDateTo: "",
+      invoiceNumberFrom: "",
+      invoiceNumberTo: "",
+    };
     setDraftFilters(empty);
     setFilters(empty);
     setPage(0);
+    navigate(moduleRoutes.HOSPITALITY_RECORDS, { replace: true });
   };
 
   const handleToggleAll = (checked) => {

@@ -7,7 +7,7 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 
 import { useState } from "react";
-import menuLables from "../../constants/menuLables";
+import menuLables from "../../constants/moduleLables";
 
 export default function Sidebar({ onOpenModule }) {
   const [masterOpen, setMasterOpen] = useState(true);
@@ -20,7 +20,7 @@ export default function Sidebar({ onOpenModule }) {
         <ListItemButton
           onClick={() =>
             onOpenModule({
-              key: "records",
+              key: "HOSPITALITY_RECORDS",
               label: menuLables.HOSPITALITY_RECORDS,
             })
           }
@@ -31,12 +31,12 @@ export default function Sidebar({ onOpenModule }) {
         <ListItemButton
           onClick={() =>
             onOpenModule({
-              key: "invoice_conflicts",
-              label: menuLables.INVOICE_CONFLICTS,
+              key: "INVOICE_CONFLICT",
+              label: menuLables.INVOICE_CONFLICT,
             })
           }
         >
-          <ListItemText primary={menuLables.INVOICE_CONFLICTS} />
+          <ListItemText primary={menuLables.INVOICE_CONFLICT} />
         </ListItemButton>
 
         <ListItemButton onClick={toggleMaster}>
@@ -49,18 +49,18 @@ export default function Sidebar({ onOpenModule }) {
             <ListItemButton
               onClick={() =>
                 onOpenModule({
-                  key: "departments",
-                  label: menuLables.DEPARTMENTS,
+                  key: "DEPARTMENT",
+                  label: menuLables.DEPARTMENT,
                 })
               }
             >
-              <ListItemText primary={menuLables.DEPARTMENTS} sx={{ pl: 2 }} />
+              <ListItemText primary={menuLables.DEPARTMENT} sx={{ pl: 2 }} />
             </ListItemButton>
 
             <ListItemButton
               onClick={() =>
                 onOpenModule({
-                  key: "counterparty",
+                  key: "COUNTERPARTY",
                   label: menuLables.COUNTERPARTY,
                 })
               }
@@ -70,10 +70,10 @@ export default function Sidebar({ onOpenModule }) {
 
             <ListItemButton
               onClick={() =>
-                onOpenModule({ key: "position", label: menuLables.POSITIONS })
+                onOpenModule({ key: "POSITION", label: menuLables.POSITION })
               }
             >
-              <ListItemText primary={menuLables.POSITIONS} sx={{ pl: 2 }} />
+              <ListItemText primary={menuLables.POSITION} sx={{ pl: 2 }} />
             </ListItemButton>
 
             <ListItemButton

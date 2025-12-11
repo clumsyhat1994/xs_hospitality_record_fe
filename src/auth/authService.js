@@ -10,8 +10,6 @@ export function getCurrentUserFromToken() {
 
   try {
     const payload = jwtDecode(token);
-
-    console.log(payload);
     return {
       username: payload.sub,
       departmentCode: payload.departmentCode,

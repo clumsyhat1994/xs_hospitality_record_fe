@@ -26,6 +26,7 @@ import {
   getCurrentUserFromToken,
   isAdmin as isAdminFn,
 } from "../../auth/authService";
+import masterDataApi from "../../api/masterDataApi";
 
 export default function HospitalityRecordDialog({
   open,
@@ -57,7 +58,7 @@ export default function HospitalityRecordDialog({
     reset(initialValues);
 
     if (!isAdmin) setValue("departmentCode", user.departmentCode);
-  }, [initialValues, open, reset]);
+  }, [initialValues, isAdmin, open, reset, setValue, user.departmentCode]);
 
   const cleanDataForUpdate = (data) => {
     return Object.fromEntries(
@@ -146,8 +147,11 @@ export default function HospitalityRecordDialog({
                 name="counterpartyId"
                 //control={control}
                 options={counterparties ?? []}
-                optionsSetter={setCounterparties}
+                setOptions={setCounterparties}
                 label={fieldLabels.counterparty}
+                fetchOptions={(keyword) =>
+                  masterDataApi.searchCounterParties(keyword)
+                }
                 sm={8}
                 rules={{ required: "Counterparty is required" }}
               />
