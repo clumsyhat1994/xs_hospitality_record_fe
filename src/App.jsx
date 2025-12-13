@@ -5,8 +5,9 @@ import RequireAuth from "./routes/RequireAuth";
 import "./App.css";
 import HospitalityRecords from "./components/hospitality/HospitalityRecords";
 import SequentialInvoiceNumber from "./components/invoice-conflict/SequentialInvoiceNumber";
-import Counterparty from "./components/master_data/Counterparty";
+import CounterpartyPage from "./components/master-data/CounterpartyPage";
 import moduleRoutes from "./constants/moduleRoutes";
+//import Department from "./components/master_data/Department";
 
 function App() {
   return (
@@ -31,10 +32,11 @@ function App() {
             path={moduleRoutes.INVOICE_CONFLICT}
             element={<SequentialInvoiceNumber />}
           />
-          <Route path={moduleRoutes.COUNTERPARTY} element={<Counterparty />} />
-          <Route path={moduleRoutes.DEPARTMENT} element={<Counterparty />} />
-          <Route path={moduleRoutes.POSITION} element={<Counterparty />} />
-          <Route path={moduleRoutes.GRADE} element={<Counterparty />} />
+          <Route
+            path={moduleRoutes.COUNTERPARTY}
+            element={<CounterpartyPage />}
+          />
+          {/* <Route path={moduleRoutes.DEPARTMENT} element={<Department />} /> */}
         </Route>
       </Routes>
     </BrowserRouter>

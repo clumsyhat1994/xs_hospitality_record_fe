@@ -15,6 +15,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import BaseComboBox from "../form/BaseComboBox";
 import { useMasterData } from "../../context/MasterDataContext";
 import masterDataApi from "../../api/masterDataApi";
+import { useCallback } from "react";
 export default function HospitalityRecordsToolbar({
   selectedCount,
   onCreate,
@@ -26,7 +27,10 @@ export default function HospitalityRecordsToolbar({
   onExport,
 }) {
   const { counterparties, setCounterparties } = useMasterData();
-
+  const fetchCounterparties = useCallback(
+    (keyword) => masterDataApi.searchCounterParties(keyword),
+    []
+  );
   return (
     <Toolbar
       sx={{
@@ -35,7 +39,7 @@ export default function HospitalityRecordsToolbar({
         //gap: 2,
       }}
     >
-      <Typography variant="h6">招待台帐</Typography>
+      <Typography variant="h6">招待台账</Typography>
       <Grid container spacing={2} pt={3}>
         <Grid>
           <TextField
@@ -116,9 +120,7 @@ export default function HospitalityRecordsToolbar({
           }}
           options={counterparties}
           setOptions={setCounterparties}
-          fetchOptions={(keyword) =>
-            masterDataApi.searchCounterParties(keyword)
-          }
+          fetchOptions={fetchCounterparties}
         />
 
         <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>

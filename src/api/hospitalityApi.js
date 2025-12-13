@@ -14,7 +14,6 @@ const hospitalityApi = {
       params: confirm ? { confirm: true } : {},
     }),
   update: (id, payload, confirm = false) => {
-    console.log("api.update confirm =", confirm);
     return api.put(`${getHospitalityPath()}/${id}`, payload, {
       params: confirm === true ? { confirm: true } : {},
     });

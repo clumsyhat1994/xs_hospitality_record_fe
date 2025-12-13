@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 console.log("FormModeContext LOADED");
-const FormModeContext = createContext({ isEditMode: false });
+const FormModeContext = createContext({ isEditMode: null });
 
 export function FormModeProvider({ isEditMode, children }) {
   return (

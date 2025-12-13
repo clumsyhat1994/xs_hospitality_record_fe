@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -41,7 +41,7 @@ export default function HospitalityRecordDialog({
 
   const { control, handleSubmit, reset, setError, setValue, getFieldState } =
     methods;
-  const [softConfirmOpen, setSoftConfirmOpen] = useState(false);
+  const [softConfirmDialogOpen, setSoftConfirmDialogOpen] = useState(false);
   const {
     departments,
     hospitalityTypes,
@@ -50,7 +50,10 @@ export default function HospitalityRecordDialog({
     setCounterparties,
   } = useMasterData();
   const [softErrors, setSoftErrors] = useState([]);
-
+  const fetchCounterparties = useCallback(
+    (keyword) => masterDataApi.searchCounterParties(keyword),
+    []
+  );
   const user = getCurrentUserFromToken();
   const isAdmin = isAdminFn(user);
 
@@ -87,7 +90,7 @@ export default function HospitalityRecordDialog({
         res = await hospitalityApi.create(data, confirm);
         console.log(res.data);
       }
-      setSoftConfirmOpen(false);
+      setSoftConfirmDialogOpen(false);
       onSave(res.data);
     } catch (err) {
       console.error(err);
@@ -103,7 +106,7 @@ export default function HospitalityRecordDialog({
       if (hasHardErrors) {
         errorData = errorData.filter((e) => !SOFT_CODES.includes(e.code));
       } else {
-        setSoftConfirmOpen(true);
+        setSoftConfirmDialogOpen(true);
         setSoftErrors(errorData);
       }
       errorData.forEach((e) => {
@@ -149,9 +152,7 @@ export default function HospitalityRecordDialog({
                 options={counterparties ?? []}
                 setOptions={setCounterparties}
                 label={fieldLabels.counterparty}
-                fetchOptions={(keyword) =>
-                  masterDataApi.searchCounterParties(keyword)
-                }
+                fetchOptions={fetchCounterparties}
                 sm={8}
                 rules={{ required: "Counterparty is required" }}
               />
@@ -259,8 +260,6 @@ export default function HospitalityRecordDialog({
                 //control={control}
                 label={fieldLabels.ourHostPosition}
                 options={positions ?? []}
-                getOptionLabel={(d) => d.title}
-                getOptionValue={(d) => d.id}
                 rules={{ required: "我方主持招待人员职务 is required" }}
               />
 
@@ -269,8 +268,6 @@ export default function HospitalityRecordDialog({
                 //control={control}
                 label={fieldLabels.theirHostPosition}
                 options={positions ?? []}
-                getOptionLabel={(d) => d.title}
-                getOptionValue={(d) => d.id}
                 rules={{ required: "对方主持招待人员职务 is required" }}
               />
 
@@ -301,7 +298,7 @@ export default function HospitalityRecordDialog({
           </DialogActions>
         </Dialog>
 
-        <Dialog maxWidth="md" open={softConfirmOpen}>
+        <Dialog maxWidth="md" open={softConfirmDialogOpen}>
           <DialogTitle>你确定要提交吗？？</DialogTitle>
           <DialogContent>
             {softErrors.map((e) => (
@@ -311,7 +308,9 @@ export default function HospitalityRecordDialog({
             ))}
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setSoftConfirmOpen(false)}>取消</Button>
+            <Button onClick={() => setSoftConfirmDialogOpen(false)}>
+              取消
+            </Button>
             <Button
               variant="contained"
               onClick={handleSubmit((data) => submit(data, true))}

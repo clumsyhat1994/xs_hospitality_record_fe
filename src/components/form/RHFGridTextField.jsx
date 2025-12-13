@@ -12,12 +12,15 @@ export default function RHFTextField({
 }) {
   const { clearErrors, control } = useFormContext();
   const { isEditMode } = useFormMode();
+
   return (
     <Grid size={{ xs: xs, sm: sm }}>
       <Controller
         name={name}
         control={control}
-        rules={!isEditMode ? { required: "不能为空", ...rules } : rules}
+        rules={
+          isEditMode === false ? { required: "不能为空", ...rules } : rules
+        }
         render={({ field, fieldState: { error } }) => (
           <TextField
             {...field}

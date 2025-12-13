@@ -78,7 +78,7 @@ export default function Sidebar({ onOpenModule }) {
 
             <ListItemButton
               onClick={() =>
-                onOpenModule({ key: "grade", label: menuLables.GRADE })
+                onOpenModule({ key: "GRADE", label: menuLables.GRADE })
               }
             >
               <ListItemText primary={menuLables.GRADE} sx={{ pl: 2 }} />
