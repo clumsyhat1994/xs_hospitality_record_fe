@@ -62,7 +62,7 @@ export default function Sidebar({ onOpenModule }) {
 
           <Collapse in={masterOpen} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-              <ListItemButton
+              {/* <ListItemButton
                 onClick={() =>
                   onOpenModule({
                     key: "DEPARTMENT",
@@ -71,7 +71,7 @@ export default function Sidebar({ onOpenModule }) {
                 }
               >
                 <ListItemText primary={menuLables.DEPARTMENT} sx={{ pl: 2 }} />
-              </ListItemButton>
+              </ListItemButton> */}
 
               <ListItemButton
                 onClick={() =>
@@ -87,7 +87,7 @@ export default function Sidebar({ onOpenModule }) {
                 />
               </ListItemButton>
 
-              <ListItemButton
+              {/* <ListItemButton
                 onClick={() =>
                   onOpenModule({ key: "POSITION", label: menuLables.POSITION })
                 }
@@ -101,7 +101,7 @@ export default function Sidebar({ onOpenModule }) {
                 }
               >
                 <ListItemText primary={menuLables.GRADE} sx={{ pl: 2 }} />
-              </ListItemButton>
+              </ListItemButton> */}
             </List>
           </Collapse>
         </List>

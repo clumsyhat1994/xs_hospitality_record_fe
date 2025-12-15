@@ -165,7 +165,7 @@ export default function HospitalityRecordsToolbar({
             导出 Excel
           </Button>
         </Tooltip>
-        <Button
+        {/* <Button
           variant="outlined"
           color="error"
           startIcon={<DeleteIcon />}
@@ -173,7 +173,7 @@ export default function HospitalityRecordsToolbar({
           onClick={onBatchDelete}
         >
           Batch Delete
-        </Button>
+        </Button> */}
       </Stack>
     </Toolbar>
   );
