@@ -18,7 +18,7 @@ const checkTokenValidity = () => {
 };
 
 const RequireAuth = ({ children }) => {
-  return checkTokenValidity() ? children : <Navigate to="/authentication" />;
+  return checkTokenValidity() ? children : <Navigate to="/login" />;
 };
 
 export default RequireAuth;
