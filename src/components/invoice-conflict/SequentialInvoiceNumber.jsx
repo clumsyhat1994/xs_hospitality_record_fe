@@ -6,8 +6,10 @@ import {
   TableBody,
   TableCell,
   TablePagination,
+  Stack,
+  CircularProgress,
 } from "@mui/material";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import invoiceRunsApi from "../../api/invoiceRunsApi";
 import moduleRoutes from "../../constants/moduleRoutes";
@@ -19,6 +21,9 @@ export default function SequentialInvoiceNumber() {
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(10);
 
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const reqIdRef = useRef(0);
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -28,16 +33,36 @@ export default function SequentialInvoiceNumber() {
     setSize(newSize);
     setPage(0);
   };
+
+  const load = useCallback(
+    async (p = page, s = size) => {
+      const reqId = ++reqIdRef.current;
+      setLoading(true);
+      try {
+        const res = await invoiceRunsApi.list(p, s);
+        if (reqId !== reqIdRef.current) return; // stale response
+        setRows(res.data.content ?? []);
+        setTotalElements(res.data.totalElements ?? 0);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        if (reqId === reqIdRef.current) setLoading(false);
+      }
+    },
+    [page, size]
+  );
+
   useEffect(() => {
-    invoiceRunsApi
-      .list(page, size)
-      .then((res) => {
-        console.log(res);
-        setRows(res.data.content);
-        setTotalElements(res.data.totalElements);
-      })
-      .catch(console.error);
-  }, [page, size]);
+    load();
+    // invoiceRunsApi
+    //   .list(page, size)
+    //   .then((res) => {
+    //     console.log(res);
+    //     setRows(res.data.content);
+    //     setTotalElements(res.data.totalElements);
+    //   })
+    //   .catch(console.error);
+  }, [load]);
 
   const handleGoToRecords = (row) => {
     const invoices = row.invoiceNumberStrings ?? [];
@@ -55,8 +80,38 @@ export default function SequentialInvoiceNumber() {
     navigate(`${moduleRoutes.HOSPITALITY_RECORDS}?${params.toString()}`);
   };
 
+  const handleRefresh = async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    try {
+      await invoiceRunsApi.refresh();
+      setPage(0);
+      await load(0, size);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   return (
     <>
+      <Stack
+        direction="row"
+        justifyContent="flex-start"
+        sx={{ margin: 2 }}
+        spacing={1}
+      >
+        <Button
+          variant="contained"
+          onClick={handleRefresh}
+          disabled={refreshing || loading}
+          startIcon={refreshing ? <CircularProgress size={16} /> : null}
+        >
+          {refreshing ? "刷新中…" : "刷新记录"}
+        </Button>
+      </Stack>
+
       <Table size="small">
         <TableHead>
           <TableRow>
@@ -73,6 +128,7 @@ export default function SequentialInvoiceNumber() {
                   variant="outlined"
                   size="small"
                   onClick={() => handleGoToRecords(row)}
+                  disabled={loading || refreshing}
                 >
                   查看明细
                 </Button>
@@ -92,6 +148,7 @@ export default function SequentialInvoiceNumber() {
         rowsPerPage={size}
         onRowsPerPageChange={handleChangeRowsPerPage}
         rowsPerPageOptions={[5, 10, 20]}
+        disabled={loading || refreshing}
       />
     </>
   );
