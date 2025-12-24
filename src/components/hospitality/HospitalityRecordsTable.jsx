@@ -101,7 +101,7 @@ export default function HospitalityRecordsTable({
                 onChange={(e) => onToggleAll(e.target.checked)}
               />
             </TableCell>
-            <TableCell padding="checkbox" align="center">
+            <TableCell sx={{ minWidth: 95 }} padding="checkbox" align="center">
               操作
             </TableCell>
             <TableCell sx={{ minWidth: 120 }}>
@@ -127,7 +127,7 @@ export default function HospitalityRecordsTable({
             <TableCell align="right" sx={{ minWidth: 110 }}>
               {fieldLabels.totalAmount}
             </TableCell>
-            <TableCell sx={{ minWidth: 200 }}>
+            <TableCell align="center" sx={{ minWidth: 200 }}>
               {fieldLabels.invoiceNumberString}
             </TableCell>
             <TableCell sx={{ minWidth: 120 }}>

@@ -40,8 +40,8 @@ export default function SequentialInvoiceNumber() {
       setLoading(true);
       try {
         const res = await invoiceRunsApi.list(p, s);
-        if (reqId !== reqIdRef.current) return; // stale response
-        //setRows(res.data.content ?? []);
+        if (reqId !== reqIdRef.current) return;
+        setRows(res.data.content ?? []);
         setTotalElements(res.data.totalElements ?? 0);
       } catch (e) {
         console.error(e);
@@ -121,23 +121,25 @@ export default function SequentialInvoiceNumber() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.id}>
-              <TableCell>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={() => handleGoToRecords(row)}
-                  disabled={loading || refreshing}
-                >
-                  查看明细
-                </Button>
-              </TableCell>
-              <TableCell>{row.invoiceNumberStrings.join(", ")}</TableCell>
+          {rows.map((row) => {
+            return (
+              <TableRow key={row.startNumber}>
+                <TableCell>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => handleGoToRecords(row)}
+                    disabled={loading || refreshing}
+                  >
+                    查看明细
+                  </Button>
+                </TableCell>
+                <TableCell>{row.invoiceNumberStrings.join(", ")}</TableCell>
 
-              <TableCell>{row.receptionDates.join(", ")}</TableCell>
-            </TableRow>
-          ))}
+                <TableCell>{row.receptionDates.join(", ")}</TableCell>
+              </TableRow>
+            );
+          })}
           {rows.length === 0 && (
             <TableRow>
               <TableCell colSpan={3} align="left">

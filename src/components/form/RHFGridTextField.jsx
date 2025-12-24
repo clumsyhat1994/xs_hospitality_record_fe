@@ -10,6 +10,7 @@ export default function RHFTextField({
   rules = {},
   ...rest
 }) {
+  const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
   const { clearErrors, control } = useFormContext();
   const { isEditMode } = useFormMode();
 
@@ -24,8 +25,14 @@ export default function RHFTextField({
         render={({ field, fieldState: { error } }) => (
           <TextField
             {...field}
+            value={field.value ?? ""}
             onChange={(e) => {
-              field.onChange(e);
+              const v = e.target.value;
+              console.log(v);
+              if (type === "date" && !ISO_DATE_REGEX.test(v)) {
+                return;
+              }
+              field.onChange(v);
               if (error?.type === "server") clearErrors(name);
             }}
             fullWidth

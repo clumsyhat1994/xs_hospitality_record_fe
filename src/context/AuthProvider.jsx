@@ -7,11 +7,10 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  console.log("AuthProvider render");
+
   useEffect(() => {
-    console.log("AuthProvider useEffect ran");
     const token = getToken();
-    console.log("token", token);
+
     if (!token) {
       setUser(null);
       setLoading(false);
@@ -51,7 +50,7 @@ export function AuthProvider({ children }) {
 // eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  console.log("ctx:", ctx);
+
   if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
   return ctx;
 }
@@ -63,9 +62,9 @@ function buildUserFromToken(token) {
   if (expired) return null;
 
   const roles = payload.authorities ?? payload.roles ?? [];
-  console.log(roles);
+
   const isAdmin = roles.includes("ROLE_ADMIN") || roles.includes("ADMIN");
-  console.log(isAdmin);
+
   return {
     username: payload.sub,
     departmentCode: payload.departmentCode,
