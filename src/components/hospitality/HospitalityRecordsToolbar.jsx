@@ -39,7 +39,6 @@ export default function HospitalityRecordsToolbar({
         //gap: 2,
       }}
     >
-      <Typography variant="h6">招待台账</Typography>
       <Grid container spacing={2} pt={3}>
         <Grid>
           <TextField

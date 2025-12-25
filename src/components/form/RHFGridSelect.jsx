@@ -14,6 +14,7 @@ export default function RHFSelect({
   sm = 6,
   isAdmin,
   rules = {},
+  required = true,
   ...rest
 }) {
   const { clearErrors, control } = useFormContext();
@@ -23,7 +24,9 @@ export default function RHFSelect({
       <Controller
         name={name}
         control={control}
-        rules={!isEditMode ? { required: "不能为空", ...rules } : rules}
+        rules={
+          required && !isEditMode ? { required: "不能为空", ...rules } : rules
+        }
         render={({ field, fieldState: { error } }) => {
           return (
             <TextField

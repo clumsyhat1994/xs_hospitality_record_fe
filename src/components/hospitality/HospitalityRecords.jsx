@@ -180,6 +180,7 @@ export default function HospitalityRecords() {
         });
 
         const data = res.data;
+
         setRecords(data.content);
         setTotalElements(data.totalElements);
       } catch (e) {

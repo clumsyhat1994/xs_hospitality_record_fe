@@ -80,25 +80,23 @@ export default function HospitalityRecordDialog({
     if (!isAdmin) setValue("departmentCode", user.departmentCode);
   }, [initialValues, isAdmin, open, reset, setValue, user.departmentCode]);
 
-  const cleanDataForUpdate = (data) => {
+  const cleanData = (data) => {
     return Object.fromEntries(
       Object.entries(data).filter(
         ([, v]) => v !== null && v !== undefined && v !== ""
       )
     );
+    //return data;
   };
 
   const submit = async (data, confirm = false) => {
     try {
       let res;
+      console.log(data);
+      data = cleanData(data);
       if (isEditMode) {
         // update
-        res = await hospitalityApi.update(
-          initialValues.id,
-          cleanDataForUpdate(data),
-          confirm
-        );
-
+        res = await hospitalityApi.update(initialValues.id, data, confirm);
         console.log(res.data);
       } else {
         // create
@@ -210,15 +208,10 @@ export default function HospitalityRecordDialog({
                 options={hospitalityTypes ?? []}
               /> */}
 
-              <RHFTextField
-                name="location"
-                //control={control}
-                label={fieldLabels.location}
-              />
+              <RHFTextField name="location" label={fieldLabels.location} />
 
               <RHFTextField
                 name="invoiceDate"
-                //control={control}
                 label={fieldLabels.invoiceDate}
                 type="date"
                 sm={4}
@@ -226,7 +219,8 @@ export default function HospitalityRecordDialog({
 
               <RHFTextField
                 name="invoiceNumberString"
-                //control={control}
+                required={false}
+                numericOnly={true}
                 label={fieldLabels.invoiceNumberString}
                 sm={8}
               />

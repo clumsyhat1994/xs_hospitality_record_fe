@@ -16,6 +16,7 @@ export default function RHFComboBox({
   xs = 12,
   sm = 6,
   rules = {},
+  required = true,
   ...rest
 }) {
   const { control } = useFormContext();
@@ -25,7 +26,9 @@ export default function RHFComboBox({
     <Controller
       name={name}
       control={control}
-      rules={!isEditMode ? { required: "不能为空", ...rules } : rules}
+      rules={
+        required && !isEditMode ? { required: "不能为空", ...rules } : rules
+      }
       render={({ field, fieldState: { error } }) => {
         return (
           <BaseComboBox

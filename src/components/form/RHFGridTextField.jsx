@@ -8,9 +8,12 @@ export default function RHFTextField({
   xs = 12,
   sm = 6,
   rules = {},
+  required = true,
+  numericOnly = false,
   ...rest
 }) {
   const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+  const DIGIT_REGEX = /^\d*$/;
   const { clearErrors, control } = useFormContext();
   const { isEditMode } = useFormMode();
 
@@ -20,7 +23,7 @@ export default function RHFTextField({
         name={name}
         control={control}
         rules={
-          isEditMode === false ? { required: "不能为空", ...rules } : rules
+          required && !isEditMode ? { required: "不能为空", ...rules } : rules
         }
         render={({ field, fieldState: { error } }) => (
           <TextField
@@ -28,10 +31,9 @@ export default function RHFTextField({
             value={field.value ?? ""}
             onChange={(e) => {
               const v = e.target.value;
-              console.log(v);
-              if (type === "date" && !ISO_DATE_REGEX.test(v)) {
+              if (type === "date" && v !== "" && !ISO_DATE_REGEX.test(v))
                 return;
-              }
+              if (numericOnly && !DIGIT_REGEX.test(v)) return;
               field.onChange(v);
               if (error?.type === "server") clearErrors(name);
             }}

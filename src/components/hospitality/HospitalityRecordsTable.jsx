@@ -57,26 +57,6 @@ export default function HospitalityRecordsTable({
     const controller = new AbortController();
     load(controller.signal);
     return () => controller.abort();
-    // let cancelled = false;
-    // const load = async () => {
-    //   setLoading(true);
-    //   try {
-    //     const res = await hospitalityApi.filtered_list(page, size, filters);
-    //     if (!cancelled) {
-    //       const data = res.data;
-    //       setRecords(data.content);
-    //       setTotalElements(data.totalElements);
-    //     }
-    //   } catch (e) {
-    //     if (!cancelled) console.error(e);
-    //   } finally {
-    //     if (!cancelled) setLoading(false);
-    //   }
-    // };
-    // load();
-    // return () => {
-    //   cancelled = true;
-    // };
   }, [load]);
 
   const handleChangePage = (event, newPage) => {

@@ -7,6 +7,7 @@ export default function RHFTableTextField({
   type = "text",
   rules = {},
   readOnly = false,
+  required = true,
   ...rest
 }) {
   const { clearErrors, control, getFieldState } = useFormContext();
@@ -16,7 +17,9 @@ export default function RHFTableTextField({
       <Controller
         name={name}
         control={control}
-        rules={!isEditMode ? { required: "不能为空", ...rules } : rules}
+        rules={
+          required && !isEditMode ? { required: "不能为空", ...rules } : rules
+        }
         render={({ field, fieldState: { error } }) => (
           <TextField
             {...field}
