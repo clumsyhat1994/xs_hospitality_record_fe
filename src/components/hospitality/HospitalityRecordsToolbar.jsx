@@ -31,6 +31,12 @@ export default function HospitalityRecordsToolbar({
     (keyword) => masterDataApi.searchCounterParties(keyword),
     []
   );
+
+  const { departments, setDepartments } = useMasterData();
+  const fetchDepartments = useCallback(
+    (keyword) => masterDataApi.searchDepartments(keyword),
+    []
+  );
   return (
     <Toolbar
       sx={{
@@ -121,6 +127,19 @@ export default function HospitalityRecordsToolbar({
           setOptions={setCounterparties}
           fetchOptions={fetchCounterparties}
         />
+        <BaseComboBox
+          label="报销部门"
+          xs={6}
+          sm={3}
+          getOptionValue={(opt) => opt.code ?? opt}
+          fieldValue={draftFilters.departmentCode}
+          onChange={(v) => {
+            onDraftFilterChange("departmentCode", v);
+          }}
+          options={departments}
+          setOptions={setDepartments}
+          fetchOptions={fetchDepartments}
+        />
 
         <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Button
@@ -135,7 +154,7 @@ export default function HospitalityRecordsToolbar({
             startIcon={<ClearIcon />}
             onClick={onClear}
           >
-            清空
+            重置
           </Button>
         </Grid>
       </Grid>

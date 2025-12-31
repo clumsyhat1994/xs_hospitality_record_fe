@@ -75,7 +75,7 @@ function buildUserFromToken(token) {
   const roles = payload.authorities ?? payload.roles ?? [];
 
   const isAdmin = roles.includes("ROLE_ADMIN") || roles.includes("ADMIN");
-  console.log(payload);
+
   return {
     username: payload.sub,
     departmentCode: payload.department,

@@ -22,7 +22,8 @@ const fieldLabels = {
   unitPrice: "物品单价(元)",
   quantity: "物品数量",
   lineTotal: "物品总价(元)",
-  items: "购买物品明细",
+  items: "领用物品明细",
+  remark: "备注",
 };
 
 export default fieldLabels;

@@ -74,13 +74,13 @@ export default function HospitalityRecordsTable({
       <Table stickyHeader size="small">
         <TableHead>
           <TableRow>
-            <TableCell padding="checkbox">
+            {/* <TableCell padding="checkbox">
               <Checkbox
                 checked={allSelected}
                 indeterminate={indeterminate}
                 onChange={(e) => onToggleAll(e.target.checked)}
               />
-            </TableCell>
+            </TableCell> */}
             <TableCell sx={{ minWidth: 95 }} padding="checkbox" align="center">
               操作
             </TableCell>
@@ -144,9 +144,9 @@ export default function HospitalityRecordsTable({
           {loading ? (
             Array.from({ length: 10 }).map((_, index) => (
               <TableRow key={index}>
-                <TableCell padding="checkbox">
+                {/* <TableCell padding="checkbox">
                   <Skeleton variant="rectangular" width={24} height={28} />
-                </TableCell>
+                </TableCell> */}
 
                 <TableCell padding="checkbox">
                   <Stack direction="row" spacing={1}>
@@ -221,12 +221,12 @@ export default function HospitalityRecordsTable({
                 const selected = selectedIds.includes(record.id);
                 return (
                   <TableRow key={record.id} hover selected={selected}>
-                    <TableCell padding="checkbox">
+                    {/* <TableCell padding="checkbox">
                       <Checkbox
                         checked={selected}
                         onChange={() => onToggleOne(record.id)}
                       />
-                    </TableCell>
+                    </TableCell> */}
 
                     <TableCell padding="checkbox">
                       <Stack direction="row" spacing={1}>
@@ -283,7 +283,7 @@ export default function HospitalityRecordsTable({
 
               {records.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={18} align="left">
+                  <TableCell colSpan={17} align="left">
                     您已抵达台帐宇宙的尽头~
                   </TableCell>
                 </TableRow>

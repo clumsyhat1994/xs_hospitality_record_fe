@@ -28,6 +28,7 @@ import {
 } from "../../auth/authService";
 import masterDataApi from "../../api/masterDataApi";
 import { useAuth } from "../../context/AuthProvider";
+import RHFTextareaField from "../form/RHFTextareaField";
 //import masterDataFetchers from "../../api/masterDataFetchers";
 
 export default function HospitalityRecordDialog({
@@ -94,16 +95,16 @@ export default function HospitalityRecordDialog({
   const submit = async (data, confirm = false) => {
     try {
       let res;
-      console.log(data);
+      //console.log(data);
       data = cleanData(data);
       if (isEditMode) {
         // update
         res = await hospitalityApi.update(initialValues.id, data, confirm);
-        console.log(res.data);
+        //console.log(res.data);
       } else {
         // create
         res = await hospitalityApi.create(data, confirm);
-        console.log(res.data);
+        //console.log(res.data);
       }
       setSoftConfirmDialogOpen(false);
       onSave();
@@ -328,6 +329,7 @@ export default function HospitalityRecordDialog({
                 label={fieldLabels.partySecretaryApprovalDate}
                 type="date"
               />
+              <RHFTextareaField name={"remark"} label={fieldLabels.remark} />
             </Grid>
             <HospitalityItemsFieldArray control={control} name="items" />
           </DialogContent>
@@ -345,7 +347,7 @@ export default function HospitalityRecordDialog({
         </Dialog>
 
         <Dialog maxWidth="md" open={softConfirmDialogOpen}>
-          <DialogTitle>你确定要提交吗？？</DialogTitle>
+          <DialogTitle>您确定要提交吗？</DialogTitle>
           <DialogContent>
             {softErrors.map((e) => (
               <div key={e.code}>

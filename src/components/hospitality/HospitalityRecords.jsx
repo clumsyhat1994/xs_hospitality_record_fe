@@ -70,6 +70,7 @@ export default function HospitalityRecords() {
       invoiceNumberFrom: from,
       invoiceNumberTo: to,
       counterpartyId: null,
+      departmentCode: "",
     };
   });
   const [filters, setFilters] = useState(draftFilters);

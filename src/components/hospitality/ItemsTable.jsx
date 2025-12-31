@@ -18,7 +18,7 @@ export default function ItemsTable({ items = [] }) {
   if (!items.length) {
     return (
       <Typography variant="body2" sx={{ p: 1 }}>
-        没有购买物品~
+        没有领用物品~
       </Typography>
     );
   }

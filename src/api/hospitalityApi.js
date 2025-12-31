@@ -9,11 +9,12 @@ const endpoint = endpoints.HOSPITALITY;
 
 const hospitalityApi = {
   get: (id) => api.get(`${endpoint}/${id}`),
-  filtered_list: (page = 0, size = 10, filters = {}, { signal } = {}) =>
-    api.get(endpoint, {
+  filtered_list: (page = 0, size = 10, filters = {}, { signal } = {}) => {
+    return api.get(endpoint, {
       params: { page, size, ...filters },
       signal,
-    }),
+    });
+  },
   create: (payload, confirm = false) =>
     api.post(endpoint, payload, {
       params: confirm ? { confirm: true } : {},

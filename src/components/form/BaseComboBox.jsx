@@ -19,8 +19,6 @@ export default function BaseComboBox({
   ...rest
 }) {
   const [keyword, setKeyword] = useState("");
-  //console.log(options);
-  //console.log("fieldValue: ", fieldValue);
   useEffect(() => {
     const handle = setTimeout(() => {
       fetchOptions(keyword, fieldValue).then((res) => {

@@ -13,6 +13,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import RHFTableTextField from "../form/RHFTableTextField";
 import ItemRow from "../form/ItemRow";
+import fieldLabels from "../../constants/recordFieldLabels";
 
 export default function HospitalityItemsFieldArray({
   control,
@@ -41,7 +42,7 @@ export default function HospitalityItemsFieldArray({
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell colSpan={4}>购买物品明细</TableCell>
+              <TableCell colSpan={4}>{fieldLabels.items}</TableCell>
 
               <TableCell align="center">操作</TableCell>
             </TableRow>

@@ -5,10 +5,10 @@ import { jwtDecode } from "jwt-decode";
 const checkTokenValidity = () => {
   const token = localStorage.getItem("authToken");
   if (!token) return false;
-  //console.log(token);
+
   try {
     const decoded = jwtDecode(token);
-    console.log("decoded: ", decoded);
+
     const currentTime = Date.now() / 1000;
     return decoded.exp > currentTime;
   } catch (e) {

@@ -47,7 +47,6 @@ export function MasterDataProvider({ children }) {
         setPositions(pos.data || []);
         setOurHostPositions(pos.data || []);
         setTheirHostPositions(pos.data || []);
-        console.log("cpt:", cpt);
         setCounterpartyTypes(cpt.data || []);
       })
       .catch((err) => {

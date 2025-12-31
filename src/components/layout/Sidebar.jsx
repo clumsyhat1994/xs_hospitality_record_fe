@@ -16,7 +16,7 @@ export default function Sidebar({ onOpenModule }) {
   const [masterOpen, setMasterOpen] = useState(true);
   const { logout, user } = useAuth();
   const isAdmin = user?.isAdmin ?? false;
-  console.log("isAdmin?", isAdmin);
+
   const toggleMaster = () => {
     setMasterOpen((prev) => !prev);
   };
