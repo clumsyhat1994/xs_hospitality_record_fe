@@ -14,6 +14,9 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import Tooltip from "@mui/material/Tooltip";
+import CommentOutlinedIcon from "@mui/icons-material/CommentOutlined";
+
 import { useEffect } from "react";
 import fieldLabels from "../../constants/recordFieldLabels";
 import { ItemsPopperCell } from "./ItemsPopperCell";
@@ -136,6 +139,9 @@ export default function HospitalityRecordsTable({
             <TableCell sx={{ minWidth: 120 }}>
               {fieldLabels.theirHostPosition}
             </TableCell>
+            <TableCell sx={{ minWidth: 70 }} align="center">
+              {fieldLabels.remark}
+            </TableCell>
           </TableRow>
         </TableHead>
 
@@ -212,6 +218,9 @@ export default function HospitalityRecordsTable({
                 <TableCell>
                   <Skeleton height={26} />
                 </TableCell>
+                <TableCell align="center">
+                  <Skeleton variant="circular" width={24} height={24} />
+                </TableCell>
               </TableRow>
             ))
           ) : (
@@ -276,13 +285,37 @@ export default function HospitalityRecordsTable({
                     </TableCell>
                     <TableCell>{record.ourHostPosition}</TableCell>
                     <TableCell>{record.theirHostPosition}</TableCell>
+                    <TableCell align="center">
+                      <Tooltip
+                        slotProps={{
+                          tooltip: {
+                            sx: {
+                              fontSize: 13,
+                              lineHeight: 1.6,
+                              maxWidth: 400,
+                            },
+                          },
+                        }}
+                        title={
+                          <span style={{ whiteSpace: "pre-wrap" }}>
+                            {record.remark ?? "没有备注~"}
+                          </span>
+                        }
+                        arrow
+                        placement="top"
+                      >
+                        <IconButton size="small">
+                          <CommentOutlinedIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
                   </TableRow>
                 );
               })}
 
               {records.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={17} align="left">
+                  <TableCell colSpan={21} align="left">
                     您已抵达台帐宇宙的尽头~
                   </TableCell>
                 </TableRow>
