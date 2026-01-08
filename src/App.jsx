@@ -5,7 +5,7 @@ import RequireAuth from "./routes/RequireAuth";
 import "./App.css";
 import HospitalityRecords from "./components/hospitality/HospitalityRecords";
 import SequentialInvoiceNumber from "./components/invoice-conflict/SequentialInvoiceNumber";
-import CounterpartyPage from "./components/master-data/CounterpartyPage";
+import CounterpartyPage from "./components/master-data/counterparty/CounterpartyPage";
 import moduleRoutes from "./constants/moduleRoutes";
 import AppShell from "./AppShell";
 //import Department from "./components/master_data/Department";

@@ -10,7 +10,6 @@ export default function RHFMultiAutocomplete({
   disabled,
   getOptionLabel = (opt) => opt?.name ?? String(opt),
   getOptionValue = (opt) => opt?.id ?? opt,
-
   rules = {},
 }) {
   const { isEditMode } = useFormMode();

@@ -54,6 +54,14 @@ const masterDataApi = {
         includeId: includeId === "" ? undefined : includeId,
       },
     }),
+  createHandler: (payload) => api.post(`/api/employee`, payload),
+  searchHandlers: (keyword, includeId) =>
+    api.get("/api/employee/search", {
+      params: {
+        q: keyword,
+        includeId: includeId === "" ? undefined : includeId,
+      },
+    }),
 };
 
 export default masterDataApi;

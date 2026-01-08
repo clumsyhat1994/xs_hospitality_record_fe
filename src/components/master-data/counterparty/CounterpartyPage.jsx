@@ -1,16 +1,16 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { Box, Paper } from "@mui/material";
 import Chip from "@mui/material/Chip";
-import MasterDataToolbar from ".//MasterDataToolbar";
-import MasterDataTable from "./MasterDataTable";
-import MasterDataDialog from "./MasterDataDialog";
-import masterDataApi from "../../api/masterDataApi";
-import { useMasterData } from "../../context/MasterDataContext";
+import MasterDataToolbar from "../MasterDataToolbar";
+import MasterDataTable from "../MasterDataTable";
+import MasterDataDialog from "../MasterDataDialog";
+import masterDataApi from "../../../api/masterDataApi";
+import { useMasterData } from "../../../context/MasterDataContext";
 import { useForm } from "react-hook-form";
 
 const emptyRow = {
-  code: "",
   name: "",
+  counterpartyTypeIds: [],
 };
 
 export default function CounterpartyPage() {
@@ -224,7 +224,6 @@ export default function CounterpartyPage() {
             setKeyword("");
             loadData(keyword);
           }}
-          //onSave={handleSave}
           save={(data) =>
             editingRow?.id == null
               ? masterDataApi.createCounterParty(data)

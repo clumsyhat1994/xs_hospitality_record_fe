@@ -7,7 +7,10 @@ import {
   Button,
   Grid,
   TextField,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import { useForm, Controller, FormProvider } from "react-hook-form";
 import RHFTextField from "../form/RHFGridTextField";
 import RHFSelect from "../form/RHFGridSelect";
@@ -29,6 +32,7 @@ import {
 import masterDataApi from "../../api/masterDataApi";
 import { useAuth } from "../../context/AuthProvider";
 import RHFTextareaField from "../form/RHFTextareaField";
+import MasterDataDialog from "../master-data/MasterDataDialog";
 //import masterDataFetchers from "../../api/masterDataFetchers";
 
 export default function HospitalityRecordDialog({
@@ -52,6 +56,7 @@ export default function HospitalityRecordDialog({
     formState: { isSubmitting },
   } = methods;
   const [softConfirmDialogOpen, setSoftConfirmDialogOpen] = useState(false);
+  const [createHandlerDialogOpen, setCreateHandlerDialogOpen] = useState(false);
   const {
     departments,
     setDepartments,
@@ -59,22 +64,13 @@ export default function HospitalityRecordDialog({
     setHospitalityTypes,
     ourHostPositions,
     setOurHostPositions,
-    theirHostPositions,
-    setTheirHostPositions,
     counterparties,
     setCounterparties,
+    handlers,
+    setHandlers,
   } = useMasterData();
-  // console.log(departments);
-  // console.log(hospitalityTypes);
-  // console.log(ourHostPositions);
-  // console.log(counterparties);
+
   const [softErrors, setSoftErrors] = useState([]);
-  // const fetchCounterparties = useCallback(
-  //   (keyword) => masterDataApi.searchCounterParties(keyword),
-  //   []
-  // );
-  //const user = getCurrentUserFromToken();
-  //const isAdmin = isAdminFn(user);
   const { departmentCode, isAdmin, user } = useAuth();
 
   useEffect(() => {
@@ -89,7 +85,6 @@ export default function HospitalityRecordDialog({
         ([, v]) => v !== null && v !== undefined && v !== ""
       )
     );
-    //return data;
   };
 
   const submit = async (data, confirm = false) => {
@@ -152,7 +147,7 @@ export default function HospitalityRecordDialog({
         >
           <DialogTitle>{isEditMode ? "修改记录" : "新建记录"}</DialogTitle>
           <DialogContent dividers>
-            <Grid container spacing={2} sx={{ mt: 0.5 }}>
+            <Grid container spacing={2} sx={{ mt: 0.5 }} alignItems="stretch">
               <RHFTextField
                 name="receptionDate"
                 //control={control}
@@ -190,11 +185,32 @@ export default function HospitalityRecordDialog({
                 isAdmin={isAdmin}
               /> */}
 
-              <RHFTextField
+              {/* <RHFTextField
+                sm={5}
                 name="handlerName"
-                //control={control}
                 label={fieldLabels.handlerName}
+              /> */}
+
+              <RHFComboBox
+                name="handlerId"
+                options={handlers ?? []}
+                setOptions={setHandlers}
+                label={fieldLabels.handlerName}
+                fetchOptions={masterDataApi.searchHandlers}
+                sm={5}
               />
+
+              <Grid size={{ sm: 1 }}>
+                <Tooltip
+                  title="没有你的名字？点击这里添加吧~"
+                  placement="top"
+                  arrow
+                >
+                  <IconButton onClick={() => setCreateHandlerDialogOpen(true)}>
+                    <AddIcon />
+                  </IconButton>
+                </Tooltip>
+              </Grid>
 
               <RHFComboBox
                 name="hospitalityTypeId"
@@ -230,7 +246,6 @@ export default function HospitalityRecordDialog({
 
               <RHFTextField
                 name="invoiceAmount"
-                //control={control}
                 label={fieldLabels.invoiceAmount}
                 type="number"
               />
@@ -250,13 +265,11 @@ export default function HospitalityRecordDialog({
 
               <RHFTextField
                 name="theirCount"
-                //control={control}
                 label={fieldLabels.theirCount}
                 type="number"
               />
               <RHFTextField
                 name="ourCount"
-                //control={control}
                 label={fieldLabels.ourCount}
                 type="number"
               />
@@ -319,13 +332,11 @@ export default function HospitalityRecordDialog({
 
               <RHFTextField
                 name="deptHeadApprovalDate"
-                //control={control}
                 label={fieldLabels.deptHeadApprovalDate}
                 type="date"
               />
               <RHFTextField
                 name="partySecretaryApprovalDate"
-                //control={control}
                 label={fieldLabels.partySecretaryApprovalDate}
                 type="date"
               />
@@ -345,6 +356,25 @@ export default function HospitalityRecordDialog({
             </Button>
           </DialogActions>
         </Dialog>
+
+        <MasterDataDialog
+          open={createHandlerDialogOpen}
+          width={400}
+          initialValues={{
+            name: "",
+          }}
+          onClose={() => {
+            setCreateHandlerDialogOpen(false);
+          }}
+          onSaveSuccess={async () => {
+            const res = await masterDataApi.searchHandlers();
+            setHandlers(res.data ?? []);
+          }}
+          save={(data) => masterDataApi.createHandler(data)}
+          textFields={[
+            { fieldName: "name", label: "姓名", sm: 12, chineseOnly: true },
+          ]}
+        />
 
         <Dialog maxWidth="md" open={softConfirmDialogOpen}>
           <DialogTitle>您确定要提交吗？</DialogTitle>

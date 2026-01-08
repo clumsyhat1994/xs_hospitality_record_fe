@@ -12,8 +12,12 @@ const MasterDataContext = createContext({
   setPositions: () => {},
   ourHostPositions: [],
   setOurHostPositions: () => {},
-  theirHostPositions: [],
-  setTheirHostPositions: () => {},
+  counterpartyTypes: [],
+  setCounterpartyTypes: () => {},
+  handlers: [],
+  setHandlers: () => {},
+  //theirHostPositions: [],
+  //setTheirHostPositions: () => {},
 });
 
 export function MasterDataProvider({ children }) {
@@ -22,8 +26,9 @@ export function MasterDataProvider({ children }) {
   const [hospitalityTypes, setHospitalityTypes] = useState([]);
   const [positions, setPositions] = useState([]);
   const [ourHostPositions, setOurHostPositions] = useState([]);
-  const [theirHostPositions, setTheirHostPositions] = useState([]);
+  //const [theirHostPositions, setTheirHostPositions] = useState([]);
   const [counterpartyTypes, setCounterpartyTypes] = useState([]);
+  const [handlers, setHandlers] = useState([]);
   useEffect(() => {
     Promise.all([
       masterDataApi.searchDepartments(),
@@ -35,8 +40,9 @@ export function MasterDataProvider({ children }) {
       masterDataApi.searchPositions(),
       //masterDataApi.listPositions(),
       masterDataApi.searchCounterpartyTypes(),
+      masterDataApi.searchHandlers(),
     ])
-      .then(([dep, types, cp, pos, cpt]) => {
+      .then(([dep, types, cp, pos, cpt, hdr]) => {
         // setDepartments(dep.data?.content || []);
         //setHospitalityTypes(types.data?.content || []);
         // setCounterparties(cp.data?.content || []);
@@ -46,8 +52,9 @@ export function MasterDataProvider({ children }) {
         setCounterparties(cp.data || []);
         setPositions(pos.data || []);
         setOurHostPositions(pos.data || []);
-        setTheirHostPositions(pos.data || []);
+        //setTheirHostPositions(pos.data || []);
         setCounterpartyTypes(cpt.data || []);
+        setHandlers(hdr.data || []);
       })
       .catch((err) => {
         console.error("Failed to load master data", err);
@@ -67,10 +74,12 @@ export function MasterDataProvider({ children }) {
         setPositions,
         ourHostPositions,
         setOurHostPositions,
-        theirHostPositions,
-        setTheirHostPositions,
+        //theirHostPositions,
+        //setTheirHostPositions,
         counterpartyTypes,
         setCounterpartyTypes,
+        handlers,
+        setHandlers,
       }}
     >
       {children}

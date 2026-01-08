@@ -10,10 +10,12 @@ export default function RHFTextField({
   rules = {},
   required = true,
   numericOnly = false,
+  chineseOnly = false,
   ...rest
 }) {
   const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
   const DIGIT_REGEX = /^\d*$/;
+  const CHINESE_REGEX = /^[\u4E00-\u9FFF·・]*$/;
   const { clearErrors, control } = useFormContext();
   const { isEditMode } = useFormMode();
 
@@ -22,9 +24,24 @@ export default function RHFTextField({
       <Controller
         name={name}
         control={control}
-        rules={
-          required && !isEditMode ? { required: "不能为空", ...rules } : rules
-        }
+        rules={{
+          ...(required && !isEditMode ? { required: "不能为空" } : {}),
+          ...(required && !isEditMode
+            ? {
+                validate: (v) => v?.trim() !== "" || "不能为空",
+              }
+            : {}),
+          ...rules,
+          ...(chineseOnly
+            ? {
+                validate: (v) => {
+                  const s = (v ?? "").trim();
+                  if (s === "") return true;
+                  return CHINESE_REGEX.test(s) || "只能输入中文（可含·/・）";
+                },
+              }
+            : {}),
+        }}
         render={({ field, fieldState: { error } }) => (
           <TextField
             {...field}
@@ -34,6 +51,7 @@ export default function RHFTextField({
               if (type === "date" && v !== "" && !ISO_DATE_REGEX.test(v))
                 return;
               if (numericOnly && !DIGIT_REGEX.test(v)) return;
+
               field.onChange(v);
               if (error?.type === "server") clearErrors(name);
             }}

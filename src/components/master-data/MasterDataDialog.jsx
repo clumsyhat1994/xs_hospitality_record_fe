@@ -20,8 +20,11 @@ export default function MasterDataDialog({
   onClose,
   save,
   onSaveSuccess,
-  textFields,
-  multiAutoCompleteFields,
+  width = 720,
+  createTitle = "新建",
+  editTitle = "编辑",
+  textFields = [],
+  multiAutoCompleteFields = [],
 }) {
   const form = useForm({
     defaultValues: initialValues,
@@ -48,8 +51,8 @@ export default function MasterDataDialog({
   const onSubmit = async (data) => {
     try {
       await save(data);
-      onSaveSuccess();
-      onClose;
+      await onSaveSuccess?.();
+      onClose();
     } catch (err) {
       if (err.response?.status === 409) {
         const data = err.response.data;
@@ -61,10 +64,17 @@ export default function MasterDataDialog({
   return (
     <FormModeProvider isEditMode={isEditMode}>
       <FormProvider {...form}>
-        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-          <DialogTitle>
-            {isEditMode ? "编辑往来单位" : "新建往来单位"}
-          </DialogTitle>
+        <Dialog
+          open={open}
+          onClose={onClose}
+          slotProps={{
+            paper: {
+              sx: { width },
+            },
+          }}
+          maxWidth="sm"
+        >
+          <DialogTitle>{isEditMode ? editTitle : createTitle}</DialogTitle>
           <DialogContent sx={{ mt: 1 }}>
             <Grid container spacing={2} pt={1}>
               {textFields.map((field) => (
@@ -73,7 +83,8 @@ export default function MasterDataDialog({
                   name={field.fieldName}
                   control={control}
                   label={field.label}
-                  sm={6}
+                  sm={field.sm ?? 6}
+                  chineseOnly={field.chineseOnly}
                 />
               ))}
               {multiAutoCompleteFields.map((field) => (
@@ -83,7 +94,7 @@ export default function MasterDataDialog({
                     control={control}
                     label={field.label}
                     options={field.options}
-                    sm={6}
+                    sm={field.sm ?? 6}
                   />
                 </Grid>
               ))}

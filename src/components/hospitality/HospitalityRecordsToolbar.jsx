@@ -17,6 +17,7 @@ import { useMasterData } from "../../context/MasterDataContext";
 import masterDataApi from "../../api/masterDataApi";
 import { useCallback } from "react";
 import { useAuth } from "../../context/AuthProvider";
+import fieldLabels from "../../constants/recordFieldLabels";
 export default function HospitalityRecordsToolbar({
   selectedCount,
   onCreate,
@@ -118,7 +119,7 @@ export default function HospitalityRecordsToolbar({
         </Grid>
 
         <BaseComboBox
-          label="招待对象"
+          label={fieldLabels.counterparty}
           xs={8}
           sm={4}
           fieldValue={draftFilters.counterpartyId}
@@ -129,9 +130,23 @@ export default function HospitalityRecordsToolbar({
           setOptions={setCounterparties}
           fetchOptions={fetchCounterparties}
         />
+        {/* 
+        <BaseComboBox
+          label={fieldLabels.handlerName}
+          xs={8}
+          sm={4}
+          fieldValue={draftFilters.handlerName}
+          onChange={(v) => {
+            onDraftFilterChange("handlerName", v);
+          }}
+          options={}
+          setOptions={}
+          fetchOptions={}
+        /> */}
+
         {isAdmin && (
           <BaseComboBox
-            label="报销部门"
+            label={fieldLabels.department}
             xs={6}
             sm={3}
             getOptionValue={(opt) => opt.code ?? opt}
