@@ -32,9 +32,14 @@ export default function RHFSelect({
             <TextField
               {...field}
               disabled={isAdmin === false}
-              value={field.value ?? ""}
+              //value={field.value ?? ""}
+              value={
+                field.value === undefined || field.value === null
+                  ? ""
+                  : field.value
+              }
               onChange={(e) => {
-                field.onChange(e);
+                field.onChange(e.target.value);
                 if (error?.type === "server") clearErrors(name);
               }}
               select

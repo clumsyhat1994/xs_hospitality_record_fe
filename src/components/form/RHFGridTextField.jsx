@@ -11,6 +11,7 @@ export default function RHFTextField({
   required = true,
   numericOnly = false,
   chineseOnly = false,
+  minWidth = 0,
   ...rest
 }) {
   const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
@@ -20,7 +21,7 @@ export default function RHFTextField({
   const { isEditMode } = useFormMode();
 
   return (
-    <Grid size={{ xs: xs, sm: sm }}>
+    <Grid size={{ xs: xs, sm: sm }} sx={{ minWidth }}>
       <Controller
         name={name}
         control={control}

@@ -11,7 +11,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { useForm, Controller, FormProvider } from "react-hook-form";
+import { useForm, useWatch, FormProvider } from "react-hook-form";
 import RHFTextField from "../form/RHFGridTextField";
 import RHFSelect from "../form/RHFGridSelect";
 import RHFCalculatedGridTextField from "../form/RHFCalculatedGridTextField";
@@ -25,16 +25,13 @@ import { FormModeProvider } from "../../context/FormModeContext";
 import { analyzeBackendErrors, SOFT_CODES } from "../../utils/errorUtils";
 import RHFComboBox from "../form/RHFComboBox";
 import { useMasterData } from "../../context/MasterDataContext";
-import {
-  getCurrentUserFromToken,
-  isAdmin as isAdminFn,
-} from "../../auth/authService";
 import masterDataApi from "../../api/masterDataApi";
 import { useAuth } from "../../context/AuthProvider";
 import RHFTextareaField from "../form/RHFTextareaField";
 import MasterDataDialog from "../master-data/MasterDataDialog";
 //import masterDataFetchers from "../../api/masterDataFetchers";
 
+const DEPTWITHQUOTA = ["SCYWB", "QCCZB"];
 export default function HospitalityRecordDialog({
   open,
   initialValues,
@@ -54,7 +51,10 @@ export default function HospitalityRecordDialog({
     setValue,
     getFieldState,
     formState: { isSubmitting },
+    getValues,
   } = methods;
+  const formDepartmentCode = useWatch({ control, name: "departmentCode" });
+
   const [softConfirmDialogOpen, setSoftConfirmDialogOpen] = useState(false);
   const [createHandlerDialogOpen, setCreateHandlerDialogOpen] = useState(false);
   const {
@@ -71,13 +71,19 @@ export default function HospitalityRecordDialog({
   } = useMasterData();
 
   const [softErrors, setSoftErrors] = useState([]);
-  const { departmentCode, isAdmin, user } = useAuth();
+  const { departmentCode: userDepartmentCode, isAdmin, user } = useAuth();
 
   useEffect(() => {
     if (!open) return;
     reset(initialValues);
-    if (!isAdmin) setValue("departmentCode", departmentCode);
-  }, [initialValues, isAdmin, open, reset, setValue, departmentCode]);
+    if (!isAdmin) setValue("departmentCode", userDepartmentCode);
+  }, [initialValues, isAdmin, open, reset, setValue, userDepartmentCode]);
+
+  useEffect(() => {
+    if (!DEPTWITHQUOTA.includes(formDepartmentCode)) {
+      setValue("usesDeptQuota", null, { shouldValidate: true });
+    }
+  }, [formDepartmentCode, setValue]);
 
   const cleanData = (data) => {
     return Object.fromEntries(
@@ -174,7 +180,22 @@ export default function HospitalityRecordDialog({
                 label={fieldLabels.department}
                 fetchOptions={masterDataApi.searchDepartments}
                 isAdmin={isAdmin}
+                sm={"grow"}
               />
+              {DEPTWITHQUOTA.includes(formDepartmentCode) && (
+                <RHFSelect
+                  name="usesDeptQuota"
+                  label="是否使用部门额度"
+                  options={[
+                    { value: "true", label: "是" },
+                    { value: "false", label: "否" },
+                  ]}
+                  getOptionLabel={(opt) => opt.label ?? String(opt)}
+                  getOptionValue={(opt) => opt.value ?? opt}
+                  required
+                  sm={2}
+                />
+              )}
 
               {/* <RHFSelect
                 name="departmentCode"

@@ -30,13 +30,13 @@ axios.interceptors.response.use(
       window.location.href = "/login";
     } else if (
       error.response &&
-      error.response.status !== 422
+      error.response.status !== 422 &&
+      error.response.status !== 401
       // (error.response.status === 500 ||
       //   error.response.status === 403 ||
       //   error.response.status === 400)
     ) {
-      console.log(error);
-      window.alert(error.response.data?.message);
+      window.alert(error.response.data?.message ?? error.message);
     }
     return Promise.reject(error);
   }
