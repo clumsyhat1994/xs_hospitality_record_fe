@@ -23,7 +23,7 @@ const AuthenticationPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from ?? "/";
-  console.log(from);
+
   //const LOGIN_URL = getEndpoint("LOGIN");
   const LOGIN_URL = endpoints.LOGIN;
   const {

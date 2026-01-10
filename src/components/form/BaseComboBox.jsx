@@ -1,6 +1,6 @@
 import { Autocomplete, TextField, Grid, Box, Tooltip } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import masterDataApi from "../../api/masterDataApi";
 
 export default function BaseComboBox({
@@ -19,12 +19,17 @@ export default function BaseComboBox({
   ...rest
 }) {
   const [keyword, setKeyword] = useState("");
+  const isFirstRender = useRef(true);
   useEffect(() => {
+    const delay = isFirstRender.current ? 0 : 200;
+
+    isFirstRender.current = false;
+
     const handle = setTimeout(() => {
       fetchOptions(keyword, fieldValue).then((res) => {
         setOptions(res.data ?? []);
       });
-    }, 200);
+    }, delay);
 
     return () => clearTimeout(handle);
   }, [keyword, fetchOptions, setOptions, fieldValue]);
@@ -44,8 +49,9 @@ export default function BaseComboBox({
             return getOptionValue(o) === fieldValue;
           }) || null
         }
-        onInputChange={(_, newInputValue) => {
-          setKeyword(newInputValue);
+        onInputChange={(_, newInputValue, reason) => {
+          if (reason === "input" || reason === "clear")
+            setKeyword(newInputValue);
         }}
         onChange={(_, newVal) => {
           onChange?.(newVal ? getOptionValue(newVal) : null);
