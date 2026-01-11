@@ -37,6 +37,10 @@ const masterDataApi = {
   deactivateCounterparty: (id) => {
     api.patch(`/api/counterparty/${id}/deactivate`);
   },
+  exportCounterparty: () =>
+    api.get(`/api/counterparty/export`, {
+      responseType: "blob",
+    }),
 
   listPositions: () => api.get("/api/position"),
   searchPositions: (keyword, includeId) =>

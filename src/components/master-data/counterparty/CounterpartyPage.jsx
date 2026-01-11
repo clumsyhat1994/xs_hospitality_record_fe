@@ -7,6 +7,7 @@ import MasterDataDialog from "../MasterDataDialog";
 import masterDataApi from "../../../api/masterDataApi";
 import { useMasterData } from "../../../context/MasterDataContext";
 import { useForm } from "react-hook-form";
+import { downloadBlob } from "../../../utils/downloadBlob";
 
 const emptyRow = {
   name: "",
@@ -146,6 +147,19 @@ export default function CounterpartyPage() {
     // }
   };
 
+  const handleExport = async () => {
+    try {
+      const res = await masterDataApi.exportCounterparty();
+      const blob = new Blob([res.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      downloadBlob(blob, "hospitality-records.xlsx");
+    } catch (err) {
+      console.error("Export failed", err);
+      window.alert("导出失败，请联系系统管理员。");
+    }
+  };
+
   const columns = [
     { fieldName: "name", headerName: "公司名称", width: 300 },
     {
@@ -177,6 +191,7 @@ export default function CounterpartyPage() {
       sm: 6,
     },
   ];
+
   return (
     <Box>
       <Paper elevation={2}>
@@ -193,6 +208,7 @@ export default function CounterpartyPage() {
             setKeyword(searchName);
           }}
           onCreate={handleCreate}
+          onExport={handleExport}
         />
 
         <MasterDataTable

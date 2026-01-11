@@ -182,7 +182,7 @@ export default function HospitalityRecordsToolbar({
           新建记录
         </Button>
         <Tooltip
-          title="导出当前筛选结果(不考虑勾选框)为Excel文件"
+          title="导出当前筛选结果为Excel文件"
           slotProps={{
             tooltip: {
               sx: {
