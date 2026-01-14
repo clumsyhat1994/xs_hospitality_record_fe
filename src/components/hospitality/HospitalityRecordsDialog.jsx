@@ -86,10 +86,14 @@ export default function HospitalityRecordDialog({
   }, [formDepartmentCode, setValue]);
 
   const cleanData = (data) => {
+    console.log(data);
+
     return Object.fromEntries(
-      Object.entries(data).filter(
-        ([, v]) => v !== null && v !== undefined && v !== ""
-      )
+      Object.entries(data).filter(([k, v]) => {
+        return (
+          (v !== null && v !== undefined && v !== "") || k === "usesDeptQuota"
+        );
+      })
     );
   };
 

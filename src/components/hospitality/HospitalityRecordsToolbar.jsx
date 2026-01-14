@@ -28,11 +28,12 @@ export default function HospitalityRecordsToolbar({
   onClear,
   onExport,
 }) {
-  const { counterparties, setCounterparties } = useMasterData();
-  const fetchCounterparties = useCallback(
-    (keyword) => masterDataApi.searchCounterParties(keyword),
-    []
-  );
+  const { counterparties, setCounterparties, handlers, setHandlers } =
+    useMasterData();
+  // const fetchCounterparties = useCallback(
+  //   (keyword) => masterDataApi.searchCounterParties(keyword),
+  //   []
+  // );
   const { isAdmin } = useAuth();
 
   const { departments, setDepartments } = useMasterData();
@@ -128,21 +129,21 @@ export default function HospitalityRecordsToolbar({
           }}
           options={counterparties}
           setOptions={setCounterparties}
-          fetchOptions={fetchCounterparties}
+          fetchOptions={masterDataApi.searchCounterParties}
         />
-        {/* 
+
         <BaseComboBox
           label={fieldLabels.handlerName}
-          xs={8}
-          sm={4}
-          fieldValue={draftFilters.handlerName}
+          xs={6}
+          sm={2}
+          fieldValue={draftFilters.handlerId}
           onChange={(v) => {
-            onDraftFilterChange("handlerName", v);
+            onDraftFilterChange("handlerId", v);
           }}
-          options={}
-          setOptions={}
-          fetchOptions={}
-        /> */}
+          options={handlers}
+          setOptions={setHandlers}
+          fetchOptions={masterDataApi.searchHandlers}
+        />
 
         {isAdmin && (
           <BaseComboBox
