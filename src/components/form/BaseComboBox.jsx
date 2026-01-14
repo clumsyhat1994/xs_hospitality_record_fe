@@ -1,7 +1,6 @@
 import { Autocomplete, TextField, Grid, Box, Tooltip } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { useState, useEffect, useRef } from "react";
-import masterDataApi from "../../api/masterDataApi";
 
 export default function BaseComboBox({
   label,

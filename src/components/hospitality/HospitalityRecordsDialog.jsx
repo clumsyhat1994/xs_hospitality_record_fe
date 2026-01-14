@@ -29,6 +29,7 @@ import masterDataApi from "../../api/masterDataApi";
 import { useAuth } from "../../context/AuthProvider";
 import RHFTextareaField from "../form/RHFTextareaField";
 import MasterDataDialog from "../master-data/MasterDataDialog";
+import RHFAutocomplete from "../form/RHFAutocomplete";
 //import masterDataFetchers from "../../api/masterDataFetchers";
 
 const DEPTWITHQUOTA = ["SCYWB", "QCCZB"];
@@ -176,7 +177,7 @@ export default function HospitalityRecordDialog({
                 sm={8}
               />
 
-              <RHFComboBox
+              {/* <RHFComboBox
                 name="departmentCode"
                 getOptionValue={(opt) => opt.code ?? opt}
                 options={departments ?? []}
@@ -185,7 +186,16 @@ export default function HospitalityRecordDialog({
                 fetchOptions={masterDataApi.searchDepartments}
                 isAdmin={isAdmin}
                 sm={"grow"}
+              /> */}
+
+              <RHFAutocomplete
+                name="departmentCode"
+                getOptionValue={(opt) => opt.code ?? opt}
+                options={departments ?? []}
+                label={fieldLabels.department}
+                sm={"grow"}
               />
+
               {DEPTWITHQUOTA.includes(formDepartmentCode) && (
                 <RHFSelect
                   name="usesDeptQuota"

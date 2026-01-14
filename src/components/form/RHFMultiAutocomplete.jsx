@@ -12,7 +12,6 @@ export default function RHFMultiAutocomplete({
   getOptionValue = (opt) => opt?.id ?? opt,
   rules = {},
 }) {
-  const { isEditMode } = useFormMode();
   return (
     <Controller
       name={name}

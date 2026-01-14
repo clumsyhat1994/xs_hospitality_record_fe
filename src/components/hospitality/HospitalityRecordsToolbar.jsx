@@ -18,6 +18,8 @@ import masterDataApi from "../../api/masterDataApi";
 import { useCallback } from "react";
 import { useAuth } from "../../context/AuthProvider";
 import fieldLabels from "../../constants/recordFieldLabels";
+import BaseSelect from "../form/BaseSelect";
+import BaseAutocomplete from "../form/BaseAutocomplete";
 export default function HospitalityRecordsToolbar({
   selectedCount,
   onCreate,
@@ -36,11 +38,8 @@ export default function HospitalityRecordsToolbar({
   // );
   const { isAdmin } = useAuth();
 
-  const { departments, setDepartments } = useMasterData();
-  const fetchDepartments = useCallback(
-    (keyword) => masterDataApi.searchDepartments(keyword),
-    []
-  );
+  const { departments } = useMasterData();
+
   return (
     <Toolbar
       sx={{
@@ -145,7 +144,7 @@ export default function HospitalityRecordsToolbar({
           fetchOptions={masterDataApi.searchHandlers}
         />
 
-        {isAdmin && (
+        {/* {isAdmin && (
           <BaseComboBox
             label={fieldLabels.department}
             xs={6}
@@ -159,6 +158,33 @@ export default function HospitalityRecordsToolbar({
             setOptions={setDepartments}
             fetchOptions={fetchDepartments}
           />
+        )} */}
+
+        {/* {isAdmin && (
+          <Grid size={{ xs: 6, sm: 3 }}>
+            <BaseSelect
+              label={fieldLabels.department}
+              getOptionValue={(opt) => opt.code ?? opt}
+              fieldValue={draftFilters.departmentCode}
+              onChange={(v) => {
+                onDraftFilterChange("departmentCode", v);
+              }}
+              options={departments}
+            />
+          </Grid>
+        )} */}
+        {isAdmin && (
+          <Grid size={{ xs: 6, sm: 3 }}>
+            <BaseAutocomplete
+              label={fieldLabels.department}
+              getOptionValue={(opt) => opt.code ?? opt}
+              fieldValue={draftFilters.departmentCode}
+              onChange={(v) => {
+                onDraftFilterChange("departmentCode", v);
+              }}
+              options={departments}
+            />
+          </Grid>
         )}
 
         <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>

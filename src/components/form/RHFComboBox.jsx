@@ -21,7 +21,7 @@ export default function RHFComboBox({
 }) {
   const { control } = useFormContext();
   const { isEditMode } = useFormMode();
-  //console.log(name);
+
   return (
     <Controller
       name={name}
