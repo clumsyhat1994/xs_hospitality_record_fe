@@ -30,15 +30,19 @@ export default function HospitalityRecordsToolbar({
   onClear,
   onExport,
 }) {
-  const { counterparties, setCounterparties, handlers, setHandlers } =
-    useMasterData();
+  const {
+    counterparties,
+    setCounterparties,
+    handlers,
+    setHandlers,
+    departments,
+    hospitalityTypes,
+  } = useMasterData();
   // const fetchCounterparties = useCallback(
   //   (keyword) => masterDataApi.searchCounterParties(keyword),
   //   []
   // );
   const { isAdmin } = useAuth();
-
-  const { departments } = useMasterData();
 
   return (
     <Toolbar
@@ -84,7 +88,7 @@ export default function HospitalityRecordsToolbar({
             }
           />
         </Grid>
-        <Grid size={{ xs: 6, sm: 3 }}>
+        <Grid size={{ xs: 6, sm: 2.5 }}>
           <TextField
             label="发票号范围起始"
             fullWidth
@@ -101,7 +105,7 @@ export default function HospitalityRecordsToolbar({
           />
         </Grid>
 
-        <Grid size={{ xs: 6, sm: 3 }}>
+        <Grid size={{ xs: 6, sm: 2.5 }}>
           <TextField
             label="发票号范围结束"
             fullWidth
@@ -119,19 +123,6 @@ export default function HospitalityRecordsToolbar({
         </Grid>
 
         <BaseComboBox
-          label={fieldLabels.counterparty}
-          xs={8}
-          sm={4}
-          fieldValue={draftFilters.counterpartyId}
-          onChange={(v) => {
-            onDraftFilterChange("counterpartyId", v);
-          }}
-          options={counterparties}
-          setOptions={setCounterparties}
-          fetchOptions={masterDataApi.searchCounterParties}
-        />
-
-        <BaseComboBox
           label={fieldLabels.handlerName}
           xs={6}
           sm={2}
@@ -142,6 +133,19 @@ export default function HospitalityRecordsToolbar({
           options={handlers}
           setOptions={setHandlers}
           fetchOptions={masterDataApi.searchHandlers}
+        />
+
+        <BaseComboBox
+          label={fieldLabels.counterparty}
+          xs={8}
+          sm={4}
+          fieldValue={draftFilters.counterpartyId}
+          onChange={(v) => {
+            onDraftFilterChange("counterpartyId", v);
+          }}
+          options={counterparties}
+          setOptions={setCounterparties}
+          fetchOptions={masterDataApi.searchCounterParties}
         />
 
         {/* {isAdmin && (
@@ -174,7 +178,7 @@ export default function HospitalityRecordsToolbar({
           </Grid>
         )} */}
         {isAdmin && (
-          <Grid size={{ xs: 6, sm: 3 }}>
+          <Grid size={{ xs: 6, sm: 2 }}>
             <BaseAutocomplete
               label={fieldLabels.department}
               getOptionValue={(opt) => opt.code ?? opt}
@@ -186,6 +190,17 @@ export default function HospitalityRecordsToolbar({
             />
           </Grid>
         )}
+
+        <Grid size={{ xs: 6, sm: 2 }}>
+          <BaseAutocomplete
+            label={fieldLabels.hospitalityType}
+            fieldValue={draftFilters.hospitalityTypeId}
+            onChange={(v) => {
+              onDraftFilterChange("hospitalityTypeId", v);
+            }}
+            options={hospitalityTypes}
+          />
+        </Grid>
 
         <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Button

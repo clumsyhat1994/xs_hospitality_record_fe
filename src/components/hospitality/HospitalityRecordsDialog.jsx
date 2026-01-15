@@ -247,12 +247,18 @@ export default function HospitalityRecordDialog({
                 </Tooltip>
               </Grid>
 
-              <RHFComboBox
+              {/* <RHFComboBox
                 name="hospitalityTypeId"
                 options={hospitalityTypes ?? []}
                 setOptions={setHospitalityTypes}
                 label={fieldLabels.hospitalityType}
                 fetchOptions={masterDataApi.searchHospitalityTypes}
+              /> */}
+
+              <RHFAutocomplete
+                name="hospitalityTypeId"
+                options={hospitalityTypes ?? []}
+                label={fieldLabels.hospitalityType}
               />
 
               {/* <RHFSelect

@@ -11,8 +11,8 @@ export default function RHFAutocomplete({
   options,
   getOptionLabel = (opt) => opt?.name ?? String(opt),
   getOptionValue = (opt) => opt?.id ?? opt,
-  xs,
-  sm,
+  xs = 12,
+  sm = 6,
   rules = {},
   ...rest
 }) {
