@@ -8,6 +8,7 @@ export default function RHFAutocomplete({
   name,
   label,
   required = true,
+  requireAdmin = false,
   options,
   getOptionLabel = (opt) => opt?.name ?? String(opt),
   getOptionValue = (opt) => opt?.id ?? opt,
@@ -31,6 +32,7 @@ export default function RHFAutocomplete({
             <BaseAutocomplete
               {...rest}
               label={label}
+              requireAdmin={requireAdmin}
               xs={xs}
               sm={sm}
               fieldValue={field.value}

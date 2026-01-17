@@ -53,7 +53,7 @@ export default function HospitalityRecordsToolbar({
       }}
     >
       <Grid container spacing={2} pt={3}>
-        <Grid>
+        <Grid size={{ xs: 6, sm: 1.5 }}>
           <TextField
             label="接待日期自"
             type="date"
@@ -71,7 +71,7 @@ export default function HospitalityRecordsToolbar({
           />
         </Grid>
 
-        <Grid>
+        <Grid size={{ xs: 6, sm: 1.5 }}>
           <TextField
             label="接待日期至"
             type="date"
@@ -202,7 +202,10 @@ export default function HospitalityRecordsToolbar({
           />
         </Grid>
 
-        <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Grid
+          size={{ xs: 6, sm: 2 }}
+          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+        >
           <Button
             variant="contained"
             startIcon={<SearchIcon />}
@@ -219,7 +222,11 @@ export default function HospitalityRecordsToolbar({
           </Button>
         </Grid>
       </Grid>
-      <Stack direction="row" spacing={2}>
+      <Stack
+        direction="row"
+        spacing={2}
+        sx={{ flexShrink: 0, whiteSpace: "nowrap" }}
+      >
         <Button variant="contained" startIcon={<AddIcon />} onClick={onCreate}>
           新建记录
         </Button>
@@ -244,16 +251,6 @@ export default function HospitalityRecordsToolbar({
             导出 Excel
           </Button>
         </Tooltip>
-        {/* DO NOT DELETE!!!
-        <Button
-          variant="outlined"
-          color="error"
-          startIcon={<DeleteIcon />}
-          disabled={selectedCount === 0}
-          onClick={onBatchDelete}
-        >
-          Batch Delete
-        </Button> */}
       </Stack>
     </Toolbar>
   );

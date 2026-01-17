@@ -190,6 +190,7 @@ export default function HospitalityRecordDialog({
 
               <RHFAutocomplete
                 name="departmentCode"
+                requireAdmin
                 getOptionValue={(opt) => opt.code ?? opt}
                 options={departments ?? []}
                 label={fieldLabels.department}

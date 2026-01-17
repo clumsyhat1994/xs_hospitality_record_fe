@@ -6,7 +6,7 @@ export default function BaseAutocomplete({
   fieldStateError,
   label,
   options = [],
-
+  requireAdmin = false,
   fieldValue,
   getOptionLabel = (opt) => opt?.name ?? String(opt),
   getOptionValue = (opt) => opt?.id ?? opt,
@@ -27,7 +27,7 @@ export default function BaseAutocomplete({
       onChange={(_, newVal) => {
         onChange?.(newVal ? getOptionValue(newVal) : null);
       }}
-      disabled={isAdmin === false}
+      disabled={requireAdmin === true && isAdmin === false}
       renderInput={(params) => (
         <TextField
           {...params}
@@ -35,7 +35,7 @@ export default function BaseAutocomplete({
           label={
             <Box sx={{ display: "flex", alignItems: "center" }}>
               {label}
-              {isAdmin === false && (
+              {requireAdmin === true && isAdmin === false && (
                 <Tooltip title="非管理员用户不能修改该字段">
                   <InfoOutlinedIcon
                     fontSize="small"

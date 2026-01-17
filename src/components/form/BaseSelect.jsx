@@ -14,12 +14,12 @@ export default function BaseSelect({
   getOptionValue = (opt) => opt.id ?? opt,
   ...rest
 }) {
-  const { isAdmin } = useAuth();
+  //const { isAdmin } = useAuth();
 
   return (
     <TextField
       {...field}
-      disabled={isAdmin === false}
+      //disabled={isAdmin === false}
       value={field?.value ?? fieldValue ?? ""}
       //   onChange={(e) => {
       //     field.onChange(e.target.value);
@@ -32,7 +32,7 @@ export default function BaseSelect({
       label={
         <Box sx={{ display: "flex", alignItems: "center" }}>
           {label}
-          {isAdmin === false && (
+          {/* {isAdmin === false && (
             <Tooltip title="非管理员用户不能修改该字段">
               <InfoOutlinedIcon
                 fontSize="small"
@@ -40,7 +40,7 @@ export default function BaseSelect({
                 sx={{ ml: 0.5 }}
               />
             </Tooltip>
-          )}
+          )} */}
         </Box>
       }
       error={!!error}
