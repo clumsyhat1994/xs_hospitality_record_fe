@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Box, Paper } from "@mui/material";
+import { Box, Button, Paper, Stack, Tooltip, Typography } from "@mui/material";
+import UploadFileIcon from "@mui/icons-material/UploadFile";
 import Chip from "@mui/material/Chip";
 import MasterDataToolbar from "../MasterDataToolbar";
 import MasterDataTable from "../MasterDataTable";
@@ -8,6 +9,7 @@ import masterDataApi from "../../../api/masterDataApi";
 import { useMasterData } from "../../../context/MasterDataContext";
 import { useForm } from "react-hook-form";
 import { downloadBlob } from "../../../utils/downloadBlob";
+import CounterpartyImportDialog from "./CounterpartyImportDialog";
 
 const emptyRow = {
   name: "",
@@ -25,6 +27,7 @@ export default function CounterpartyPage() {
   const [togglingIds, setTogglingIds] = useState(new Set());
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
+  const [importOpen, setImportOpen] = useState(false);
   const debounceRef = useRef(null);
   const { counterpartyTypes } = useMasterData();
 
@@ -209,6 +212,46 @@ export default function CounterpartyPage() {
           }}
           onCreate={handleCreate}
           onExport={handleExport}
+          extraActions={
+            <Tooltip
+              arrow
+              placement="bottom"
+              title={
+                <Stack spacing={1} sx={{ maxWidth: 320 }}>
+                  <Typography variant="body2">Excel导入格式如图</Typography>
+                  <img
+                    src="/public/images/counterparty-import-example.png"
+                    alt="导入示例"
+                    style={{
+                      width: "100%",
+                      borderRadius: 6,
+                      border: "1px solid #eee",
+                    }}
+                  />
+
+                  <Typography variant="caption">
+                    归属地支持分隔符：, ， ; ； 、<br />
+                    “是否启用”可为空，默认启用
+                  </Typography>
+                </Stack>
+              }
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    p: 1.5,
+                  },
+                },
+              }}
+            >
+              <Button
+                variant="outlined"
+                startIcon={<UploadFileIcon />}
+                onClick={() => setImportOpen(true)}
+              >
+                导入Excel
+              </Button>
+            </Tooltip>
+          }
         />
 
         <MasterDataTable
@@ -247,6 +290,14 @@ export default function CounterpartyPage() {
           }
           textFields={dialogTextFields}
           multiAutoCompleteFields={dialogMuiltiAutoCompleteFields}
+        />
+        <CounterpartyImportDialog
+          open={importOpen}
+          onClose={() => setImportOpen(false)}
+          onSuccess={() => {
+            loadData(keyword);
+            setImportOpen(false);
+          }}
         />
       </Paper>
     </Box>

@@ -20,6 +20,7 @@ export default function MasterDataToolbar({
   onSearchSubmit,
   onCreate,
   onExport,
+  extraActions,
 }) {
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
@@ -78,6 +79,7 @@ export default function MasterDataToolbar({
             导出 Excel
           </Button>
         </Tooltip>
+        {extraActions}
       </Stack>
     </Toolbar>
   );

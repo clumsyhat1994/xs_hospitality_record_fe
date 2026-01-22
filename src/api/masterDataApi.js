@@ -41,6 +41,8 @@ const masterDataApi = {
     api.get(`/api/counterparty/export`, {
       responseType: "blob",
     }),
+  importCounterparty: (payload) =>
+    api.post(`/api/counterparty/import`, payload),
 
   listPositions: () => api.get("/api/position"),
   searchPositions: (keyword, includeId) =>
