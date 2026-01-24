@@ -220,7 +220,7 @@ export default function CounterpartyPage() {
                 <Stack spacing={1} sx={{ maxWidth: 320 }}>
                   <Typography variant="body2">Excel导入格式如图</Typography>
                   <img
-                    src="/public/images/counterparty-import-example.png"
+                    src="/images/counterparty-import-example.png"
                     alt="导入示例"
                     style={{
                       width: "100%",
