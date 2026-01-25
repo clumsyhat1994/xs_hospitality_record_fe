@@ -57,7 +57,7 @@ export default function MasterDataToolbar({
         <Button variant="contained" startIcon={<AddIcon />} onClick={onCreate}>
           新建
         </Button>
-
+        {extraActions}
         <Tooltip
           title={`导出所有${title}为Excel`}
           slotProps={{
@@ -79,7 +79,6 @@ export default function MasterDataToolbar({
             导出 Excel
           </Button>
         </Tooltip>
-        {extraActions}
       </Stack>
     </Toolbar>
   );

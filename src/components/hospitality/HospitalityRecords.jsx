@@ -141,7 +141,7 @@ export default function HospitalityRecords() {
   };
 
   const handleDeleteRow = (id) => {
-    if (!window.confirm("Delete this record?")) return;
+    if (!window.confirm("确定删除这条记录吗?")) return;
     hospitalityApi.deleteOne(id).catch((err) => console.error(err));
     setRecords((prev) => prev.filter((r) => r.id !== id));
     setSelectedIds((prev) => prev.filter((x) => x !== id));
