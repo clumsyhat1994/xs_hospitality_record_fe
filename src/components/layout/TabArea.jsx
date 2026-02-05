@@ -1,20 +1,47 @@
 import { Tabs, Tab, Box } from "@mui/material";
 
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import moduleRoutes from "../../constants/moduleRoutes";
 import { MasterDataProvider } from "../../context/MasterDataContext";
 import AppFooter from "./AppFooter";
+import { useEffect, useRef } from "react";
+import routeToModule from "../../constants/routeToModule";
 
 export default function TabArea({ tabs, activeTab, setActiveTab }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const lastUrlByTab = useRef({});
+
+  useEffect(() => {
+    const activeTabKey = routeToModule[location.pathname].key;
+    lastUrlByTab.current[activeTabKey] = location.pathname + location.search;
+    //console.log("lastUrlByTab", lastUrlByTab.current);
+  }, [location.pathname, location.search]);
+
+  // 2) When user clicks a tab, navigate to its last remembered URL (or base)
+  const handleTabChange = (e, tabKey) => {
+    setActiveTab(tabKey);
+    navigate(lastUrlByTab.current[tabKey] ?? moduleRoutes[tabKey]);
+  };
+
   return (
     <>
       <Tabs
         value={activeTab} //which tab is currently selected
-        onChange={(e, v) => {
-          setActiveTab(v);
-          navigate(moduleRoutes[v]);
-        }}
+        // onChange={(e, v) => {
+        //   lastUrlByTab.current[activeTab] = location.pathname + location.search;
+        //   console.log(
+        //     "url of current active tab: ",
+        //     lastUrlByTab.current[activeTab]
+        //   );
+        //   console.log(
+        //     "last recorded url of the selected tab",
+        //     lastUrlByTab.current[v]
+        //   );
+        //   setActiveTab(v);
+        //   navigate(lastUrlByTab.current[v] ?? moduleRoutes[v]);
+        // }}
+        onChange={handleTabChange}
         aria-label="module tabs" //for accessibility
       >
         {tabs.map((tab) => (
@@ -24,8 +51,6 @@ export default function TabArea({ tabs, activeTab, setActiveTab }) {
       <MasterDataProvider>
         <Outlet />
       </MasterDataProvider>
-
-      {/* <Box sx={{ mt: 2 }}>{activeTab && componentMap[activeTab]}</Box> */}
     </>
   );
 }

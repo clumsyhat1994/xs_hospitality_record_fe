@@ -11,6 +11,7 @@ import menuLables from "../../constants/moduleLables";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthProvider";
 import { GuardedListItemButton } from "../common/GuardedListItemButton";
+import moduleTabKeys from "../../constants/moduleKeys";
 
 export default function Sidebar({ onOpenModule }) {
   const [masterOpen, setMasterOpen] = useState(true);
@@ -42,7 +43,7 @@ export default function Sidebar({ onOpenModule }) {
           <ListItemButton
             onClick={() =>
               onOpenModule({
-                key: "HOSPITALITY_RECORDS",
+                key: moduleTabKeys.HOSPITALITY_RECORDS,
                 label: menuLables.HOSPITALITY_RECORDS,
               })
             }
@@ -54,7 +55,7 @@ export default function Sidebar({ onOpenModule }) {
             allowed={isAdmin}
             onClick={() =>
               onOpenModule({
-                key: "INVOICE_CONFLICT",
+                key: moduleTabKeys.INVOICE_CONFLICT,
                 label: menuLables.INVOICE_CONFLICT,
               })
             }
@@ -82,7 +83,7 @@ export default function Sidebar({ onOpenModule }) {
                 allowed={isAdmin}
                 onClick={() =>
                   onOpenModule({
-                    key: "COUNTERPARTY",
+                    key: moduleTabKeys.COUNTERPARTY,
                     label: menuLables.COUNTERPARTY,
                   })
                 }

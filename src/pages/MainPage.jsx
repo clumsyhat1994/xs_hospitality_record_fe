@@ -16,13 +16,10 @@ export default function MainLayout() {
   );
   const [activeTab, setActiveTab] = useState(() => initialModule?.key ?? null);
 
-  const currentPath = location.pathname;
-
   const navigate = useNavigate();
 
   const handleOpenModule = (module) => {
     const path = moduleRoutes[module.key];
-
     if (path) navigate(path);
   };
 

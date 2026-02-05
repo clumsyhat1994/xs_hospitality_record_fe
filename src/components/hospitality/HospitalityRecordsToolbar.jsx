@@ -43,7 +43,7 @@ export default function HospitalityRecordsToolbar({
   //   []
   // );
   const { isAdmin } = useAuth();
-
+  // console.log("draftFilters", draftFilters);
   return (
     <Toolbar
       sx={{

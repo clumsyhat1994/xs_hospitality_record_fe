@@ -12,6 +12,7 @@ export default function BaseAutocomplete({
   getOptionValue = (opt) => opt?.id ?? opt,
 }) {
   const { isAdmin } = useAuth();
+
   return (
     <Autocomplete
       options={options ?? []}

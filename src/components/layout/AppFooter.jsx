@@ -16,7 +16,7 @@ export default function AppFooter() {
       }}
     >
       <Typography variant="caption">
-        © {new Date().getFullYear()} — 工程技术部曾轩
+        © {new Date().getFullYear()} - 工程技术部 - 曾轩
       </Typography>
     </Box>
   );
