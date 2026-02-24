@@ -5,5 +5,6 @@ const moduleRoutes = {
   DEPARTMENT: "/master-data/department",
   POSITION: "/master-data/position",
   GRADE: "/master-data/position-grade",
+  HOME: "/",
 };
 export default moduleRoutes;

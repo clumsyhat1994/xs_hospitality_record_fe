@@ -13,7 +13,9 @@ export default function TabArea({ tabs, activeTab, setActiveTab }) {
   const lastUrlByTab = useRef({});
 
   useEffect(() => {
-    const activeTabKey = routeToModule[location.pathname].key;
+    
+    const activeTabKey = routeToModule[location.pathname]?.key;
+    if(!activeTabKey) return;
     lastUrlByTab.current[activeTabKey] = location.pathname + location.search;
     //console.log("lastUrlByTab", lastUrlByTab.current);
   }, [location.pathname, location.search]);
