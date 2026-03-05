@@ -19,6 +19,9 @@ export default function RHFAutocomplete({
 }) {
   const { control } = useFormContext();
   const { isEditMode } = useFormMode();
+  console.log("autocomplete: ");
+  console.log("required: ", required);
+  console.log("isEditMode: ", isEditMode);
   return (
     <Controller
       name={name}

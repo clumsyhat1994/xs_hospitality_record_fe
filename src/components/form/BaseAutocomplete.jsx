@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthProvider";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 export default function BaseAutocomplete({
   onChange,
-  fieldStateError,
+  error:fieldStateError,
   label,
   options = [],
   requireAdmin = false,

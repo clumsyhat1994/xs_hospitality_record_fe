@@ -177,17 +177,6 @@ export default function HospitalityRecordDialog({
                 sm={8}
               />
 
-              {/* <RHFComboBox
-                name="departmentCode"
-                getOptionValue={(opt) => opt.code ?? opt}
-                options={departments ?? []}
-                setOptions={setDepartments}
-                label={fieldLabels.department}
-                fetchOptions={masterDataApi.searchDepartments}
-                isAdmin={isAdmin}
-                sm={"grow"}
-              /> */}
-
               <RHFAutocomplete
                 name="departmentCode"
                 requireAdmin
