@@ -38,7 +38,6 @@ export default function CounterpartyPage() {
         const res = await masterDataApi.listCounterParties(page, size, keyword);
 
         const data = res.data;
-        //console.log(data.content);
         setRows(data.content || data); // if backend returns plain list, this still works
         setTotal(data.totalElements ?? 0);
       } catch (err) {
@@ -85,25 +84,6 @@ export default function CounterpartyPage() {
     }
   };
 
-  // const handleSave = async (data) => {
-  //   try {
-  //     if (editingRow?.id == null) {
-  //       await masterDataApi.createCounterParty(data);
-  //     } else {
-  //       await masterDataApi.updateCounterParty(editingRow.id, data);
-  //     }
-  //     setDialogOpen(false);
-  //     setEditingRow(null);
-  //     if (editingRow?.id == null) {
-  //       await loadData();
-  //     } else {
-  //       await loadData(keyword);
-  //     }
-  //   } catch (err) {
-  //     console.error("Save failed", err);
-  //   }
-  // };
-
   const handleSearchChange = (value) => {
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -138,16 +118,7 @@ export default function CounterpartyPage() {
       });
     }
 
-    // try {
-    //   if (row.active) {
-    //     await masterDataApi.deactivateCounterparty(row.id);
-    //   } else {
-    //     await masterDataApi.activateCounterparty(row.id);
-    //   }
-    //   await loadData(keyword);
-    // } catch (err) {
-    //   console.error("Toggle active failed", err);
-    // }
+   
   };
 
   const handleExport = async () => {
