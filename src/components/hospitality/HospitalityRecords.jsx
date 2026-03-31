@@ -3,24 +3,6 @@ import { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Paper,
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-  TableContainer,
-  Checkbox,
-  IconButton,
-  Button,
-  Toolbar,
-  Typography,
-  Stack,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Grid,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -158,38 +140,12 @@ export default function HospitalityRecords() {
       next.set("size", String(size)); // keep current size
       return next;
     });
-
-    // setFilters({ ...draftFilters });
-    // setPage(0);
   };
 
   const handleClear = () => {
-    // const empty = {
-    //   receptionDateFrom: "",
-    //   receptionDateTo: "",
-    //   invoiceNumberFrom: "",
-    //   invoiceNumberTo: "",
-    // };
-    // setDraftFilters(empty);
-    // setFilters(empty);
-    // setPage(0);
     setSearchParams(new URLSearchParams());
     navigate(moduleRoutes.HOSPITALITY_RECORDS, { replace: true });
   };
-
-  // const handleToggleAll = (checked) => {
-  //   if (checked) {
-  //     setSelectedIds(records.map((r) => r.id));
-  //   } else {
-  //     setSelectedIds([]);
-  //   }
-  // };
-
-  // const handleToggleOne = (id) => {
-  //   setSelectedIds((prev) =>
-  //     prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-  //   );
-  // };
 
   const handleCreateClick = () => {
     setEditingRecord(null);
@@ -208,27 +164,11 @@ export default function HospitalityRecords() {
     setSelectedIds((prev) => prev.filter((x) => x !== id));
   };
 
-  // const handleBatchDeleteClick = () => {
-  //   if (selectedIds.length === 0) return;
-  //   if (!window.confirm(`Delete ${selectedIds.length} selected records?`)) {
-  //     return;
-  //   }
-  //   setRecords((prev) => prev.filter((r) => !selectedIds.includes(r.id)));
-  //   setSelectedIds([]);
-  // };
-
   const handleDialogClose = () => {
     setDialogOpen(false);
   };
 
   const handleDialogSave = async () => {
-    // if (editingRecord) {
-    //   setRecords((prev) =>
-    //     prev.map((r) => (r.id === editingRecord.id ? { ...r, ...values } : r))
-    //   );
-    // } else {
-    //   setRecords((prev) => [values, ...prev]);
-    // }
     load();
     setDialogOpen(false);
   };
@@ -257,6 +197,27 @@ export default function HospitalityRecords() {
     },
     [page, size, filters, setRecords, setTotalElements]
   );
+  
+  const handleSaveAttachments = useCallback(
+    async (record, { invoiceFiles, formFiles, removeInvoicePaths, removeFormPaths }) => {
+      const inv = invoiceFiles ?? [];
+      const frm = formFiles ?? [];
+      const removedInv = removeInvoicePaths ?? [];
+      const removedFrm = removeFormPaths ?? [];
+      if (inv.length === 0 && frm.length === 0 && removedInv.length === 0 && removedFrm.length === 0) return;
+      const params = new URLSearchParams();
+      removedInv.forEach((p) => params.append("removeInvoicePaths", p));
+      removedFrm.forEach((p) => params.append("removeFormPaths", p));
+      const fd = new FormData();
+      inv.forEach((f) => fd.append("invoiceImages", f));
+      frm.forEach((f) => fd.append("hospitalityFormImages", f));
+      await hospitalityApi.patchAttachments(record.id, fd, params);
+      await load();
+    },
+    [load]
+  );
+
+ 
 
   const setPageUrl = (newPage) => {
     setSearchParams((prev) => {
@@ -307,6 +268,7 @@ export default function HospitalityRecords() {
           load={load}
           loading={loading}
           setLoading={setLoading}
+          onSaveAttachments={handleSaveAttachments}
         />
       </Paper>
       <HospitalityRecordDialog

@@ -14,12 +14,14 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
 import Tooltip from "@mui/material/Tooltip";
 import CommentOutlinedIcon from "@mui/icons-material/CommentOutlined";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import fieldLabels from "../../constants/recordFieldLabels";
 import { ItemsPopperCell } from "./ItemsPopperCell";
+import { AttachmentsDialog } from "./AttachmentsDialog";
 
 function formatDate(value) {
   if (!value) return "";
@@ -33,15 +35,10 @@ function formatAmount(value) {
 
 export default function HospitalityRecordsTable({
   records,
-  setRecords,
-  selectedIds,
-  // onToggleAll,
-  // onToggleOne,
   onEditRow,
   onDeleteRow,
   page,
   setPage,
-  filters,
   size,
   setSize,
   totalElements,
@@ -49,11 +46,9 @@ export default function HospitalityRecordsTable({
   load,
   loading,
   setLoading,
+  // Optional callbacks to let parent handle actual upload/download
+  onSaveAttachments = () => {},
 }) {
-  // const allSelected =
-  //   records.length > 0 && selectedIds.length === records.length;
-  // const indeterminate =
-  //   selectedIds.length > 0 && selectedIds.length < records.length;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -71,18 +66,30 @@ export default function HospitalityRecordsTable({
     setPage(0);
   };
 
+  const [attachmentsDialogOpen, setAttachmentsDialogOpen] = useState(false);
+  const [attachmentsRecord, setAttachmentsRecord] = useState(null);
+
+  const handleOpenAttachments = (record) => {
+    setAttachmentsRecord(record);
+    setAttachmentsDialogOpen(true);
+  };
+
+  const handleCloseAttachments = () => {
+    setAttachmentsDialogOpen(false);
+    setAttachmentsRecord(null);
+  };
+
+  const handleSaveAttachments = async (payload = {}) => {
+    if (!attachmentsRecord) return;
+    await onSaveAttachments(attachmentsRecord, payload);
+    handleCloseAttachments();
+  };
+
   return (
     <TableContainer sx={{ maxHeight: "80vh", overflowX: "auto" }}>
       <Table stickyHeader size="small">
         <TableHead>
           <TableRow>
-            {/* <TableCell padding="checkbox">
-              <Checkbox
-                checked={allSelected}
-                indeterminate={indeterminate}
-                onChange={(e) => onToggleAll(e.target.checked)}
-              />
-            </TableCell> */}
             <TableCell sx={{ minWidth: 95 }} padding="checkbox" align="center">
               操作
             </TableCell>
@@ -149,10 +156,6 @@ export default function HospitalityRecordsTable({
           {loading ? (
             Array.from({ length: 10 }).map((_, index) => (
               <TableRow key={index}>
-                {/* <TableCell padding="checkbox">
-                  <Skeleton variant="rectangular" width={24} height={28} />
-                </TableCell> */}
-
                 <TableCell padding="checkbox">
                   <Stack direction="row" spacing={1}>
                     <Skeleton variant="circular" width={28} height={28} />
@@ -226,16 +229,9 @@ export default function HospitalityRecordsTable({
           ) : (
             <>
               {records.map((record) => {
-                const selected = selectedIds.includes(record.id);
+                
                 return (
-                  <TableRow key={record.id} hover selected={selected}>
-                    {/* <TableCell padding="checkbox">
-                      <Checkbox
-                        checked={selected}
-                        onChange={() => onToggleOne(record.id)}
-                      />
-                    </TableCell> */}
-
+                  <TableRow key={record.id} hover>
                     <TableCell padding="checkbox">
                       <Stack direction="row" spacing={1}>
                         <IconButton
@@ -250,6 +246,12 @@ export default function HospitalityRecordsTable({
                           onClick={() => onDeleteRow(record.id)}
                         >
                           <DeleteIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOpenAttachments(record)}
+                        >
+                          <InsertPhotoIcon fontSize="small" />
                         </IconButton>
                       </Stack>
                     </TableCell>
@@ -332,6 +334,13 @@ export default function HospitalityRecordsTable({
         rowsPerPage={size}
         onRowsPerPageChange={handleChangeRowsPerPage}
         rowsPerPageOptions={[5, 10, 20]}
+      />
+
+      <AttachmentsDialog
+        open={attachmentsDialogOpen}
+        record={attachmentsRecord}
+        onClose={handleCloseAttachments}
+        onSave={handleSaveAttachments}
       />
     </TableContainer>
   );

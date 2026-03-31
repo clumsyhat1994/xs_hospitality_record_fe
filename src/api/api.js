@@ -1,11 +1,5 @@
 import axios from "axios";
 import endpoints from "../constants/Endpoints";
-//import { getEndpoint } from "../config/runtimeConfig.js";
-//const API_BASE_URL = window.__APP_CONFIG__.BASE_URL;
-
-// const api = axios.create({
-//   baseURL: API_BASE_URL,
-// });
 
 axios.interceptors.request.use(
   (config) => {
