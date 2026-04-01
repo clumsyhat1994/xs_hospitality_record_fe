@@ -25,7 +25,7 @@ axios.interceptors.response.use(
     } else if (
       error.response &&
       error.response.status !== 422 &&
-      error.response.status !== 401
+      error.response.status !== 401 && error.response.status !== 409
       // (error.response.status === 500 ||
       //   error.response.status === 403 ||
       //   error.response.status === 400)

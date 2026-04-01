@@ -201,21 +201,6 @@ export default function HospitalityRecordDialog({
                 />
               )}
 
-              {/* <RHFSelect
-                name="departmentCode"
-                //control={control}
-                getOptionValue={(opt) => opt.code ?? opt}
-                label={fieldLabels.department}
-                options={departments ?? []}
-                isAdmin={isAdmin}
-              /> */}
-
-              {/* <RHFTextField
-                sm={5}
-                name="handlerName"
-                label={fieldLabels.handlerName}
-              /> */}
-
               <RHFComboBox
                 name="handlerId"
                 options={handlers ?? []}
@@ -237,26 +222,11 @@ export default function HospitalityRecordDialog({
                 </Tooltip>
               </Grid>
 
-              {/* <RHFComboBox
-                name="hospitalityTypeId"
-                options={hospitalityTypes ?? []}
-                setOptions={setHospitalityTypes}
-                label={fieldLabels.hospitalityType}
-                fetchOptions={masterDataApi.searchHospitalityTypes}
-              /> */}
-
               <RHFAutocomplete
                 name="hospitalityTypeId"
                 options={hospitalityTypes ?? []}
                 label={fieldLabels.hospitalityType}
               />
-
-              {/* <RHFSelect
-                name="hospitalityTypeId"
-                //control={control}
-                label={fieldLabels.hospitalityType}
-                options={hospitalityTypes ?? []}
-              /> */}
 
               <RHFTextField name="location" label={fieldLabels.location} />
 
