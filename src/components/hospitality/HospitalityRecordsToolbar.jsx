@@ -157,68 +157,67 @@ export default function HospitalityRecordsToolbar({
           </Button>
         </Grid>
 
+        {/* One grid row: advanced Collapse + search buttons — avoids double container gap when collapsed */}
         <Grid size={{ xs: 12 }}>
-          <Collapse in={advancedSearchOpen} timeout={60}>
-            <Grid container spacing={2} sx={{ pt: 0 }}>
-              <BaseComboBox
-                label={fieldLabels.counterparty}
-                xs={8}
-                sm={4}
-                fieldValue={draftFilters.counterpartyId}
-                onChange={(v) => {
-                  onDraftFilterChange("counterpartyId", v);
-                }}
-                options={counterparties}
-                setOptions={setCounterparties}
-                fetchOptions={masterDataApi.searchCounterParties}
-              />
+          <Stack spacing={advancedSearchOpen ? 2 : 0}>
+            <Collapse in={advancedSearchOpen} timeout={60} collapsedSize={0}>
+              <Grid container spacing={2} sx={{ pt: 0 }}>
+                <BaseComboBox
+                  label={fieldLabels.counterparty}
+                  xs={8}
+                  sm={4}
+                  fieldValue={draftFilters.counterpartyId}
+                  onChange={(v) => {
+                    onDraftFilterChange("counterpartyId", v);
+                  }}
+                  options={counterparties}
+                  setOptions={setCounterparties}
+                  fetchOptions={masterDataApi.searchCounterParties}
+                />
 
-              {isAdmin && (
+                {isAdmin && (
+                  <Grid size={{ xs: 6, sm: 2 }}>
+                    <BaseAutocomplete
+                      label={fieldLabels.department}
+                      getOptionValue={(opt) => opt.code ?? opt}
+                      fieldValue={draftFilters.departmentCode}
+                      onChange={(v) => {
+                        onDraftFilterChange("departmentCode", v);
+                      }}
+                      options={departments}
+                    />
+                  </Grid>
+                )}
+
                 <Grid size={{ xs: 6, sm: 2 }}>
                   <BaseAutocomplete
-                    label={fieldLabels.department}
-                    getOptionValue={(opt) => opt.code ?? opt}
-                    fieldValue={draftFilters.departmentCode}
+                    label={fieldLabels.hospitalityType}
+                    fieldValue={draftFilters.hospitalityTypeId}
                     onChange={(v) => {
-                      onDraftFilterChange("departmentCode", v);
+                      onDraftFilterChange("hospitalityTypeId", v);
                     }}
-                    options={departments}
+                    options={hospitalityTypes}
                   />
                 </Grid>
-              )}
-
-              <Grid size={{ xs: 6, sm: 2 }}>
-                <BaseAutocomplete
-                  label={fieldLabels.hospitalityType}
-                  fieldValue={draftFilters.hospitalityTypeId}
-                  onChange={(v) => {
-                    onDraftFilterChange("hospitalityTypeId", v);
-                  }}
-                  options={hospitalityTypes}
-                />
               </Grid>
-            </Grid>
-          </Collapse>
-        </Grid>
-
-        <Grid
-          size={{ xs: 12, sm: "auto" }}
-          sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}
-        >
-          <Button
-            variant="contained"
-            startIcon={<SearchIcon />}
-            onClick={onSearch}
-          >
-            查询
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<ClearIcon />}
-            onClick={onClear}
-          >
-            重置
-          </Button>
+            </Collapse>
+            <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ alignItems: "center" }}>
+              <Button
+                variant="contained"
+                startIcon={<SearchIcon />}
+                onClick={onSearch}
+              >
+                查询
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<ClearIcon />}
+                onClick={onClear}
+              >
+                重置
+              </Button>
+            </Stack>
+          </Stack>
         </Grid>
       </Grid>
       <Stack
