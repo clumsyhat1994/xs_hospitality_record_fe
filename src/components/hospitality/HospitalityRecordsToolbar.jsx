@@ -6,7 +6,9 @@ import {
   TextField,
   Grid,
   Tooltip,
+  Collapse,
 } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from "@mui/icons-material/Search";
@@ -15,7 +17,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import BaseComboBox from "../form/BaseComboBox";
 import { useMasterData } from "../../context/MasterDataContext";
 import masterDataApi from "../../api/masterDataApi";
-import { useCallback } from "react";
+import { useState } from "react";
 import { useAuth } from "../../context/AuthProvider";
 import fieldLabels from "../../constants/recordFieldLabels";
 import BaseSelect from "../form/BaseSelect";
@@ -38,21 +40,20 @@ export default function HospitalityRecordsToolbar({
     departments,
     hospitalityTypes,
   } = useMasterData();
-  // const fetchCounterparties = useCallback(
-  //   (keyword) => masterDataApi.searchCounterParties(keyword),
-  //   []
-  // );
+
   const { isAdmin } = useAuth();
+  const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
   // console.log("draftFilters", draftFilters);
   return (
     <Toolbar
       sx={{
         display: "flex",
         justifyContent: "space-between",
-        //gap: 2,
+        alignItems: "flex-start",
+        gap: 2,
       }}
     >
-      <Grid container spacing={2} pt={3}>
+      <Grid container spacing={2} pt={3} sx={{ flex: 1, minWidth: 0 }}>
         <Grid size={{ xs: 6, sm: 1.5 }}>
           <TextField
             label="接待日期自"
@@ -135,76 +136,74 @@ export default function HospitalityRecordsToolbar({
           fetchOptions={masterDataApi.searchHandlers}
         />
 
-        <BaseComboBox
-          label={fieldLabels.counterparty}
-          xs={8}
-          sm={4}
-          fieldValue={draftFilters.counterpartyId}
-          onChange={(v) => {
-            onDraftFilterChange("counterpartyId", v);
-          }}
-          options={counterparties}
-          setOptions={setCounterparties}
-          fetchOptions={masterDataApi.searchCounterParties}
-        />
+        <Grid
+          size={{ xs: 6, sm: "auto" }}
+          sx={{ display: "flex", alignItems: "center" }}
+        >
+          <Button
+            variant="text"
+            size="small"
+            onClick={() => setAdvancedSearchOpen((v) => !v)}
+            endIcon={
+              <ExpandMoreIcon
+                sx={{
+                  transform: advancedSearchOpen ? "rotate(180deg)" : "none",
+                  transition: "transform 0.1s ease-out",
+                }}
+              />
+            }
+          >
+            高级搜索
+          </Button>
+        </Grid>
 
-        {/* {isAdmin && (
-          <BaseComboBox
-            label={fieldLabels.department}
-            xs={6}
-            sm={3}
-            getOptionValue={(opt) => opt.code ?? opt}
-            fieldValue={draftFilters.departmentCode}
-            onChange={(v) => {
-              onDraftFilterChange("departmentCode", v);
-            }}
-            options={departments}
-            setOptions={setDepartments}
-            fetchOptions={fetchDepartments}
-          />
-        )} */}
+        <Grid size={{ xs: 12 }}>
+          <Collapse in={advancedSearchOpen} timeout={60}>
+            <Grid container spacing={2} sx={{ pt: 0 }}>
+              <BaseComboBox
+                label={fieldLabels.counterparty}
+                xs={8}
+                sm={4}
+                fieldValue={draftFilters.counterpartyId}
+                onChange={(v) => {
+                  onDraftFilterChange("counterpartyId", v);
+                }}
+                options={counterparties}
+                setOptions={setCounterparties}
+                fetchOptions={masterDataApi.searchCounterParties}
+              />
 
-        {/* {isAdmin && (
-          <Grid size={{ xs: 6, sm: 3 }}>
-            <BaseSelect
-              label={fieldLabels.department}
-              getOptionValue={(opt) => opt.code ?? opt}
-              fieldValue={draftFilters.departmentCode}
-              onChange={(v) => {
-                onDraftFilterChange("departmentCode", v);
-              }}
-              options={departments}
-            />
-          </Grid>
-        )} */}
-        {isAdmin && (
-          <Grid size={{ xs: 6, sm: 2 }}>
-            <BaseAutocomplete
-              label={fieldLabels.department}
-              getOptionValue={(opt) => opt.code ?? opt}
-              fieldValue={draftFilters.departmentCode}
-              onChange={(v) => {
-                onDraftFilterChange("departmentCode", v);
-              }}
-              options={departments}
-            />
-          </Grid>
-        )}
+              {isAdmin && (
+                <Grid size={{ xs: 6, sm: 2 }}>
+                  <BaseAutocomplete
+                    label={fieldLabels.department}
+                    getOptionValue={(opt) => opt.code ?? opt}
+                    fieldValue={draftFilters.departmentCode}
+                    onChange={(v) => {
+                      onDraftFilterChange("departmentCode", v);
+                    }}
+                    options={departments}
+                  />
+                </Grid>
+              )}
 
-        <Grid size={{ xs: 6, sm: 2 }}>
-          <BaseAutocomplete
-            label={fieldLabels.hospitalityType}
-            fieldValue={draftFilters.hospitalityTypeId}
-            onChange={(v) => {
-              onDraftFilterChange("hospitalityTypeId", v);
-            }}
-            options={hospitalityTypes}
-          />
+              <Grid size={{ xs: 6, sm: 2 }}>
+                <BaseAutocomplete
+                  label={fieldLabels.hospitalityType}
+                  fieldValue={draftFilters.hospitalityTypeId}
+                  onChange={(v) => {
+                    onDraftFilterChange("hospitalityTypeId", v);
+                  }}
+                  options={hospitalityTypes}
+                />
+              </Grid>
+            </Grid>
+          </Collapse>
         </Grid>
 
         <Grid
-          size={{ xs: 6, sm: 2 }}
-          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+          size={{ xs: 12, sm: "auto" }}
+          sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}
         >
           <Button
             variant="contained"
@@ -225,7 +224,12 @@ export default function HospitalityRecordsToolbar({
       <Stack
         direction="row"
         spacing={2}
-        sx={{ flexShrink: 0, whiteSpace: "nowrap" }}
+        sx={{
+          flexShrink: 0,
+          whiteSpace: "nowrap",
+          alignSelf: "flex-start",
+          pt: 3,
+        }}
       >
         <Button variant="contained" startIcon={<AddIcon />} onClick={onCreate}>
           新建记录
