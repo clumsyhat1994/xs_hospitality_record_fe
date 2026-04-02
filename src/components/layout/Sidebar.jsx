@@ -12,6 +12,10 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthProvider";
 import { GuardedListItemButton } from "../common/GuardedListItemButton";
 import moduleTabKeys from "../../constants/moduleKeys";
+import { APP_FOOTER_HEIGHT_PX } from "./AppFooter";
+
+/** Fixed sidebar width — keep in sync with main content `marginLeft` in `MainPage`. */
+export const APP_SIDEBAR_WIDTH_PX = 200;
 
 export default function Sidebar({ onOpenModule }) {
   const [masterOpen, setMasterOpen] = useState(true);
@@ -30,15 +34,21 @@ export default function Sidebar({ onOpenModule }) {
 
   return (
     <Box
+      component="nav"
       sx={{
-        width: 200,
+        position: "fixed",
+        left: 0,
+        top: 0,
+        bottom: APP_FOOTER_HEIGHT_PX,
+        width: APP_SIDEBAR_WIDTH_PX,
+        zIndex: (theme) => theme.zIndex.appBar,
         borderRight: "1px solid #ddd",
-
+        bgcolor: "background.paper",
         display: "flex",
         flexDirection: "column",
       }}
     >
-      <Box sx={{ flex: 1, overflowY: "auto" }}>
+      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
         <List>
           <ListItemButton
             onClick={() =>
@@ -69,16 +79,6 @@ export default function Sidebar({ onOpenModule }) {
 
           <Collapse in={masterOpen} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-              {/* <ListItemButton
-                onClick={() =>
-                  onOpenModule({
-                    key: "DEPARTMENT",
-                    label: menuLables.DEPARTMENT,
-                  })
-                }
-              >
-                <ListItemText primary={menuLables.DEPARTMENT} sx={{ pl: 2 }} />
-              </ListItemButton> */}
               <GuardedListItemButton
                 allowed={isAdmin}
                 onClick={() =>
@@ -93,22 +93,6 @@ export default function Sidebar({ onOpenModule }) {
                   sx={{ pl: 2 }}
                 />
               </GuardedListItemButton>
-
-              {/* <ListItemButton
-                onClick={() =>
-                  onOpenModule({ key: "POSITION", label: menuLables.POSITION })
-                }
-              >
-                <ListItemText primary={menuLables.POSITION} sx={{ pl: 2 }} />
-              </ListItemButton>
-
-              <ListItemButton
-                onClick={() =>
-                  onOpenModule({ key: "GRADE", label: menuLables.GRADE })
-                }
-              >
-                <ListItemText primary={menuLables.GRADE} sx={{ pl: 2 }} />
-              </ListItemButton> */}
             </List>
           </Collapse>
         </List>

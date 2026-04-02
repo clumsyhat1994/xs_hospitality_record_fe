@@ -1,11 +1,19 @@
 import { Box, Typography } from "@mui/material";
 
+/** Fixed footer height — keep in sync with `AppShell` bottom padding. */
+export const APP_FOOTER_HEIGHT_PX = 36;
+
 export default function AppFooter() {
   return (
     <Box
       component="footer"
       sx={{
-        height: 36,
+        position: "fixed",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: (theme) => theme.zIndex.appBar,
+        height: APP_FOOTER_HEIGHT_PX,
         borderTop: "1px solid #e0e0e0",
         display: "flex",
         alignItems: "center",

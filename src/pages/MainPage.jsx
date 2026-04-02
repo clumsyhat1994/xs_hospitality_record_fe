@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
-import Sidebar from "../components/layout/Sidebar";
+import Sidebar, { APP_SIDEBAR_WIDTH_PX } from "../components/layout/Sidebar";
 import TabArea from "../components/layout/TabArea";
 import Box from "@mui/material/Box";
 import { Outlet, useLocation, Link, useNavigate } from "react-router-dom";
 import menuLables from "../constants/moduleLables";
 import moduleRoutes from "../constants/moduleRoutes";
 import routeToModule from "../constants/routeToModule";
-import AppFooter from "../components/layout/AppFooter";
-
 export default function MainLayout() {
   const location = useLocation();
   const initialModule = routeToModule[location.pathname] ?? null;
@@ -22,18 +20,6 @@ export default function MainLayout() {
     const path = moduleRoutes[module.key];
     if (path) navigate(path);
   };
-
-  // useEffect(() => {
-  //   const module = routeToModule[location.pathname];
-  //   if (module) {
-  //     setTabs((prev) => {
-  //       const exists = prev.some((t) => t.key === module.key);
-
-  //       return exists ? prev : [...prev, module];
-  //     });
-  //     setActiveTab(module.key);
-  //   }
-  // }, [location.pathname]);
 
   useEffect(() => {
     const module = routeToModule[location.pathname];
@@ -51,7 +37,14 @@ export default function MainLayout() {
   return (
     <Box sx={{ display: "flex", flex: 1 }}>
       <Sidebar onOpenModule={handleOpenModule} />
-      <Box sx={{ flexGrow: 1, p: 2, width: "80%" }}>
+      <Box
+        sx={{
+          flexGrow: 1,
+          minWidth: 0,
+          p: 2,
+          ml: `${APP_SIDEBAR_WIDTH_PX}px`,
+        }}
+      >
         <TabArea
           tabs={tabs}
           activeTab={activeTab}
