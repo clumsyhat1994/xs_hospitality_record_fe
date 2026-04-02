@@ -141,7 +141,7 @@ export function AttachmentsDialog({
           type="file"
           hidden
           multiple
-          accept="image/*"
+          accept="image/*,.pdf,application/pdf"
           onChange={(e) => {
             const next = Array.from(e.target.files || []);
             appendUniqueFiles(setSelectedFiles, next);
