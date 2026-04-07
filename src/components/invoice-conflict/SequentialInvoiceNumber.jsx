@@ -5,7 +5,6 @@ import {
   TableRow,
   TableBody,
   TableCell,
-  TablePagination,
   Stack,
   CircularProgress,
 } from "@mui/material";
@@ -13,6 +12,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import invoiceRunsApi from "../../api/invoiceRunsApi";
 import moduleRoutes from "../../constants/moduleRoutes";
+import { NumberedTablePagination } from "../common/NumberedTablePagination";
 
 export default function SequentialInvoiceNumber() {
   const navigate = useNavigate();
@@ -149,8 +149,7 @@ export default function SequentialInvoiceNumber() {
           )}
         </TableBody>
       </Table>
-      <TablePagination
-        component="div"
+      <NumberedTablePagination
         count={totalElements}
         page={page}
         onPageChange={handleChangePage}

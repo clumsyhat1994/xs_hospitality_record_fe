@@ -8,7 +8,6 @@ import {
   Checkbox,
   IconButton,
   Stack,
-  TablePagination,
   CircularProgress,
   Skeleton,
 } from "@mui/material";
@@ -22,6 +21,7 @@ import { useEffect, useState } from "react";
 import fieldLabels from "../../constants/recordFieldLabels";
 import { ItemsPopperCell } from "./ItemsPopperCell";
 import { AttachmentsDialog } from "./AttachmentsDialog";
+import { NumberedTablePagination } from "../common/NumberedTablePagination";
 
 function formatDate(value) {
   if (!value) return "";
@@ -326,8 +326,7 @@ export default function HospitalityRecordsTable({
           )}
         </TableBody>
       </Table>
-      <TablePagination
-        component="div"
+      <NumberedTablePagination
         count={totalElements}
         page={page}
         onPageChange={handleChangePage}

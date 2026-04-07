@@ -9,7 +9,6 @@ import {
   IconButton,
   TableContainer,
   Paper,
-  TablePagination,
   CircularProgress,
   Box,
   Switch,
@@ -19,6 +18,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ToggleOffIcon from "@mui/icons-material/ToggleOff";
 import ToggleOnIcon from "@mui/icons-material/ToggleOn";
+
+import { NumberedTablePagination } from "../common/NumberedTablePagination";
 
 export default function MasterDataTable({
   rows,
@@ -119,8 +120,7 @@ export default function MasterDataTable({
         </Table>
       </TableContainer>
 
-      <TablePagination
-        component="div"
+      <NumberedTablePagination
         page={page}
         onPageChange={(_, newPage) => onPageChange(newPage)}
         rowsPerPage={size}
