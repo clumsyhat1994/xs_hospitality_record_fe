@@ -290,7 +290,7 @@ export function AttachmentsDialog({
           gap: 2,
         }}
       >
-        <span>附件： 发票 / 接待审批表 </span>
+        <span>附件： 发票 / 业务招待清单 </span>
         <Typography variant="subtitle1">
           发票号码：{record?.invoiceNumberString || "未填写"}
         </Typography>
@@ -300,8 +300,8 @@ export function AttachmentsDialog({
           <Box display="flex" flexDirection="column" gap={2} mt={1}>
             <Box display="flex" flexDirection="column" gap={2}>
               {renderAttachmentSection({
-                sectionLabel: "发票附件（可多张）",
-                selectLabel: "选择发票图片",
+                sectionLabel: "发票附件（可上传多张）",
+                selectLabel: "选择发票",
                 pendingLabel: "待上传发票：",
                 existingLabel: "已上传发票：",
                 existingNamePrefix: "发票",
@@ -316,11 +316,11 @@ export function AttachmentsDialog({
               <Divider sx={{ borderColor: "text.disabled" }} />
 
               {renderAttachmentSection({
-                sectionLabel: "接待审批表附件（可多张）",
-                selectLabel: "选择审批表图片",
-                pendingLabel: "待上传接待审批表：",
-                existingLabel: "已上传审批表：",
-                existingNamePrefix: "审批表",
+                sectionLabel: "业务招待清单附件（可上传多张）",
+                selectLabel: "选择业务招待清单",
+                pendingLabel: "待上传业务招待清单：",
+                existingLabel: "已上传业务招待清单：",
+                existingNamePrefix: "业务招待清单",
                 selectedFiles: formFiles,
                 setSelectedFiles: setFormFiles,
                 inputRef: formInputRef,
