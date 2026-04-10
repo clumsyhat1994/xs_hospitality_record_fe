@@ -62,6 +62,8 @@ export function AttachmentsDialog({
   const [removedFormPaths, setRemovedFormPaths] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+  // UI-only state for showing which drop zone is currently highlighted.
+  const [activeDropSection, setActiveDropSection] = useState(null);
 
   useEffect(() => {
     if (!open) return;
@@ -86,12 +88,13 @@ export function AttachmentsDialog({
     );
   };
 
-  const appendUniqueFiles = (setFiles, nextFiles) => {
-    if (!nextFiles?.length) return;
+  const appendDedupedFiles = (setFiles, nextFiles) => {
+    const normalizedNext = Array.from(nextFiles || []);
+    if (!normalizedNext.length) return;
     setFiles((prev) => {
       const current = prev ?? [];
       const existingKeys = new Set(current.map(fileKey));
-      const filteredNext = nextFiles.filter((f) => !existingKeys.has(fileKey(f)));
+      const filteredNext = normalizedNext.filter((f) => !existingKeys.has(fileKey(f)));
       return [...current, ...filteredNext];
     });
   };
@@ -118,6 +121,7 @@ export function AttachmentsDialog({
     existingEntries,
     removedPaths,
     toggleRemoved,
+    dropKey,
   }) => (
     <Box sx={{ py: 0.5 }}>
       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 1 }}>
@@ -134,22 +138,52 @@ export function AttachmentsDialog({
             {sectionLabel}
           </Typography>
         </Box>
-        <Button component="label" variant="outlined" size="small">
-        {selectLabel}
-        <input
-          ref={inputRef}
-          type="file"
-          hidden
-          multiple
-          accept="image/*,.pdf,application/pdf"
-          onChange={(e) => {
-            const next = Array.from(e.target.files || []);
-            appendUniqueFiles(setSelectedFiles, next);
-            // Allow selecting the same file again to trigger onChange.
-            e.target.value = "";
+        <Box
+          sx={{
+            border: "1px dashed",
+            borderColor: activeDropSection === dropKey ? "primary.main" : "divider",
+            borderRadius: 1,
+            px: 1,
+            py: 1,
+            bgcolor: activeDropSection === dropKey ? "primary.50" : "transparent",
+            transition: "all 120ms ease-in-out",
           }}
-        />
-        </Button>
+          onDragOver={(e) => {
+            e.preventDefault();
+            setActiveDropSection(dropKey);
+          }}
+          onDragLeave={(e) => {
+            e.preventDefault();
+            if (e.currentTarget.contains(e.relatedTarget)) return;
+            // When dragging quickly across drop areas, a late dragleave from this area
+            // can fire after another area becomes active; only clear if still active.
+            setActiveDropSection((prev) => (prev === dropKey ? null : prev));
+          }}
+          onDrop={(e) => {
+            e.preventDefault();
+            setActiveDropSection((prev) => (prev === dropKey ? null : prev));
+            appendDedupedFiles(setSelectedFiles, e.dataTransfer?.files);
+          }}
+        >
+          <Button component="label" variant="outlined" size="small">
+            {selectLabel}
+            <input
+              ref={inputRef}
+              type="file"
+              hidden
+              multiple
+              accept="image/*,.pdf,application/pdf"
+              onChange={(e) => {
+                appendDedupedFiles(setSelectedFiles, e.target.files);
+                // Allow selecting the same file again to trigger onChange.
+                e.target.value = "";
+              }}
+            />
+          </Button>
+          <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+            或将文件拖拽到此区域
+          </Typography>
+        </Box>
       </Box>
       {selectedFiles?.length > 0 && (
         <Box
@@ -311,6 +345,7 @@ export function AttachmentsDialog({
                 existingEntries: record.invoiceImages,
                 removedPaths: removedInvoicePaths,
                 toggleRemoved: toggleInvoiceRemoved,
+                dropKey: "invoice",
               })}
 
               <Divider sx={{ borderColor: "text.disabled" }} />
@@ -327,6 +362,7 @@ export function AttachmentsDialog({
                 existingEntries: record.formImages,
                 removedPaths: removedFormPaths,
                 toggleRemoved: toggleFormRemoved,
+                dropKey: "form",
               })}
             </Box>
           </Box>
