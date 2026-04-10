@@ -40,6 +40,17 @@ function fileKey(file) {
   return `${file.name ?? ""}|${file.size ?? ""}|${file.lastModified ?? ""}`;
 }
 
+function isAllowedAttachmentFile(file) {
+  if (!file) return false;
+  const type = String(file.type || "").toLowerCase();
+  const name = String(file.name || "").toLowerCase();
+  if (type.startsWith("image/") || type === "application/pdf") return true;
+  return (
+    name.endsWith(".pdf") ||
+    /\.(png|jpe?g|gif|bmp|webp|svg|heic|heif|tiff?)$/i.test(name)
+  );
+}
+
 async function openProtectedImage(relativePath) {
   const res = await hospitalityApi.fetchAttachmentBlob(relativePath);
   if (!res?.data) return;
@@ -89,7 +100,7 @@ export function AttachmentsDialog({
   };
 
   const appendDedupedFiles = (setFiles, nextFiles) => {
-    const normalizedNext = Array.from(nextFiles || []);
+    const normalizedNext = Array.from(nextFiles || []).filter(isAllowedAttachmentFile);
     if (!normalizedNext.length) return;
     setFiles((prev) => {
       const current = prev ?? [];
@@ -140,12 +151,17 @@ export function AttachmentsDialog({
         </Box>
         <Box
           sx={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 0.75,
             border: "1px dashed",
-            borderColor: activeDropSection === dropKey ? "primary.main" : "divider",
+            borderColor: "divider",
             borderRadius: 1,
             px: 1,
             py: 1,
-            bgcolor: activeDropSection === dropKey ? "primary.50" : "transparent",
+            bgcolor: activeDropSection === dropKey ? "rgba(25, 118, 210, 0.12)" : "transparent",
             transition: "all 120ms ease-in-out",
           }}
           onDragOver={(e) => {
@@ -180,8 +196,13 @@ export function AttachmentsDialog({
               }}
             />
           </Button>
-          <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-            或将文件拖拽到此区域
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            align="center"
+            sx={{ fontSize: "0.68rem" }}
+          >
+            支持图片文件和 PDF（可拖拽到此区域）
           </Typography>
         </Box>
       </Box>
