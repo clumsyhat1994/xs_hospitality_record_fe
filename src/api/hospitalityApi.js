@@ -7,8 +7,12 @@ const endpoint = endpoints.HOSPITALITY;
 const hospitalityApi = {
   get: (id) => api.get(`${endpoint}/${id}`),
   filtered_list: (page = 0, size = 10, filters = {}, { signal } = {}) => {
+    const params = { page, size };
+    for (const [k, v] of Object.entries(filters)) {
+      if (v != null) params[k] = v;
+    }
     return api.get(endpoint, {
-      params: { page, size, ...filters },
+      params,
       signal,
     });
   },
@@ -43,11 +47,16 @@ const hospitalityApi = {
   },
   deleteOne: (id) => api.delete(`${endpoint}/${id}`),
   batchDelete: (ids) => api.delete(`${endpoint}/batch`, { params: { ids } }),
-  export: (filters = {}) =>
-    api.get(`${endpoint}/export`, {
-      params: { ...filters },
+  export: (filters = {}) => {
+    const params = {};
+    for (const [k, v] of Object.entries(filters)) {
+      if (v != null) params[k] = v;
+    }
+    return api.get(`${endpoint}/export`, {
+      params,
       responseType: "blob",
-    }),
+    });
+  },
 };
 
 export default hospitalityApi;

@@ -22,6 +22,8 @@ import { useAuth } from "../../context/AuthProvider";
 import fieldLabels from "../../constants/recordFieldLabels";
 import BaseSelect from "../form/BaseSelect";
 import BaseAutocomplete from "../form/BaseAutocomplete";
+import ClearableBooleanSelect from "./ClearableBooleanSelect";
+
 export default function HospitalityRecordsToolbar({
   selectedCount,
   onCreate,
@@ -197,6 +199,38 @@ export default function HospitalityRecordsToolbar({
                       onDraftFilterChange("hospitalityTypeId", v);
                     }}
                     options={hospitalityTypes}
+                  />
+                </Grid>
+
+                <Grid size={{ xs: 6, sm: 2 }}>
+                  <ClearableBooleanSelect
+                    label="发票附件"
+                    value={draftFilters.hasInvoiceUploaded}
+                    onChange={(v) =>
+                      onDraftFilterChange("hasInvoiceUploaded", v)
+                    }
+                  />
+                </Grid>
+
+                <Grid size={{ xs: 6, sm: 2 }}>
+                  <ClearableBooleanSelect
+                    label="招待清单附件"
+                    value={draftFilters.hasFormUploaded}
+                    onChange={(v) =>
+                      onDraftFilterChange("hasFormUploaded", v)
+                    }
+                  />
+                </Grid>
+
+                <Grid size={{ xs: 6, sm: 2 }}>
+                  <ClearableBooleanSelect
+                    label="发票号码是否填写"
+                    value={draftFilters.invoiceNumberFilled}
+                    onChange={(v) =>
+                      onDraftFilterChange("invoiceNumberFilled", v)
+                    }
+                    yesLabel="已填写"
+                    noLabel="未填写"
                   />
                 </Grid>
               </Grid>

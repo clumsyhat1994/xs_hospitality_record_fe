@@ -33,6 +33,13 @@ function fileNameFromPath(path, fallback = "附件") {
   }
 }
 
+function formatDate(value) {
+  if (!value) return "未填写";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleDateString();
+}
+
 function fileKey(file) {
   if (!file) return "";
   // Quick/simple dedupe within the current selection list.
@@ -340,52 +347,58 @@ export function AttachmentsDialog({
       <DialogTitle
         sx={{
           display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 2,
+          flexDirection: "column",
+          alignItems: "flex-start",
+          gap: 0.5,
         }}
       >
-        <span>附件： 发票 / 业务招待清单 </span>
-        <Typography variant="subtitle1">
-          发票号码：{record?.invoiceNumberString || "未填写"}
-        </Typography>
+        <Typography variant="h6">附件： 发票 / 业务招待清单</Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2.5, flexWrap: "wrap" }}>
+          <Typography variant="subtitle2" color="text.secondary">
+            发票号码：{record?.invoiceNumberString || "未填写"}
+          </Typography>
+          <Typography variant="subtitle2" color="text.secondary">
+            接待日期：{formatDate(record?.receptionDate)}
+          </Typography>
+          <Typography variant="subtitle2" color="text.secondary">
+            往来单位：{record?.counterpartyName || "未填写"}
+          </Typography>
+        </Box>
       </DialogTitle>
       <DialogContent dividers>
         {record && (
           <Box display="flex" flexDirection="column" gap={2} mt={1}>
-            <Box display="flex" flexDirection="column" gap={2}>
-              {renderAttachmentSection({
-                sectionLabel: "发票附件（可上传多张）",
-                selectLabel: "选择发票",
-                pendingLabel: "待上传发票：",
-                existingLabel: "已上传发票：",
-                existingNamePrefix: "发票",
-                selectedFiles: invoiceFiles,
-                setSelectedFiles: setInvoiceFiles,
-                inputRef: invoiceInputRef,
-                existingEntries: record.invoiceImages,
-                removedPaths: removedInvoicePaths,
-                toggleRemoved: toggleInvoiceRemoved,
-                dropKey: "invoice",
-              })}
+            {renderAttachmentSection({
+              sectionLabel: "发票附件（可上传多张）",
+              selectLabel: "选择发票",
+              pendingLabel: "待上传发票：",
+              existingLabel: "已上传发票：",
+              existingNamePrefix: "发票",
+              selectedFiles: invoiceFiles,
+              setSelectedFiles: setInvoiceFiles,
+              inputRef: invoiceInputRef,
+              existingEntries: record.invoiceImages,
+              removedPaths: removedInvoicePaths,
+              toggleRemoved: toggleInvoiceRemoved,
+              dropKey: "invoice",
+            })}
 
-              <Divider sx={{ borderColor: "text.disabled" }} />
+           
 
-              {renderAttachmentSection({
-                sectionLabel: "业务招待清单附件（可上传多张）",
-                selectLabel: "选择业务招待清单",
-                pendingLabel: "待上传业务招待清单：",
-                existingLabel: "已上传业务招待清单：",
-                existingNamePrefix: "业务招待清单",
-                selectedFiles: formFiles,
-                setSelectedFiles: setFormFiles,
-                inputRef: formInputRef,
-                existingEntries: record.formImages,
-                removedPaths: removedFormPaths,
-                toggleRemoved: toggleFormRemoved,
-                dropKey: "form",
-              })}
-            </Box>
+            {renderAttachmentSection({
+              sectionLabel: "业务招待清单附件（可上传多张）",
+              selectLabel: "选择业务招待清单",
+              pendingLabel: "待上传业务招待清单：",
+              existingLabel: "已上传业务招待清单：",
+              existingNamePrefix: "业务招待清单",
+              selectedFiles: formFiles,
+              setSelectedFiles: setFormFiles,
+              inputRef: formInputRef,
+              existingEntries: record.formImages,
+              removedPaths: removedFormPaths,
+              toggleRemoved: toggleFormRemoved,
+              dropKey: "form",
+            })}
           </Box>
         )}
       </DialogContent>

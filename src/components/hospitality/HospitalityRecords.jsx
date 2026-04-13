@@ -56,6 +56,9 @@ export default function HospitalityRecords() {
       counterpartyId: null,
       departmentCode: "",
       hospitalityTypeId: null,
+      hasInvoiceUploaded: null,
+      hasFormUploaded: null,
+      invoiceNumberFilled: null,
     };
   });
   const [filters, setFilters] = useState(draftFilters);
@@ -65,6 +68,13 @@ export default function HospitalityRecords() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    const boolParam = (key) => {
+      const v = searchParams.get(key);
+      if (v === "true") return true;
+      if (v === "false") return false;
+      return null;
+    };
+
     const urlFilters = {
       receptionDateFrom: searchParams.get("receptionDateFrom") ?? "",
       receptionDateTo: searchParams.get("receptionDateTo") ?? "",
@@ -84,6 +94,10 @@ export default function HospitalityRecords() {
       hospitalityTypeId: searchParams.get("hospitalityTypeId")
         ? Number(searchParams.get("hospitalityTypeId"))
         : null,
+
+      hasInvoiceUploaded: boolParam("hasInvoiceUploaded"),
+      hasFormUploaded: boolParam("hasFormUploaded"),
+      invoiceNumberFilled: boolParam("invoiceNumberFilled"),
     };
 
     const urlPage = searchParams.get("page")
@@ -93,10 +107,12 @@ export default function HospitalityRecords() {
       ? Number(searchParams.get("size"))
       : 10;
 
-    // Applied filters come from URL (source of truth)
+    // filters = criteria used for list/export (URL is source of truth).
+    // draftFilters = what user has typed into toolbar filter inputs; usually they become filters only after 查询.
+    // When searchParams change (back/forward, shared link, etc.), keep both in sync so
+    // the toolbar does not show a stale draft that was never submitted. Same snapshot for
+    // both; order of setState calls does not matter (batched).
     setFilters(urlFilters);
-
-    // Draft should match applied when URL changes (e.g. back/forward, switching tabs)
     setDraftFilters(urlFilters);
 
     setPage(urlPage);
@@ -135,6 +151,9 @@ export default function HospitalityRecords() {
       setParams(next, "handlerId", draftFilters.handlerId);
       setParams(next, "counterpartyId", draftFilters.counterpartyId);
       setParams(next, "hospitalityTypeId", draftFilters.hospitalityTypeId);
+      setParams(next, "hasInvoiceUploaded", draftFilters.hasInvoiceUploaded);
+      setParams(next, "hasFormUploaded", draftFilters.hasFormUploaded);
+      setParams(next, "invoiceNumberFilled", draftFilters.invoiceNumberFilled);
 
       next.set("page", "0");
       next.set("size", String(size)); // keep current size
@@ -197,7 +216,13 @@ export default function HospitalityRecords() {
     },
     [page, size, filters, setRecords, setTotalElements]
   );
-  
+
+  useEffect(() => {
+    const controller = new AbortController();
+    load(controller.signal);
+    return () => controller.abort();
+  }, [load]);
+
   const handleSaveAttachments = useCallback(
     async (record, { invoiceFiles, formFiles, removeInvoicePaths, removeFormPaths }) => {
       const inv = invoiceFiles ?? [];
@@ -265,9 +290,7 @@ export default function HospitalityRecords() {
           //setSize={setSize}
           totalElements={totalElements}
           setTotalElements={setTotalElements}
-          load={load}
           loading={loading}
-          setLoading={setLoading}
           onSaveAttachments={handleSaveAttachments}
         />
       </Paper>

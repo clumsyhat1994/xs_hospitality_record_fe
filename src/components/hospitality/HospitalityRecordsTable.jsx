@@ -17,7 +17,7 @@ import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
 import Tooltip from "@mui/material/Tooltip";
 import CommentOutlinedIcon from "@mui/icons-material/CommentOutlined";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import fieldLabels from "../../constants/recordFieldLabels";
 import { ItemsPopperCell } from "./ItemsPopperCell";
 import { AttachmentsDialog } from "./AttachmentsDialog";
@@ -43,18 +43,10 @@ export default function HospitalityRecordsTable({
   setSize,
   totalElements,
   setTotalElements,
-  load,
   loading,
-  setLoading,
   // Optional callbacks to let parent handle actual upload/download
   onSaveAttachments = () => {},
 }) {
-
-  useEffect(() => {
-    const controller = new AbortController();
-    load(controller.signal);
-    return () => controller.abort();
-  }, [load]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
