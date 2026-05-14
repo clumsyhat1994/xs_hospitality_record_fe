@@ -79,8 +79,7 @@ async function fetchEligiblePurchaseRecordsByCategory(
     purchaseDateTo: formatDate(today),
     inStockOnly: true,
   };
-  const listOptions =
-    includeIds.length > 0 ? { includeIds } : {};
+  const listOptions = includeIds.length > 0 ? { includeIds } : {};
 
   while (categoryRecords.length < totalElements) {
     const res = await purchaseRecordApi.filteredList(
@@ -216,11 +215,8 @@ function GiftInventoryLineRow({
           rules={{ required: "请选择礼品类型" }}
           afterFieldValueChange={() => {
             setValue(`giftInventoryLines.${index}.purchaseId`, "");
-            setValue(`giftInventoryLines.${index}.productName`, "");
-            setValue(`giftInventoryLines.${index}.specification`, "");
-            setValue(`giftInventoryLines.${index}.purchaseDate`, "");
-            setValue(`giftInventoryLines.${index}.remainingQuantity`, null);
             setValue(`giftInventoryLines.${index}.quantity`, "");
+            setValue(`giftInventoryLines.${index}.unitPrice`, "");
           }}
           required={false}
         />
@@ -239,13 +235,12 @@ function GiftInventoryLineRow({
             getOptionLabel={getPurchaseRecordLabel}
             rules={{ required: "请选择采购记录" }}
             afterFieldValueChange={(next) => {
-              // Backend expects each line to provide either purchaseId OR productName (not both).
-              // Since we select by purchaseId in this UI, keep productName empty.
-              setValue(`giftInventoryLines.${index}.productName`, "");
-              setValue(`giftInventoryLines.${index}.specification`, "");
-              setValue(`giftInventoryLines.${index}.purchaseDate`, "");
-              setValue(`giftInventoryLines.${index}.remainingQuantity`, null);
               setValue(`giftInventoryLines.${index}.quantity`, "");
+              const price =
+                next != null && next.unitPrice != null && next.unitPrice !== ""
+                  ? next.unitPrice
+                  : "";
+              setValue(`giftInventoryLines.${index}.unitPrice`, price);
             }}
             required={false}
           />
@@ -328,11 +323,8 @@ export default function UsageItemLinesFieldArray({
     append({
       category: "",
       purchaseId: "",
-      productName: "",
-      specification: "",
-      purchaseDate: "",
-      remainingQuantity: null,
       quantity: "",
+      unitPrice: "",
     });
     clearErrors("giftInventoryLines");
   };

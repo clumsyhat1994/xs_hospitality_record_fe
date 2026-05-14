@@ -11,6 +11,7 @@ export default function RHFCalculatedField({
 }) {
   const { control, setValue } = useFormContext();
   const allValues = useWatch({ control });
+
   const value = computeValue(allValues);
 
   useEffect(() => {

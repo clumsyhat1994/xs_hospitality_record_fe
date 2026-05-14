@@ -19,21 +19,8 @@ import { useMasterData } from "../../context/MasterDataContext";
 import masterDataApi from "../../api/masterDataApi";
 import usageRecordApi from "../../api/usageRecordApi";
 import { toNullableNumber } from "../../utils/numberUtils";
+import { initialAllocatedByPurchaseIdFromSlices } from "../../utils/giftAllocationFormUtils";
 import UsageItemLinesFieldArray from "./UsageItemLinesFieldArray";
-
-/** Quantities already saved on this usage (per purchase), used to avoid double-counting API remaining. */
-function initialAllocatedByPurchaseIdFromRecord(record) {
-  const rows = record?.purchaseAllocations;
-  if (!Array.isArray(rows) || rows.length === 0) return {};
-  return rows.reduce((acc, a) => {
-    const purchaseId = a?.purchaseId;
-    const quantity = Number(a?.quantity);
-    if (!purchaseId || !Number.isFinite(quantity) || quantity <= 0) return acc;
-    const key = String(purchaseId);
-    acc[key] = (acc[key] ?? 0) + quantity;
-    return acc;
-  }, {});
-}
 
 function toDialogDefaultValues(record) {
   if (!record) {
@@ -52,15 +39,14 @@ function toDialogDefaultValues(record) {
     counterpartyId: record.counterpartyId ?? null,
     recipientId: record.recipientId ?? null,
     remark: record.remark ?? "",
-    giftInventoryLines: (record.purchaseAllocations ?? []).map((a) => ({
-      category: a.category ?? "",
-      purchaseId: a.purchaseId,
-      productName: a.productName ?? "",
-      specification: a.specification ?? "",
-      purchaseDate: a.purchaseDate ?? "",
-      remainingQuantity: a.remainingQuantity ?? null,
-      quantity: a.quantity,
-    })),
+    giftInventoryLines: (record.purchaseAllocations ?? [])
+      .filter(Boolean)
+      .map((a) => ({
+        category: a.category ?? "",
+        purchaseId: a.purchaseId,
+        quantity: a.quantity,
+        unitPrice: a.unitPrice != null && a.unitPrice !== "" ? a.unitPrice : "",
+      })),
   };
 }
 
@@ -72,7 +58,10 @@ export default function UsageRecordDialog({
 }) {
   const isEditMode = !!editingRecord?.id;
   const initialAllocatedByPurchaseId = useMemo(
-    () => initialAllocatedByPurchaseIdFromRecord(editingRecord),
+    () =>
+      initialAllocatedByPurchaseIdFromSlices(
+        editingRecord?.purchaseAllocations,
+      ),
     [editingRecord],
   );
   const [submitError, setSubmitError] = useState("");
@@ -105,7 +94,6 @@ export default function UsageRecordDialog({
   }, [open, reset, editingRecord]);
 
   const submit = async (data) => {
-    console.log("submiting");
     setSubmitError("");
 
     const payload = {
@@ -130,10 +118,8 @@ export default function UsageRecordDialog({
 
     try {
       if (isEditMode) {
-        console.log("editingRecord", editingRecord);
         await usageRecordApi.update(editingRecord.id, payload);
       } else {
-        console.log("creating");
         if (!payload.giftInventoryLines?.length) {
           setError("giftInventoryLines", {
             type: "manual",

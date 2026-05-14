@@ -13,11 +13,9 @@ export default function TabArea({ tabs, activeTab, setActiveTab }) {
   const lastUrlByTab = useRef({});
 
   useEffect(() => {
-    
     const activeTabKey = routeToModule[location.pathname]?.key;
-    if(!activeTabKey) return;
+    if (!activeTabKey) return;
     lastUrlByTab.current[activeTabKey] = location.pathname + location.search;
-    //console.log("lastUrlByTab", lastUrlByTab.current);
   }, [location.pathname, location.search]);
 
   // 2) When user clicks a tab, navigate to its last remembered URL (or base)
@@ -30,19 +28,6 @@ export default function TabArea({ tabs, activeTab, setActiveTab }) {
     <>
       <Tabs
         value={activeTab} //which tab is currently selected
-        // onChange={(e, v) => {
-        //   lastUrlByTab.current[activeTab] = location.pathname + location.search;
-        //   console.log(
-        //     "url of current active tab: ",
-        //     lastUrlByTab.current[activeTab]
-        //   );
-        //   console.log(
-        //     "last recorded url of the selected tab",
-        //     lastUrlByTab.current[v]
-        //   );
-        //   setActiveTab(v);
-        //   navigate(lastUrlByTab.current[v] ?? moduleRoutes[v]);
-        // }}
         onChange={handleTabChange}
         aria-label="module tabs" //for accessibility
       >

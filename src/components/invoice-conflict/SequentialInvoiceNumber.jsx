@@ -49,19 +49,11 @@ export default function SequentialInvoiceNumber() {
         if (reqId === reqIdRef.current) setLoading(false);
       }
     },
-    [page, size]
+    [page, size],
   );
 
   useEffect(() => {
     load();
-    // invoiceRunsApi
-    //   .list(page, size)
-    //   .then((res) => {
-    //     console.log(res);
-    //     setRows(res.data.content);
-    //     setTotalElements(res.data.totalElements);
-    //   })
-    //   .catch(console.error);
   }, [load]);
 
   const handleGoToRecords = (row) => {

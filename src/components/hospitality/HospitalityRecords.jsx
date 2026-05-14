@@ -43,6 +43,7 @@ export default function HospitalityRecords() {
   //const [selectedIds, setSelectedIds] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
+
   const [draftFilters, setDraftFilters] = useState(() => {
     const from = searchParams.get("invoiceNumberFrom") ?? "";
     const to = searchParams.get("invoiceNumberTo") ?? "";

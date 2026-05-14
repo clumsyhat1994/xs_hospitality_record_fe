@@ -32,11 +32,12 @@ import RHFTextareaField from "../form/RHFTextareaField";
 import MasterDataDialog from "../master-data/MasterDataDialog";
 import RHFAutocomplete from "../form/RHFAutocomplete";
 import { toNullableNumber } from "../../utils/numberUtils";
+import { initialAllocatedByPurchaseIdFromSlices } from "../../utils/giftAllocationFormUtils";
 
 const DEPTWITHQUOTA = ["SCYWB", "QCCZB"];
 
 /** Gift purchase allocation block under the hospitality form; flip to re-show. */
-const SHOW_USAGE_ITEM_LINES_IN_HOSPITALITY_DIALOG = false;
+const SHOW_USAGE_ITEM_LINES_IN_HOSPITALITY_DIALOG = true;
 
 /**
  * Gift usage: API read model vs form write field.
@@ -44,25 +45,12 @@ const SHOW_USAGE_ITEM_LINES_IN_HOSPITALITY_DIALOG = false;
  * - {@code purchaseAllocations}: returned by the backend on hospitality records (resolved slices for display).
  * - {@code giftInventoryLines}: react-hook-form field for the same lines in the UI. When opening the dialog we
  *   copy {@code purchaseAllocations} into {@code giftInventoryLines} (see {@link toHospitalityFormDefaults}) so
- *   {@code UsageItemLinesFieldArray} can edit them.
+ *   {@code UsageItemLinesFieldArray} can edit them. Each line keeps {@code category}, {@code purchaseId}, {@code quantity},
+ *   and client-only {@code unitPrice} for totals; display fields come from the selected purchase option.
  * - On save, the client sends {@code giftInventoryLines} in the create/update body (server {@code GiftInventoryLineDTO}
  *   shape). This dialog only submits lines with {@code purchaseId} and {@code quantity} (always {@code productName: null});
  *   incomplete rows are dropped. {@code purchaseAllocations} is not the write contract.
  */
-
-/** For includePurchaseIds when editing; sums quantities per purchase from saved allocations only. */
-function initialAllocatedByPurchaseIdFromHospitalitySeed(values) {
-  const allocRows = values?.purchaseAllocations;
-  if (!Array.isArray(allocRows) || allocRows.length === 0) return {};
-  return allocRows.reduce((acc, a) => {
-    const purchaseId = a?.purchaseId;
-    const quantity = Number(a?.quantity);
-    if (!purchaseId || !Number.isFinite(quantity) || quantity <= 0) return acc;
-    const key = String(purchaseId);
-    acc[key] = (acc[key] ?? 0) + quantity;
-    return acc;
-  }, {});
-}
 
 /** Seeds form {@code giftInventoryLines} from API {@code purchaseAllocations} when opening (see block comment above). */
 function toHospitalityFormDefaults(values) {
@@ -71,14 +59,11 @@ function toHospitalityFormDefaults(values) {
   if (Array.isArray(alloc) && alloc.length > 0) {
     return {
       ...values,
-      giftInventoryLines: alloc.map((a) => ({
+      giftInventoryLines: alloc.filter(Boolean).map((a) => ({
         category: a.category ?? "",
         purchaseId: a.purchaseId,
-        productName: a.productName ?? "",
-        specification: a.specification ?? "",
-        purchaseDate: a.purchaseDate ?? "",
-        remainingQuantity: a.remainingQuantity ?? null,
         quantity: a.quantity,
+        unitPrice: a.unitPrice != null && a.unitPrice !== "" ? a.unitPrice : "",
       })),
     };
   }
@@ -96,11 +81,16 @@ export default function HospitalityRecordDialog({
   onSave,
 }) {
   const methods = useForm({
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: toHospitalityFormDefaults(initialValues),
   });
 
   const initialAllocatedByPurchaseId = useMemo(
-    () => initialAllocatedByPurchaseIdFromHospitalitySeed(initialValues),
+    () =>
+      initialAllocatedByPurchaseIdFromSlices(
+        initialValues?.purchaseAllocations,
+      ),
     [initialValues],
   );
 
@@ -160,7 +150,7 @@ export default function HospitalityRecordDialog({
   const submit = async (data, confirm = false) => {
     try {
       let res;
-      //console.log(data);
+
       const normalized = {
         ...data,
         invoiceAmount: toNullableNumber(data.invoiceAmount),
@@ -197,7 +187,6 @@ export default function HospitalityRecordDialog({
       if (isEditMode) {
         // update
         res = await hospitalityApi.update(initialValues.id, data, confirm);
-        //console.log(res.data);
       } else {
         // create
         const createPayload = {
@@ -205,13 +194,10 @@ export default function HospitalityRecordDialog({
           giftInventoryLines: data.giftInventoryLines ?? [],
         };
         res = await hospitalityApi.create(createPayload, confirm);
-        //console.log(res.data);
       }
       setSoftConfirmDialogOpen(false);
       onSave();
     } catch (err) {
-      //console.error(err);
-
       let errorData = err.response?.data;
 
       if (!Array.isArray(errorData)) {
@@ -364,7 +350,26 @@ export default function HospitalityRecordDialog({
                     (sum, item) => sum + (Number(item?.lineTotal) || 0),
                     0,
                   );
-                  return itemsTotal + Number(values?.invoiceAmount || 0);
+                  const giftLines = values?.giftInventoryLines ?? [];
+
+                  const giftLinesTotal = giftLines.reduce((sum, line) => {
+                    const q = Number(line?.quantity);
+                    const p = Number(line?.unitPrice);
+                    if (
+                      !Number.isFinite(q) ||
+                      !Number.isFinite(p) ||
+                      q <= 0 ||
+                      p < 0
+                    ) {
+                      return sum;
+                    }
+                    return sum + q * p;
+                  }, 0);
+                  return (
+                    itemsTotal +
+                    Number(values?.invoiceAmount || 0) +
+                    giftLinesTotal
+                  );
                 }}
               />
 

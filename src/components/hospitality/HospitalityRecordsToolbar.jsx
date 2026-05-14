@@ -46,7 +46,7 @@ export default function HospitalityRecordsToolbar({
 
   const { isAdmin } = useAuth();
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
-  // console.log("draftFilters", draftFilters);
+
   return (
     <Toolbar
       sx={{
@@ -217,9 +217,7 @@ export default function HospitalityRecordsToolbar({
                   <ClearableBooleanSelect
                     label="招待清单附件"
                     value={draftFilters.hasFormUploaded}
-                    onChange={(v) =>
-                      onDraftFilterChange("hasFormUploaded", v)
-                    }
+                    onChange={(v) => onDraftFilterChange("hasFormUploaded", v)}
                   />
                 </Grid>
 
@@ -236,7 +234,13 @@ export default function HospitalityRecordsToolbar({
                 </Grid>
               </Grid>
             </Collapse>
-            <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ alignItems: "center" }}>
+            <Stack
+              direction="row"
+              spacing={1}
+              useFlexGap
+              flexWrap="wrap"
+              sx={{ alignItems: "center" }}
+            >
               <Button
                 variant="contained"
                 startIcon={<SearchIcon />}

@@ -80,8 +80,6 @@ export default function MasterDataTable({
                 return (
                   <TableRow key={id} hover>
                     {columns.map((col) => {
-                      //console.log(row);
-                      //console.log(row[col.fieldName]);
                       return (
                         <TableCell key={col.fieldName}>
                           {col.renderCell
