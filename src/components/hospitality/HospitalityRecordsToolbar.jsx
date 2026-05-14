@@ -19,15 +19,16 @@ import { useMasterData } from "../../context/MasterDataContext";
 import masterDataApi from "../../api/masterDataApi";
 import { useState } from "react";
 import { useAuth } from "../../context/AuthProvider";
-import fieldLabels from "../../constants/recordFieldLabels";
+import { hospitalityRecordFieldLabels as fieldLabels } from "../../constants/recordFieldLabels";
+import { hospitalityButtonLabels as buttonLabels } from "../../constants/buttonLabels";
 import BaseSelect from "../form/BaseSelect";
 import BaseAutocomplete from "../form/BaseAutocomplete";
 import ClearableBooleanSelect from "./ClearableBooleanSelect";
 
 export default function HospitalityRecordsToolbar({
-  selectedCount,
+  //selectedCount,
   onCreate,
-  onBatchDelete,
+  //onBatchDelete,
   draftFilters,
   onDraftFilterChange,
   onSearch,
@@ -155,7 +156,7 @@ export default function HospitalityRecordsToolbar({
               />
             }
           >
-            高级搜索
+            {buttonLabels.advancedSearch}
           </Button>
         </Grid>
 
@@ -241,14 +242,14 @@ export default function HospitalityRecordsToolbar({
                 startIcon={<SearchIcon />}
                 onClick={onSearch}
               >
-                查询
+                {buttonLabels.search}
               </Button>
               <Button
                 variant="outlined"
                 startIcon={<ClearIcon />}
                 onClick={onClear}
               >
-                重置
+                {buttonLabels.reset}
               </Button>
             </Stack>
           </Stack>
@@ -265,7 +266,7 @@ export default function HospitalityRecordsToolbar({
         }}
       >
         <Button variant="contained" startIcon={<AddIcon />} onClick={onCreate}>
-          新建记录
+          {buttonLabels.createRecord}
         </Button>
         <Tooltip
           title="导出当前筛选结果为Excel文件"
@@ -285,7 +286,7 @@ export default function HospitalityRecordsToolbar({
             startIcon={<DownloadIcon />}
             onClick={onExport}
           >
-            导出 Excel
+            {buttonLabels.exportExcel}
           </Button>
         </Tooltip>
       </Stack>

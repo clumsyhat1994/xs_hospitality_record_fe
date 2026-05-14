@@ -18,20 +18,14 @@ import Tooltip from "@mui/material/Tooltip";
 import CommentOutlinedIcon from "@mui/icons-material/CommentOutlined";
 
 import { useState } from "react";
-import fieldLabels from "../../constants/recordFieldLabels";
+import { hospitalityRecordFieldLabels as fieldLabels } from "../../constants/recordFieldLabels";
 import { ItemsPopperCell } from "./ItemsPopperCell";
 import { AttachmentsDialog } from "./AttachmentsDialog";
 import { NumberedTablePagination } from "../common/NumberedTablePagination";
-
-function formatDate(value) {
-  if (!value) return "";
-  return new Date(value).toLocaleDateString();
-}
-
-function formatAmount(value) {
-  if (value === null || value === undefined || value === "") return "";
-  return Number(value).toFixed(2);
-}
+import {
+  formatDisplayAmount,
+  formatDisplayDate,
+} from "../../utils/formatters";
 
 export default function HospitalityRecordsTable({
   records,
@@ -248,7 +242,7 @@ export default function HospitalityRecordsTable({
                       </Stack>
                     </TableCell>
 
-                    <TableCell>{formatDate(record.receptionDate)}</TableCell>
+                    <TableCell>{formatDisplayDate(record.receptionDate)}</TableCell>
                     <TableCell>{record.counterpartyName}</TableCell>
                     <TableCell>{record.departmentName}</TableCell>
                     <TableCell>{record.handlerName}</TableCell>
@@ -258,24 +252,24 @@ export default function HospitalityRecordsTable({
                       <ItemsPopperCell items={record.items} />
                     </TableCell>
                     <TableCell align="right">
-                      {formatAmount(record.invoiceAmount)}
+                      {formatDisplayAmount(record.invoiceAmount)}
                     </TableCell>
                     <TableCell align="right">
-                      {formatAmount(record.totalAmount)}
+                      {formatDisplayAmount(record.totalAmount)}
                     </TableCell>
                     <TableCell>{record.invoiceNumberString}</TableCell>
                     <TableCell>{record.invoiceDate}</TableCell>
                     <TableCell>
-                      {formatDate(record.deptHeadApprovalDate)}
+                      {formatDisplayDate(record.deptHeadApprovalDate)}
                     </TableCell>
                     <TableCell>
-                      {formatDate(record.partySecretaryApprovalDate)}
+                      {formatDisplayDate(record.partySecretaryApprovalDate)}
                     </TableCell>
                     <TableCell align="right">{record.theirCount}</TableCell>
                     <TableCell align="right">{record.ourCount}</TableCell>
                     <TableCell align="right">{record.totalCount}</TableCell>
                     <TableCell align="right">
-                      {formatAmount(record.perCapitaAmount)}
+                      {formatDisplayAmount(record.perCapitaAmount)}
                     </TableCell>
                     <TableCell>{record.ourHostPosition}</TableCell>
                     <TableCell>{record.theirHostPosition}</TableCell>

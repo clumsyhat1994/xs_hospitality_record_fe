@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { useEffect } from "react";
 import { useForm, Controller, FormProvider } from "react-hook-form";
-import RHFTextField from "../form/RHFGridTextField";
+import RHFTextField from "../form/RHFTextField";
 import RHFMultiAutocomplete from "../form/RHFMultiAutocomplete";
 
 import { FormModeProvider } from "../../context/FormModeContext";
@@ -78,14 +78,14 @@ export default function MasterDataDialog({
           <DialogContent sx={{ mt: 1 }}>
             <Grid container spacing={2} pt={1}>
               {textFields.map((field) => (
-                <RHFTextField
-                  key={field.fieldName}
-                  name={field.fieldName}
-                  control={control}
-                  label={field.label}
-                  sm={field.sm ?? 6}
-                  chineseOnly={field.chineseOnly}
-                />
+                <Grid key={field.fieldName} size={{ xs: 12, sm: field.sm ?? 6 }}>
+                  <RHFTextField
+                    name={field.fieldName}
+                    control={control}
+                    label={field.label}
+                    chineseOnly={field.chineseOnly}
+                  />
+                </Grid>
               ))}
               {multiAutoCompleteFields.map((field) => (
                 <Grid key={field.fieldName} size={{ sm: field.sm ?? 6 }}>

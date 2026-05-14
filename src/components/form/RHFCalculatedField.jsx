@@ -26,7 +26,7 @@ export default function RHFCalculatedField({
       name={name}
       control={control}
       render={({ fieldState: { error } }) => (
-        <Grid size={{ xs: xs, sm: sm }}>
+        <Grid size={{ xs, sm }}>
           <Tooltip title="自动计算，不可录入。" placement="top" arrow>
             <TextField
               label={label}

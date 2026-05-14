@@ -10,6 +10,7 @@ import { useMasterData } from "../../../context/MasterDataContext";
 import { useForm } from "react-hook-form";
 import { downloadBlob } from "../../../utils/downloadBlob";
 import CounterpartyImportDialog from "./CounterpartyImportDialog";
+import { masterDataButtonLabels as buttonLabels } from "../../../constants/buttonLabels";
 
 const emptyRow = {
   name: "",
@@ -219,7 +220,7 @@ export default function CounterpartyPage() {
                 startIcon={<UploadFileIcon />}
                 onClick={() => setImportOpen(true)}
               >
-                导入Excel
+                {buttonLabels.importExcel}
               </Button>
             </Tooltip>
           }

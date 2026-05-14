@@ -9,8 +9,7 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DownloadIcon from "@mui/icons-material/Download";
-import DeleteIcon from "@mui/icons-material/Delete";
-import SearchIcon from "@mui/icons-material/Search";
+import { masterDataButtonLabels as buttonLabels } from "../../constants/buttonLabels";
 
 export default function MasterDataToolbar({
   title,
@@ -46,16 +45,9 @@ export default function MasterDataToolbar({
           onChange={(e) => onSearchChange(e.target.value)}
           onKeyDown={handleKeyDown}
         />
-        {/* <Button
-          variant="outlined"
-          startIcon={<SearchIcon />}
-          onClick={onSearchSubmit}
-        >
-          搜索
-        </Button> */}
 
         <Button variant="contained" startIcon={<AddIcon />} onClick={onCreate}>
-          新建
+          {buttonLabels.create}
         </Button>
         {extraActions}
         <Tooltip
@@ -76,7 +68,7 @@ export default function MasterDataToolbar({
             startIcon={<DownloadIcon />}
             onClick={onExport}
           >
-            导出 Excel
+            {buttonLabels.exportExcel}
           </Button>
         </Tooltip>
       </Stack>

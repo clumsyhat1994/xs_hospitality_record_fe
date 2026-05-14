@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import fieldLabels from "../../constants/recordFieldLabels";
+import { hospitalityRecordFieldLabels as fieldLabels } from "../../constants/recordFieldLabels";
 
 export default function ItemsTable({ items = [] }) {
   if (!items.length) {

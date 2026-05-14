@@ -3,32 +3,42 @@ import { useAuth } from "../../context/AuthProvider";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 export default function BaseAutocomplete({
   onChange,
-  error:fieldStateError,
+  error: fieldStateError,
   label,
   options = [],
   requireAdmin = false,
   fieldValue,
   getOptionLabel = (opt) => opt?.name ?? String(opt),
   getOptionValue = (opt) => opt?.id ?? opt,
+  loading = false,
+  afterFieldValueChange,
+  isOptionEqualToValue,
+  textFieldProps = {},
+  autocompleteProps = {},
 }) {
   const { isAdmin } = useAuth();
 
   return (
     <Autocomplete
       options={options ?? []}
+      loading={loading}
       value={
         options.find((o) => {
-          return getOptionValue(o) === fieldValue;
+          return String(getOptionValue(o)) === String(fieldValue ?? "");
         }) || null
       }
-      isOptionEqualToValue={(opt, val) =>
-        getOptionValue(opt) === getOptionValue(val)
+      isOptionEqualToValue={
+        isOptionEqualToValue ??
+        ((opt, val) => String(getOptionValue(opt)) === String(getOptionValue(val)))
       }
       getOptionLabel={(o) => getOptionLabel(o)}
       onChange={(_, newVal) => {
-        onChange?.(newVal ? getOptionValue(newVal) : null);
+        const nextValue = newVal ? getOptionValue(newVal) : "";
+        onChange?.(nextValue);
+        afterFieldValueChange?.(newVal, nextValue);
       }}
       disabled={requireAdmin === true && isAdmin === false}
+      {...autocompleteProps}
       renderInput={(params) => (
         <TextField
           {...params}
@@ -50,6 +60,7 @@ export default function BaseAutocomplete({
           error={!!fieldStateError}
           helperText={fieldStateError?.message}
           slotProps={{ inputLabel: { shrink: true } }}
+          {...textFieldProps}
         />
       )}
     />

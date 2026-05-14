@@ -11,9 +11,8 @@ import {
 import { useFieldArray, Controller } from "react-hook-form";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import RHFTableTextField from "../form/RHFTableTextField";
 import ItemRow from "../form/ItemRow";
-import fieldLabels from "../../constants/recordFieldLabels";
+import { hospitalityRecordFieldLabels as fieldLabels } from "../../constants/recordFieldLabels";
 
 export default function HospitalityItemsFieldArray({
   control,

@@ -1,7 +1,5 @@
 import { Controller, useFormContext } from "react-hook-form";
-import BaseComboBox from "./BaseComboBox";
 import BaseAutocomplete from "./BaseAutocomplete";
-import { Grid } from "@mui/material";
 import { useFormMode } from "../../context/FormModeContext";
 
 export default function RHFAutocomplete({
@@ -10,18 +8,18 @@ export default function RHFAutocomplete({
   required = true,
   requireAdmin = false,
   options,
+  loading = false,
   getOptionLabel = (opt) => opt?.name ?? String(opt),
   getOptionValue = (opt) => opt?.id ?? opt,
-  xs = 12,
-  sm = 6,
+  afterFieldValueChange,
+  isOptionEqualToValue,
+  textFieldProps,
+  autocompleteProps,
   rules = {},
   ...rest
 }) {
   const { control } = useFormContext();
   const { isEditMode } = useFormMode();
-  console.log("autocomplete: ");
-  console.log("required: ", required);
-  console.log("isEditMode: ", isEditMode);
   return (
     <Controller
       name={name}
@@ -31,21 +29,22 @@ export default function RHFAutocomplete({
       }
       render={({ field, fieldState: { error } }) => {
         return (
-          <Grid size={{ xs: xs, sm: sm }}>
-            <BaseAutocomplete
-              {...rest}
-              label={label}
-              requireAdmin={requireAdmin}
-              xs={xs}
-              sm={sm}
-              fieldValue={field.value}
-              onChange={field.onChange}
-              error={error}
-              getOptionLabel={getOptionLabel}
-              getOptionValue={getOptionValue}
-              options={options}
-            />
-          </Grid>
+          <BaseAutocomplete
+            {...rest}
+            label={label}
+            requireAdmin={requireAdmin}
+            fieldValue={field.value}
+            onChange={field.onChange}
+            afterFieldValueChange={afterFieldValueChange}
+            error={error}
+            loading={loading}
+            isOptionEqualToValue={isOptionEqualToValue}
+            getOptionLabel={getOptionLabel}
+            getOptionValue={getOptionValue}
+            options={options}
+            textFieldProps={textFieldProps}
+            autocompleteProps={autocompleteProps}
+          />
         );
       }}
     />

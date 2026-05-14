@@ -60,6 +60,26 @@ export default function Sidebar({ onOpenModule }) {
           >
             <ListItemText primary={menuLables.HOSPITALITY_RECORDS} />
           </ListItemButton>
+          <ListItemButton
+            onClick={() =>
+              onOpenModule({
+                key: moduleTabKeys.PURCHASE_RECORDS,
+                label: menuLables.PURCHASE_RECORDS,
+              })
+            }
+          >
+            <ListItemText primary={menuLables.PURCHASE_RECORDS} />
+          </ListItemButton>
+          <ListItemButton
+            onClick={() =>
+              onOpenModule({
+                key: moduleTabKeys.USAGE_RECORDS,
+                label: menuLables.USAGE_RECORDS,
+              })
+            }
+          >
+            <ListItemText primary={menuLables.USAGE_RECORDS} />
+          </ListItemButton>
 
           <GuardedListItemButton
             allowed={isAdmin}

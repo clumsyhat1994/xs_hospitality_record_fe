@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -12,12 +12,13 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { useForm, useWatch, FormProvider } from "react-hook-form";
-import RHFTextField from "../form/RHFGridTextField";
-import RHFSelect from "../form/RHFGridSelect";
-import RHFCalculatedGridTextField from "../form/RHFCalculatedGridTextField";
+import RHFTextField from "../form/RHFTextField";
+import RHFSelect from "../form/RHFSelect";
+import RHFCalculatedField from "../form/RHFCalculatedField";
 
 import HospitalityItemsFieldArray from "./HospitalityItemsFieldArray";
-import fieldLabels from "../../constants/recordFieldLabels";
+import UsageItemLinesFieldArray from "../usage/UsageItemLinesFieldArray";
+import { hospitalityRecordFieldLabels as fieldLabels } from "../../constants/recordFieldLabels";
 import hospitalityApi from "../../api/hospitalityApi";
 import { validationMessages } from "../../constants/validationMessages";
 import { BEErrorFieldToFEFormFieldMap } from "../../constants/BEErrorFieldToFEFormFieldMap";
@@ -30,9 +31,60 @@ import { useAuth } from "../../context/AuthProvider";
 import RHFTextareaField from "../form/RHFTextareaField";
 import MasterDataDialog from "../master-data/MasterDataDialog";
 import RHFAutocomplete from "../form/RHFAutocomplete";
-//import masterDataFetchers from "../../api/masterDataFetchers";
+import { toNullableNumber } from "../../utils/numberUtils";
 
 const DEPTWITHQUOTA = ["SCYWB", "QCCZB"];
+
+/**
+ * Gift usage: API read model vs form write field.
+ *
+ * - {@code purchaseAllocations}: returned by the backend on hospitality records (resolved slices for display).
+ * - {@code giftInventoryLines}: react-hook-form field for the same lines in the UI. When opening the dialog we
+ *   copy {@code purchaseAllocations} into {@code giftInventoryLines} (see {@link toHospitalityFormDefaults}) so
+ *   {@code UsageItemLinesFieldArray} can edit them.
+ * - On save, the client sends {@code giftInventoryLines} in the create/update body (server {@code GiftInventoryLineDTO}
+ *   shape). This dialog only submits lines with {@code purchaseId} and {@code quantity} (always {@code productName: null});
+ *   incomplete rows are dropped. {@code purchaseAllocations} is not the write contract.
+ */
+
+/** For includePurchaseIds when editing; sums quantities per purchase from saved allocations only. */
+function initialAllocatedByPurchaseIdFromHospitalitySeed(values) {
+  const allocRows = values?.purchaseAllocations;
+  if (!Array.isArray(allocRows) || allocRows.length === 0) return {};
+  return allocRows.reduce((acc, a) => {
+    const purchaseId = a?.purchaseId;
+    const quantity = Number(a?.quantity);
+    if (!purchaseId || !Number.isFinite(quantity) || quantity <= 0) return acc;
+    const key = String(purchaseId);
+    acc[key] = (acc[key] ?? 0) + quantity;
+    return acc;
+  }, {});
+}
+
+/** Seeds form {@code giftInventoryLines} from API {@code purchaseAllocations} when opening (see block comment above). */
+function toHospitalityFormDefaults(values) {
+  if (!values) return values;
+  const alloc = values.purchaseAllocations;
+  if (Array.isArray(alloc) && alloc.length > 0) {
+    return {
+      ...values,
+      giftInventoryLines: alloc.map((a) => ({
+        category: a.category ?? "",
+        purchaseId: a.purchaseId,
+        productName: a.productName ?? "",
+        specification: a.specification ?? "",
+        purchaseDate: a.purchaseDate ?? "",
+        remainingQuantity: a.remainingQuantity ?? null,
+        quantity: a.quantity,
+      })),
+    };
+  }
+  return {
+    ...values,
+    giftInventoryLines: [],
+  };
+}
+
 export default function HospitalityRecordDialog({
   open,
   initialValues,
@@ -41,17 +93,23 @@ export default function HospitalityRecordDialog({
   onSave,
 }) {
   const methods = useForm({
-    defaultValues: initialValues,
+    defaultValues: toHospitalityFormDefaults(initialValues),
   });
+
+  const initialAllocatedByPurchaseId = useMemo(
+    () => initialAllocatedByPurchaseIdFromHospitalitySeed(initialValues),
+    [initialValues],
+  );
 
   const {
     control,
     handleSubmit,
     reset,
     setError,
+    clearErrors,
     setValue,
     getFieldState,
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors },
     getValues,
   } = methods;
   const formDepartmentCode = useWatch({ control, name: "departmentCode" });
@@ -76,7 +134,7 @@ export default function HospitalityRecordDialog({
 
   useEffect(() => {
     if (!open) return;
-    reset(initialValues);
+    reset(toHospitalityFormDefaults(initialValues));
     if (!isAdmin) setValue("departmentCode", userDepartmentCode);
   }, [initialValues, isAdmin, open, reset, setValue, userDepartmentCode]);
 
@@ -87,14 +145,12 @@ export default function HospitalityRecordDialog({
   }, [formDepartmentCode, setValue]);
 
   const cleanData = (data) => {
-    console.log(data);
-
     return Object.fromEntries(
       Object.entries(data).filter(([k, v]) => {
         return (
           (v !== null && v !== undefined && v !== "") || k === "usesDeptQuota"
         );
-      })
+      }),
     );
   };
 
@@ -102,14 +158,50 @@ export default function HospitalityRecordDialog({
     try {
       let res;
       //console.log(data);
-      data = cleanData(data);
+      const normalized = {
+        ...data,
+        invoiceAmount: toNullableNumber(data.invoiceAmount),
+        theirCount: toNullableNumber(data.theirCount, { integer: true }),
+        ourCount: toNullableNumber(data.ourCount, { integer: true }),
+        items: Array.isArray(data.items)
+          ? data.items.map((item) => ({
+              ...item,
+              unitPrice: toNullableNumber(item?.unitPrice),
+              quantity: toNullableNumber(item?.quantity, { integer: true }),
+            }))
+          : data.items,
+        giftInventoryLines: Array.isArray(data.giftInventoryLines)
+          ? data.giftInventoryLines
+              .map((line) => {
+                const purchaseId = toNullableNumber(line?.purchaseId, {
+                  integer: true,
+                });
+                const quantity = toNullableNumber(line?.quantity, {
+                  integer: true,
+                });
+                if (!purchaseId || !quantity || quantity < 1) return null;
+                return {
+                  id: toNullableNumber(line?.id, { integer: true }),
+                  purchaseId,
+                  productName: null,
+                  quantity,
+                };
+              })
+              .filter(Boolean)
+          : data.giftInventoryLines,
+      };
+      data = cleanData(normalized);
       if (isEditMode) {
         // update
         res = await hospitalityApi.update(initialValues.id, data, confirm);
         //console.log(res.data);
       } else {
         // create
-        res = await hospitalityApi.create(data, confirm);
+        const createPayload = {
+          ...data,
+          giftInventoryLines: data.giftInventoryLines ?? [],
+        };
+        res = await hospitalityApi.create(createPayload, confirm);
         //console.log(res.data);
       }
       setSoftConfirmDialogOpen(false);
@@ -159,13 +251,13 @@ export default function HospitalityRecordDialog({
           <DialogTitle>{isEditMode ? "修改记录" : "新建记录"}</DialogTitle>
           <DialogContent dividers>
             <Grid container spacing={2} sx={{ mt: 0.5 }} alignItems="stretch">
-              <RHFTextField
-                name="receptionDate"
-                //control={control}
-                label={fieldLabels.receptionDate}
-                type="date"
-                sm={4}
-              />
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <RHFTextField
+                  name="receptionDate"
+                  label={fieldLabels.receptionDate}
+                  type="date"
+                />
+              </Grid>
 
               <RHFComboBox
                 name="counterpartyId"
@@ -177,14 +269,15 @@ export default function HospitalityRecordDialog({
                 sm={8}
               />
 
-              <RHFAutocomplete
-                name="departmentCode"
-                requireAdmin
-                getOptionValue={(opt) => opt.code ?? opt}
-                options={departments ?? []}
-                label={fieldLabels.department}
-                sm={"grow"}
-              />
+              <Grid size={{ xs: 12, sm: "grow" }}>
+                <RHFAutocomplete
+                  name="departmentCode"
+                  requireAdmin
+                  getOptionValue={(opt) => opt.code ?? opt}
+                  options={departments ?? []}
+                  label={fieldLabels.department}
+                />
+              </Grid>
 
               {DEPTWITHQUOTA.includes(formDepartmentCode) && (
                 <RHFSelect
@@ -222,60 +315,72 @@ export default function HospitalityRecordDialog({
                 </Tooltip>
               </Grid>
 
-              <RHFAutocomplete
-                name="hospitalityTypeId"
-                options={hospitalityTypes ?? []}
-                label={fieldLabels.hospitalityType}
-              />
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <RHFAutocomplete
+                  name="hospitalityTypeId"
+                  options={hospitalityTypes ?? []}
+                  label={fieldLabels.hospitalityType}
+                />
+              </Grid>
 
-              <RHFTextField name="location" label={fieldLabels.location} />
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <RHFTextField name="location" label={fieldLabels.location} />
+              </Grid>
 
-              <RHFTextField
-                name="invoiceDate"
-                label={fieldLabels.invoiceDate}
-                type="date"
-                sm={4}
-              />
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <RHFTextField
+                  name="invoiceDate"
+                  label={fieldLabels.invoiceDate}
+                  type="date"
+                />
+              </Grid>
 
-              <RHFTextField
-                name="invoiceNumberString"
-                required={false}
-                numericOnly={true}
-                label={fieldLabels.invoiceNumberString}
-                sm={8}
-              />
+              <Grid size={{ xs: 12, sm: 8 }}>
+                <RHFTextField
+                  name="invoiceNumberString"
+                  required={false}
+                  numericOnly={true}
+                  label={fieldLabels.invoiceNumberString}
+                />
+              </Grid>
 
-              <RHFTextField
-                name="invoiceAmount"
-                label={fieldLabels.invoiceAmount}
-                type="number"
-              />
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <RHFTextField
+                  name="invoiceAmount"
+                  label={fieldLabels.invoiceAmount}
+                  type="number"
+                />
+              </Grid>
 
-              <RHFCalculatedGridTextField
+              <RHFCalculatedField
                 label={fieldLabels.totalAmount}
                 name="totalAmount"
                 computeValue={(values) => {
                   const items = values?.items ?? [];
                   const itemsTotal = items.reduce(
                     (sum, item) => sum + (Number(item?.lineTotal) || 0),
-                    0
+                    0,
                   );
                   return itemsTotal + Number(values?.invoiceAmount || 0);
                 }}
               />
 
-              <RHFTextField
-                name="theirCount"
-                label={fieldLabels.theirCount}
-                type="number"
-              />
-              <RHFTextField
-                name="ourCount"
-                label={fieldLabels.ourCount}
-                type="number"
-              />
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <RHFTextField
+                  name="theirCount"
+                  label={fieldLabels.theirCount}
+                  type="number"
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <RHFTextField
+                  name="ourCount"
+                  label={fieldLabels.ourCount}
+                  type="number"
+                />
+              </Grid>
 
-              <RHFCalculatedGridTextField
+              <RHFCalculatedField
                 label={fieldLabels.totalCount}
                 name="totalCount"
                 computeValue={(values) => {
@@ -285,7 +390,7 @@ export default function HospitalityRecordDialog({
                 }}
               />
 
-              <RHFCalculatedGridTextField
+              <RHFCalculatedField
                 name="perCapitaAmount"
                 label={fieldLabels.perCapitaAmount}
                 computeValue={(values) => {
@@ -304,46 +409,36 @@ export default function HospitalityRecordDialog({
                 fetchOptions={masterDataApi.searchPositions}
               />
 
-              {/* <RHFSelect
-                name="ourHostPositionId"
-                //control={control}
-                label={fieldLabels.ourHostPosition}
-                options={positions ?? []}
-              /> */}
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <RHFTextField
+                  name="theirHostPosition"
+                  label={fieldLabels.theirHostPosition}
+                />
+              </Grid>
 
-              {/* <RHFComboBox
-                name="theirHostPositionId"
-                options={theirHostPositions ?? []}
-                setOptions={setTheirHostPositions}
-                label={fieldLabels.theirHostPosition}
-                fetchOptions={masterDataApi.searchPositions}
-              /> */}
-
-              {/* <RHFSelect
-                name="theirHostPositionId"
-                //control={control}
-                label={fieldLabels.theirHostPosition}
-                options={positions ?? []}
-              /> */}
-
-              <RHFTextField
-                name="theirHostPosition"
-                label={fieldLabels.theirHostPosition}
-              />
-
-              <RHFTextField
-                name="deptHeadApprovalDate"
-                label={fieldLabels.deptHeadApprovalDate}
-                type="date"
-              />
-              <RHFTextField
-                name="partySecretaryApprovalDate"
-                label={fieldLabels.partySecretaryApprovalDate}
-                type="date"
-              />
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <RHFTextField
+                  name="deptHeadApprovalDate"
+                  label={fieldLabels.deptHeadApprovalDate}
+                  type="date"
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <RHFTextField
+                  name="partySecretaryApprovalDate"
+                  label={fieldLabels.partySecretaryApprovalDate}
+                  type="date"
+                />
+              </Grid>
               <RHFTextareaField name={"remark"} label={fieldLabels.remark} />
             </Grid>
             <HospitalityItemsFieldArray control={control} name="items" />
+            <UsageItemLinesFieldArray
+              control={control}
+              errors={errors}
+              clearErrors={clearErrors}
+              initialAllocatedByPurchaseId={initialAllocatedByPurchaseId}
+            />
           </DialogContent>
 
           <DialogActions>

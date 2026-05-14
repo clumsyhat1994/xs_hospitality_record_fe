@@ -1,9 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 
-import {
-  Box,
-  Paper,
-} from "@mui/material";
+import { Box, Paper } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -35,13 +32,15 @@ const emptyRecord = {
   ourHostPositionId: null,
   theirHostPositionId: null,
   items: [],
+  giftInventoryLines: [],
+  purchaseAllocations: [],
 };
 
 export default function HospitalityRecords() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [records, setRecords] = useState([]);
-  const [selectedIds, setSelectedIds] = useState([]);
+  //const [selectedIds, setSelectedIds] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
   const [draftFilters, setDraftFilters] = useState(() => {
@@ -176,11 +175,11 @@ export default function HospitalityRecords() {
     setDialogOpen(true);
   };
 
-  const handleDeleteRow = (id) => {
+  const handleDeleteRow = async (id) => {
     if (!window.confirm("确定删除这条记录吗?")) return;
-    hospitalityApi.deleteOne(id).catch((err) => console.error(err));
+    await hospitalityApi.deleteOne(id).catch((err) => console.error(err));
     setRecords((prev) => prev.filter((r) => r.id !== id));
-    setSelectedIds((prev) => prev.filter((x) => x !== id));
+    //setSelectedIds((prev) => prev.filter((x) => x !== id));
   };
 
   const handleDialogClose = () => {
@@ -214,7 +213,7 @@ export default function HospitalityRecords() {
         if (!signal?.aborted) setLoading(false);
       }
     },
-    [page, size, filters, setRecords, setTotalElements]
+    [page, size, filters, setRecords, setTotalElements],
   );
 
   useEffect(() => {
@@ -224,12 +223,21 @@ export default function HospitalityRecords() {
   }, [load]);
 
   const handleSaveAttachments = useCallback(
-    async (record, { invoiceFiles, formFiles, removeInvoicePaths, removeFormPaths }) => {
+    async (
+      record,
+      { invoiceFiles, formFiles, removeInvoicePaths, removeFormPaths },
+    ) => {
       const inv = invoiceFiles ?? [];
       const frm = formFiles ?? [];
       const removedInv = removeInvoicePaths ?? [];
       const removedFrm = removeFormPaths ?? [];
-      if (inv.length === 0 && frm.length === 0 && removedInv.length === 0 && removedFrm.length === 0) return;
+      if (
+        inv.length === 0 &&
+        frm.length === 0 &&
+        removedInv.length === 0 &&
+        removedFrm.length === 0
+      )
+        return;
       const params = new URLSearchParams();
       removedInv.forEach((p) => params.append("removeInvoicePaths", p));
       removedFrm.forEach((p) => params.append("removeFormPaths", p));
@@ -239,10 +247,8 @@ export default function HospitalityRecords() {
       await hospitalityApi.patchAttachments(record.id, fd, params);
       await load();
     },
-    [load]
+    [load],
   );
-
- 
 
   const setPageUrl = (newPage) => {
     setSearchParams((prev) => {
@@ -266,7 +272,7 @@ export default function HospitalityRecords() {
     <Box>
       <Paper elevation={2}>
         <HospitalityRecordsToolBar
-          selectedCount={selectedIds.length}
+          //selectedCount={selectedIds.length}
           draftFilters={draftFilters}
           onDraftFilterChange={handleDraftFilterChange}
           onSearch={handleSearch}
@@ -282,7 +288,7 @@ export default function HospitalityRecords() {
           //setPage={setPage}
           records={records}
           setRecords={setRecords}
-          selectedIds={selectedIds}
+          //selectedIds={selectedIds}
           onEditRow={handleEditRow}
           onDeleteRow={handleDeleteRow}
           size={size}

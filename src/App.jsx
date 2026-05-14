@@ -4,6 +4,8 @@ import AuthenticationPage from "./pages/Authentication";
 import RequireAuth from "./routes/RequireAuth";
 import "./App.css";
 import HospitalityRecords from "./components/hospitality/HospitalityRecords";
+import PurchaseRecords from "./components/purchase/PurchaseRecords";
+import UsageRecords from "./components/usage/UsageRecords";
 import SequentialInvoiceNumber from "./components/invoice-conflict/SequentialInvoiceNumber";
 import CounterpartyPage from "./components/master-data/counterparty/CounterpartyPage";
 import moduleRoutes from "./constants/moduleRoutes";
@@ -29,6 +31,14 @@ function App() {
             <Route
               path={moduleRoutes.HOSPITALITY_RECORDS}
               element={<HospitalityRecords />}
+            />
+            <Route
+              path={moduleRoutes.PURCHASE_RECORDS}
+              element={<PurchaseRecords />}
+            />
+            <Route
+              path={moduleRoutes.USAGE_RECORDS}
+              element={<UsageRecords />}
             />
             <Route
               path={moduleRoutes.INVOICE_CONFLICT}

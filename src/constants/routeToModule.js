@@ -7,6 +7,14 @@ const routeToModule = {
     key: moduleKeys.HOSPITALITY_RECORDS,
     label: menuLables.HOSPITALITY_RECORDS,
   },
+  [moduleRoutes.PURCHASE_RECORDS]: {
+    key: moduleKeys.PURCHASE_RECORDS,
+    label: menuLables.PURCHASE_RECORDS,
+  },
+  [moduleRoutes.USAGE_RECORDS]: {
+    key: moduleKeys.USAGE_RECORDS,
+    label: menuLables.USAGE_RECORDS,
+  },
   [moduleRoutes.INVOICE_CONFLICT]: {
     key: moduleKeys.INVOICE_CONFLICT,
     label: menuLables.INVOICE_CONFLICT,
