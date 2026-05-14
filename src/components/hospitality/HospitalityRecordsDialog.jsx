@@ -35,6 +35,9 @@ import { toNullableNumber } from "../../utils/numberUtils";
 
 const DEPTWITHQUOTA = ["SCYWB", "QCCZB"];
 
+/** Gift purchase allocation block under the hospitality form; flip to re-show. */
+const SHOW_USAGE_ITEM_LINES_IN_HOSPITALITY_DIALOG = false;
+
 /**
  * Gift usage: API read model vs form write field.
  *
@@ -433,12 +436,14 @@ export default function HospitalityRecordDialog({
               <RHFTextareaField name={"remark"} label={fieldLabels.remark} />
             </Grid>
             <HospitalityItemsFieldArray control={control} name="items" />
-            <UsageItemLinesFieldArray
-              control={control}
-              errors={errors}
-              clearErrors={clearErrors}
-              initialAllocatedByPurchaseId={initialAllocatedByPurchaseId}
-            />
+            {SHOW_USAGE_ITEM_LINES_IN_HOSPITALITY_DIALOG && (
+              <UsageItemLinesFieldArray
+                control={control}
+                errors={errors}
+                clearErrors={clearErrors}
+                initialAllocatedByPurchaseId={initialAllocatedByPurchaseId}
+              />
+            )}
           </DialogContent>
 
           <DialogActions>

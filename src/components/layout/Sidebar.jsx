@@ -60,7 +60,8 @@ export default function Sidebar({ onOpenModule }) {
           >
             <ListItemText primary={menuLables.HOSPITALITY_RECORDS} />
           </ListItemButton>
-          <ListItemButton
+          <GuardedListItemButton
+            allowed={isAdmin}
             onClick={() =>
               onOpenModule({
                 key: moduleTabKeys.PURCHASE_RECORDS,
@@ -69,8 +70,9 @@ export default function Sidebar({ onOpenModule }) {
             }
           >
             <ListItemText primary={menuLables.PURCHASE_RECORDS} />
-          </ListItemButton>
-          <ListItemButton
+          </GuardedListItemButton>
+          <GuardedListItemButton
+            allowed={isAdmin}
             onClick={() =>
               onOpenModule({
                 key: moduleTabKeys.USAGE_RECORDS,
@@ -79,7 +81,7 @@ export default function Sidebar({ onOpenModule }) {
             }
           >
             <ListItemText primary={menuLables.USAGE_RECORDS} />
-          </ListItemButton>
+          </GuardedListItemButton>
 
           <GuardedListItemButton
             allowed={isAdmin}
