@@ -19,6 +19,7 @@ import { useMasterData } from "../../context/MasterDataContext";
 import masterDataApi from "../../api/masterDataApi";
 import usageRecordApi from "../../api/usageRecordApi";
 import { toNullableNumber } from "../../utils/numberUtils";
+import { UsageRecordBEErrorFieldToFEFormFieldMap } from "../../constants/BEErrorFieldToFEFormFieldMap";
 import { initialAllocatedByPurchaseIdFromSlices } from "../../utils/giftAllocationFormUtils";
 import UsageItemLinesFieldArray from "./UsageItemLinesFieldArray";
 
@@ -132,11 +133,6 @@ export default function UsageRecordDialog({
       onSave();
     } catch (err) {
       const serverErrors = err?.response?.data;
-      const fieldNameMap = {
-        department: "departmentId",
-        counterparty: "counterpartyId",
-        recipient: "recipientId",
-      };
 
       if (Array.isArray(serverErrors) && serverErrors.length > 0) {
         const globalMessages = [];
@@ -146,7 +142,8 @@ export default function UsageRecordDialog({
           // Backend may return array paths like giftInventoryLines[0].quantity,
           // while react-hook-form setError expects dot paths (giftInventoryLines.0.quantity).
           const normalizedPath = rawField.replace(/\[(\d+)\]/g, ".$1");
-          const fieldName = fieldNameMap[normalizedPath] ?? normalizedPath;
+          const fieldName =
+            UsageRecordBEErrorFieldToFEFormFieldMap[normalizedPath] ?? normalizedPath;
           const message = e?.message ?? "提交失败";
 
           if (fieldName) {

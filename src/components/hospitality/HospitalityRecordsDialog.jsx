@@ -37,7 +37,6 @@ import { initialAllocatedByPurchaseIdFromSlices } from "../../utils/giftAllocati
 const DEPTWITHQUOTA = ["SCYWB", "QCCZB"];
 
 /** Gift purchase allocation block under the hospitality form; flip to re-show. */
-const SHOW_USAGE_ITEM_LINES_IN_HOSPITALITY_DIALOG = true;
 
 /**
  * Gift usage: API read model vs form write field.
@@ -441,7 +440,7 @@ export default function HospitalityRecordDialog({
               <RHFTextareaField name={"remark"} label={fieldLabels.remark} />
             </Grid>
             <HospitalityItemsFieldArray control={control} name="items" />
-            {SHOW_USAGE_ITEM_LINES_IN_HOSPITALITY_DIALOG && (
+            {isAdmin && (
               <UsageItemLinesFieldArray
                 control={control}
                 errors={errors}
