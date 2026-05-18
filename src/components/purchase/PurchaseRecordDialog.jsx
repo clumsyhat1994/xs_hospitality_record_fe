@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -6,6 +6,8 @@ import {
   DialogActions,
   Button,
   Grid,
+  Alert,
+  Box,
 } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import RHFTextField from "../form/RHFTextField";
@@ -14,6 +16,7 @@ import { FormModeProvider } from "../../context/FormModeContext";
 import purchaseRecordApi from "../../api/purchaseRecordApi";
 import { toNullableNumber } from "../../utils/numberUtils";
 import { purchaseRecordFieldLabels as fieldLabels } from "../../constants/recordFieldLabels";
+import { validationMessages } from "../../constants/validationMessages";
 
 const categoryOptions = [
   { value: "", label: "请选择类别" },
@@ -43,27 +46,62 @@ export default function PurchaseRecordDialog({
   const {
     reset,
     handleSubmit,
+    setError,
+    clearErrors,
     formState: { isSubmitting },
   } = methods;
 
+  const [submitError, setSubmitError] = useState("");
+
   useEffect(() => {
     if (!open) return;
+    setSubmitError("");
     reset(initialValues);
   }, [open, initialValues, reset]);
 
   const submit = async (data) => {
+    setSubmitError("");
+    clearErrors();
+
     const normalized = {
       ...data,
       unitPrice: toNullableNumber(data.unitPrice),
       purchasedQuantity: toNullableNumber(data.purchasedQuantity, { integer: true }),
     };
     const payload = cleanPayload(normalized);
-    if (isEditMode) {
-      await purchaseRecordApi.update(initialValues.id, payload);
-    } else {
-      await purchaseRecordApi.create(payload);
+
+    try {
+      if (isEditMode) {
+        await purchaseRecordApi.update(initialValues.id, payload);
+      } else {
+        await purchaseRecordApi.create(payload);
+      }
+      onSave();
+    } catch (err) {
+      const serverErrors = err?.response?.data;
+
+      if (Array.isArray(serverErrors) && serverErrors.length > 0) {
+        const globalMessages = [];
+
+        serverErrors.forEach((e) => {
+          const fieldName = typeof e?.field === "string" ? e.field : "";
+          const message = validationMessages[e?.code] ?? e?.message ?? "提交失败";
+
+          if (fieldName) {
+            setError(fieldName, { type: "server", message });
+          } else {
+            globalMessages.push(message);
+          }
+        });
+
+        if (globalMessages.length > 0) {
+          setSubmitError(globalMessages.join("；"));
+        }
+        return;
+      }
+
+      setSubmitError(err?.response?.data?.message ?? "保存失败，请稍后重试");
     }
-    onSave();
   };
 
   return (
@@ -117,15 +155,22 @@ export default function PurchaseRecordDialog({
               </Grid>
             </Grid>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={onClose}>取消</Button>
-            <Button
-              variant="contained"
-              disabled={isSubmitting}
-              onClick={handleSubmit(submit)}
-            >
-              {isSubmitting ? "保存中..." : "保存"}
-            </Button>
+          <DialogActions sx={{ flexDirection: "column", alignItems: "stretch", px: 3, pb: 2 }}>
+            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, width: "100%" }}>
+              <Button onClick={onClose}>取消</Button>
+              <Button
+                variant="contained"
+                disabled={isSubmitting}
+                onClick={handleSubmit(submit)}
+              >
+                {isSubmitting ? "保存中..." : "保存"}
+              </Button>
+            </Box>
+            {submitError ? (
+              <Alert severity="error" sx={{ width: "100%" }}>
+                {submitError}
+              </Alert>
+            ) : null}
           </DialogActions>
         </Dialog>
       </FormProvider>
