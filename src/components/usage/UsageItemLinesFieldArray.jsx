@@ -47,16 +47,16 @@ function getPurchaseRecordLabel(option) {
 /**
  * API `remainingQuantity` is net of persisted usage; add back this usage's baseline so form totals don't double-count.
  */
-function purchaseRemainingCeiling(record, initialAllocatedByPurchaseId) {
+function purchaseRemainingCeiling(record, initialUsedByPurchaseId) {
   if (!record?.id) return 0;
   const baseline =
-    Number(initialAllocatedByPurchaseId[String(record.id)] ?? 0) || 0;
+    Number(initialUsedByPurchaseId[String(record.id)] ?? 0) || 0;
   return Number(record.remainingQuantity ?? 0) + baseline;
 }
 
 /** Purchases already saved on this usage (edit); backend inStockOnly omits remaining 0 unless these ids are passed. */
-function buildIncludePurchaseIdsForUsage(initialAllocatedByPurchaseId) {
-  return Object.keys(initialAllocatedByPurchaseId ?? {})
+function buildIncludePurchaseIdsForUsage(initialUsedByPurchaseId) {
+  return Object.keys(initialUsedByPurchaseId ?? {})
     .map((idStr) => Number(idStr))
     .filter((n) => Number.isFinite(n) && n > 0);
 }
@@ -109,7 +109,7 @@ function GiftInventoryLineRow({
   purchaseRecords,
   loadCategoryRecords,
   loadingCategoryRecords,
-  initialAllocatedByPurchaseId,
+  initialUsedByPurchaseId,
   allGiftInventoryLines,
 }) {
   const { setValue } = useFormContext();
@@ -124,7 +124,7 @@ function GiftInventoryLineRow({
     (record) => {
       const ceiling = purchaseRemainingCeiling(
         record,
-        initialAllocatedByPurchaseId,
+        initialUsedByPurchaseId,
       );
       return {
         ...record,
@@ -173,7 +173,7 @@ function GiftInventoryLineRow({
     0,
     selectedPurchaseOption != null
       ? Number(selectedPurchaseOption.effectiveRemainingQuantity ?? 0)
-      : initialAllocatedByPurchaseId[String(selectedPurchaseId ?? "")] || 0,
+      : initialUsedByPurchaseId[String(selectedPurchaseId ?? "")] || 0,
   );
 
   useEffect(() => {
@@ -304,7 +304,7 @@ export default function UsageItemLinesFieldArray({
   control,
   errors,
   clearErrors,
-  initialAllocatedByPurchaseId = {},
+  initialUsedByPurchaseId = {},
 }) {
   const { fields, append, remove } = useFieldArray({
     control,
@@ -341,7 +341,7 @@ export default function UsageItemLinesFieldArray({
     setLoadingByCategory((prev) => ({ ...prev, [category]: true }));
     try {
       const includeIds = buildIncludePurchaseIdsForUsage(
-        initialAllocatedByPurchaseId,
+        initialUsedByPurchaseId,
       );
       const records = await fetchEligiblePurchaseRecordsByCategory(
         category,
@@ -373,7 +373,7 @@ export default function UsageItemLinesFieldArray({
                 purchaseRecords={purchaseRecordsByCategory}
                 loadCategoryRecords={loadCategoryRecords}
                 loadingCategoryRecords={loadingByCategory}
-                initialAllocatedByPurchaseId={initialAllocatedByPurchaseId}
+                initialUsedByPurchaseId={initialUsedByPurchaseId}
                 allGiftInventoryLines={giftInventoryLines}
               />
             ))}

@@ -37,7 +37,7 @@ export const usageRecordFieldLabels = {
   department: "部门",
   counterparty: "招待对象",
   recipient: "领用人",
-  purchaseAllocations: "领用明细",
+  purchaseSlices: "领用明细",
   hospitalityRecordId: "招待记录",
   createdAt: "创建时间",
 };

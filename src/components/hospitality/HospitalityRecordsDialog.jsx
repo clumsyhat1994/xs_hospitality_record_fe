@@ -32,29 +32,29 @@ import RHFTextareaField from "../form/RHFTextareaField";
 import MasterDataDialog from "../master-data/MasterDataDialog";
 import RHFAutocomplete from "../form/RHFAutocomplete";
 import { toNullableNumber } from "../../utils/numberUtils";
-import { initialAllocatedByPurchaseIdFromSlices } from "../../utils/giftAllocationFormUtils";
+import { initialUsedByPurchaseIdFromSlices } from "../../utils/giftPurchaseSliceFormUtils";
 
 const DEPTWITHQUOTA = ["SCYWB", "QCCZB"];
 
-/** Gift purchase allocation block under the hospitality form; flip to re-show. */
+/** Gift purchase lines block under the hospitality form; flip to re-show. */
 
 /**
  * Gift usage: API read model vs form write field.
  *
- * - {@code purchaseAllocations}: returned by the backend on hospitality records (resolved slices for display).
+ * - {@code purchaseSlices}: returned by the backend on hospitality records (resolved slices for display).
  * - {@code giftInventoryLines}: react-hook-form field for the same lines in the UI. When opening the dialog we
- *   copy {@code purchaseAllocations} into {@code giftInventoryLines} (see {@link toHospitalityFormDefaults}) so
+ *   copy {@code purchaseSlices} into {@code giftInventoryLines} (see {@link toHospitalityFormDefaults}) so
  *   {@code UsageItemLinesFieldArray} can edit them. Each line keeps {@code category}, {@code purchaseId}, {@code quantity},
  *   and client-only {@code unitPrice} for totals; display fields come from the selected purchase option.
  * - On save, the client sends {@code giftInventoryLines} in the create/update body (server {@code GiftInventoryLineDTO}
  *   shape). This dialog only submits lines with {@code purchaseId} and {@code quantity} (always {@code productName: null});
- *   incomplete rows are dropped. {@code purchaseAllocations} is not the write contract.
+ *   incomplete rows are dropped. {@code purchaseSlices} is not the write contract.
  */
 
-/** Seeds form {@code giftInventoryLines} from API {@code purchaseAllocations} when opening (see block comment above). */
+/** Seeds form {@code giftInventoryLines} from API {@code purchaseSlices} when opening (see block comment above). */
 function toHospitalityFormDefaults(values) {
   if (!values) return values;
-  const alloc = values.purchaseAllocations;
+  const alloc = values.purchaseSlices;
   if (Array.isArray(alloc) && alloc.length > 0) {
     return {
       ...values,
@@ -85,10 +85,10 @@ export default function HospitalityRecordDialog({
     defaultValues: toHospitalityFormDefaults(initialValues),
   });
 
-  const initialAllocatedByPurchaseId = useMemo(
+  const initialUsedByPurchaseId = useMemo(
     () =>
-      initialAllocatedByPurchaseIdFromSlices(
-        initialValues?.purchaseAllocations,
+      initialUsedByPurchaseIdFromSlices(
+        initialValues?.purchaseSlices,
       ),
     [initialValues],
   );
@@ -445,7 +445,7 @@ export default function HospitalityRecordDialog({
                 control={control}
                 errors={errors}
                 clearErrors={clearErrors}
-                initialAllocatedByPurchaseId={initialAllocatedByPurchaseId}
+                initialUsedByPurchaseId={initialUsedByPurchaseId}
               />
             )}
           </DialogContent>

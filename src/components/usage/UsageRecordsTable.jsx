@@ -16,7 +16,7 @@ import { formatDisplayDate } from "../../utils/formatters";
 import { usageRecordFieldLabels as fieldLabels } from "../../constants/recordFieldLabels";
 
 /** Aligns with purchase slice fields used in UsageItemLinesFieldArray / API slice DTO. */
-function formatPurchaseDateForAllocation(value) {
+function formatPurchaseDateForSlice(value) {
   if (!value) return "-";
   if (typeof value === "string") return value.slice(0, 10);
   return formatDisplayDate(value);
@@ -68,7 +68,7 @@ export default function UsageRecordsTable({
               {fieldLabels.recipient}
             </TableCell>
             <TableCell align="center" sx={{ minWidth: 360 }}>
-              {fieldLabels.purchaseAllocations}
+              {fieldLabels.purchaseSlices}
             </TableCell>
             <TableCell sx={{ minWidth: 120 }}>
               {fieldLabels.hospitalityRecordId}
@@ -121,7 +121,7 @@ export default function UsageRecordsTable({
                   <TableCell>{record.counterpartyName}</TableCell>
                   <TableCell>{record.recipientName}</TableCell>
                   <TableCell align="center" sx={{ verticalAlign: "top", py: 0.5 }}>
-                    {record.purchaseAllocations?.length ? (
+                    {record.purchaseSlices?.length ? (
                       <Table
                         size="small"
                         sx={{
@@ -157,7 +157,7 @@ export default function UsageRecordsTable({
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {record.purchaseAllocations.map((a, i) => (
+                          {record.purchaseSlices.map((a, i) => (
                             <TableRow key={`${a.purchaseId ?? "row"}-${i}`}>
                               <TableCell sx={{ wordBreak: "break-word" }}>
                                 {a.productName ?? "—"}
@@ -166,7 +166,7 @@ export default function UsageRecordsTable({
                                 {a.specification ?? "—"}
                               </TableCell>
                               <TableCell sx={{ whiteSpace: "nowrap" }}>
-                                {formatPurchaseDateForAllocation(
+                                {formatPurchaseDateForSlice(
                                   a.purchaseDate,
                                 )}
                               </TableCell>

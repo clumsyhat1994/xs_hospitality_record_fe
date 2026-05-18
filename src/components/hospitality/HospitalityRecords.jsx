@@ -33,7 +33,7 @@ const emptyRecord = {
   theirHostPositionId: null,
   items: [],
   giftInventoryLines: [],
-  purchaseAllocations: [],
+  purchaseSlices: [],
 };
 
 export default function HospitalityRecords() {

@@ -20,7 +20,7 @@ import masterDataApi from "../../api/masterDataApi";
 import usageRecordApi from "../../api/usageRecordApi";
 import { toNullableNumber } from "../../utils/numberUtils";
 import { UsageRecordBEErrorFieldToFEFormFieldMap } from "../../constants/BEErrorFieldToFEFormFieldMap";
-import { initialAllocatedByPurchaseIdFromSlices } from "../../utils/giftAllocationFormUtils";
+import { initialUsedByPurchaseIdFromSlices } from "../../utils/giftPurchaseSliceFormUtils";
 import UsageItemLinesFieldArray from "./UsageItemLinesFieldArray";
 
 function toDialogDefaultValues(record) {
@@ -40,7 +40,7 @@ function toDialogDefaultValues(record) {
     counterpartyId: record.counterpartyId ?? null,
     recipientId: record.recipientId ?? null,
     remark: record.remark ?? "",
-    giftInventoryLines: (record.purchaseAllocations ?? [])
+    giftInventoryLines: (record.purchaseSlices ?? [])
       .filter(Boolean)
       .map((a) => ({
         category: a.category ?? "",
@@ -58,10 +58,10 @@ export default function UsageRecordDialog({
   editingRecord = null,
 }) {
   const isEditMode = !!editingRecord?.id;
-  const initialAllocatedByPurchaseId = useMemo(
+  const initialUsedByPurchaseId = useMemo(
     () =>
-      initialAllocatedByPurchaseIdFromSlices(
-        editingRecord?.purchaseAllocations,
+      initialUsedByPurchaseIdFromSlices(
+        editingRecord?.purchaseSlices,
       ),
     [editingRecord],
   );
@@ -215,7 +215,7 @@ export default function UsageRecordDialog({
               control={control}
               errors={errors}
               clearErrors={clearErrors}
-              initialAllocatedByPurchaseId={initialAllocatedByPurchaseId}
+              initialUsedByPurchaseId={initialUsedByPurchaseId}
             />
           </DialogContent>
           <DialogActions>
