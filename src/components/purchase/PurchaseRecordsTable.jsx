@@ -8,14 +8,13 @@ import {
   IconButton,
   Stack,
   Skeleton,
+  Tooltip,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ListAltIcon from "@mui/icons-material/ListAlt";
 import { NumberedTablePagination } from "../common/NumberedTablePagination";
-import {
-  formatDisplayAmount,
-  formatDisplayDate,
-} from "../../utils/formatters";
+import { formatDisplayAmount, formatDisplayDate } from "../../utils/formatters";
 import { purchaseRecordFieldLabels as fieldLabels } from "../../constants/recordFieldLabels";
 
 function renderCategory(value) {
@@ -32,6 +31,7 @@ export default function PurchaseRecordsTable({
   records,
   onEditRow,
   onDeleteRow,
+  onViewUsages,
   page,
   setPage,
   size,
@@ -60,29 +60,43 @@ export default function PurchaseRecordsTable({
               },
             }}
           >
-            <TableCell sx={{ minWidth: 95 }} padding="checkbox" align="center">
+            <TableCell sx={{ minWidth: 130 }} padding="checkbox" align="center">
               操作
             </TableCell>
-            <TableCell sx={{ minWidth: 110 }}>{fieldLabels.purchaseCategory}</TableCell>
+            <TableCell sx={{ minWidth: 110 }}>
+              {fieldLabels.purchaseCategory}
+            </TableCell>
             <TableCell sx={{ minWidth: 200 }}>{fieldLabels.supplier}</TableCell>
-            <TableCell sx={{ minWidth: 120 }}>{fieldLabels.productName}</TableCell>
+            <TableCell sx={{ minWidth: 120 }}>
+              {fieldLabels.productName}
+            </TableCell>
+            <TableCell sx={{ minWidth: 100 }}>
+              {fieldLabels.specification}
+            </TableCell>
             <TableCell align="right" sx={{ minWidth: 100 }}>
               {fieldLabels.purchasedQuantity}
             </TableCell>
-            <TableCell align="right" sx={{ minWidth: 100 }}>
-              {fieldLabels.remainingQuantity}
-            </TableCell>
-            <TableCell sx={{ minWidth: 100 }}>{fieldLabels.specification}</TableCell>
             <TableCell align="right" sx={{ minWidth: 100 }}>
               {fieldLabels.unitPrice}
             </TableCell>
             <TableCell align="right" sx={{ minWidth: 120 }}>
               {fieldLabels.totalAmount}
             </TableCell>
-            <TableCell sx={{ minWidth: 120 }}>{fieldLabels.applicationDate}</TableCell>
-            <TableCell sx={{ minWidth: 120 }}>{fieldLabels.purchaseDate}</TableCell>
-            <TableCell sx={{ minWidth: 120 }}>{fieldLabels.invoiceDate}</TableCell>
-            <TableCell sx={{ minWidth: 200 }}>{fieldLabels.invoiceNumberString}</TableCell>
+            <TableCell align="right" sx={{ minWidth: 100 }}>
+              {fieldLabels.remainingQuantity}
+            </TableCell>
+            <TableCell sx={{ minWidth: 120 }}>
+              {fieldLabels.applicationDate}
+            </TableCell>
+            <TableCell sx={{ minWidth: 120 }}>
+              {fieldLabels.purchaseDate}
+            </TableCell>
+            <TableCell sx={{ minWidth: 120 }}>
+              {fieldLabels.invoiceDate}
+            </TableCell>
+            <TableCell sx={{ minWidth: 200 }}>
+              {fieldLabels.invoiceNumberString}
+            </TableCell>
           </TableRow>
         </TableHead>
 
@@ -92,6 +106,7 @@ export default function PurchaseRecordsTable({
               <TableRow key={index}>
                 <TableCell padding="checkbox">
                   <Stack direction="row" spacing={1}>
+                    <Skeleton variant="circular" width={28} height={28} />
                     <Skeleton variant="circular" width={28} height={28} />
                     <Skeleton variant="circular" width={28} height={28} />
                   </Stack>
@@ -105,40 +120,85 @@ export default function PurchaseRecordsTable({
             ))
           ) : (
             <>
-              {records.map((record) => (
-                <TableRow key={record.id} hover>
-                  <TableCell padding="checkbox">
-                    <Stack direction="row" spacing={1}>
-                      <IconButton size="small" onClick={() => onEditRow(record)}>
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => onDeleteRow(record.id)}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </Stack>
-                  </TableCell>
-                  <TableCell>{renderCategory(record.category)}</TableCell>
-                  <TableCell>{record.supplier}</TableCell>
-                  <TableCell>{record.productName}</TableCell>
-                  <TableCell align="right">{record.purchasedQuantity}</TableCell>
-                  <TableCell align="right">{record.remainingQuantity}</TableCell>
-                  <TableCell>{record.specification}</TableCell>
-                  <TableCell align="right">
-                    {formatDisplayAmount(record.unitPrice)}
-                  </TableCell>
-                  <TableCell align="right">
-                    {formatDisplayAmount(record.totalAmount)}
-                  </TableCell>
-                  <TableCell>{formatDisplayDate(record.applicationDate)}</TableCell>
-                  <TableCell>{formatDisplayDate(record.purchaseDate)}</TableCell>
-                  <TableCell>{formatDisplayDate(record.invoiceDate)}</TableCell>
-                  <TableCell>{record.invoiceNumber}</TableCell>
-                </TableRow>
-              ))}
+              {records.flatMap((record) => {
+                const lines =
+                  Array.isArray(record.lines) && record.lines.length > 0
+                    ? record.lines
+                    : [null];
+                return lines.map((line, lineIndex) => (
+                  <TableRow key={`${record.id}-${line?.id ?? lineIndex}`} hover>
+                    <TableCell padding="checkbox">
+                      {lineIndex === 0 ? (
+                        <Stack direction="row" spacing={1}>
+                          <Tooltip title="领用记录">
+                            <IconButton
+                              size="small"
+                              onClick={() => onViewUsages?.(record)}
+                            >
+                              <ListAltIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <IconButton
+                            size="small"
+                            onClick={() => onEditRow(record)}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => onDeleteRow(record.id)}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Stack>
+                      ) : null}
+                    </TableCell>
+                    <TableCell>
+                      {lineIndex === 0 ? renderCategory(record.category) : ""}
+                    </TableCell>
+                    <TableCell>
+                      {lineIndex === 0 ? record.supplier : ""}
+                    </TableCell>
+                    <TableCell>{line?.productName ?? "—"}</TableCell>
+                    <TableCell>{line?.specification ?? "—"}</TableCell>
+                    <TableCell align="right">
+                      {line?.purchasedQuantity ?? "—"}
+                    </TableCell>
+                    <TableCell align="right">
+                      {line?.unitPrice != null
+                        ? formatDisplayAmount(line.unitPrice)
+                        : "—"}
+                    </TableCell>
+                    <TableCell align="right">
+                      {line?.totalAmount != null
+                        ? formatDisplayAmount(line.totalAmount)
+                        : "—"}
+                    </TableCell>
+                    <TableCell align="right">
+                      {line?.remainingQuantity ?? "—"}
+                    </TableCell>
+                    <TableCell>
+                      {lineIndex === 0
+                        ? formatDisplayDate(record.applicationDate)
+                        : ""}
+                    </TableCell>
+                    <TableCell>
+                      {lineIndex === 0
+                        ? formatDisplayDate(record.purchaseDate)
+                        : ""}
+                    </TableCell>
+                    <TableCell>
+                      {lineIndex === 0
+                        ? formatDisplayDate(record.invoiceDate)
+                        : ""}
+                    </TableCell>
+                    <TableCell>
+                      {lineIndex === 0 ? record.invoiceNumber : ""}
+                    </TableCell>
+                  </TableRow>
+                ));
+              })}
 
               {records.length === 0 && (
                 <TableRow>

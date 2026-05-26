@@ -20,7 +20,7 @@ import masterDataApi from "../../api/masterDataApi";
 import usageRecordApi from "../../api/usageRecordApi";
 import { toNullableNumber } from "../../utils/numberUtils";
 import { UsageRecordBEErrorFieldToFEFormFieldMap } from "../../constants/BEErrorFieldToFEFormFieldMap";
-import { initialUsedByPurchaseIdFromSlices } from "../../utils/giftPurchaseSliceFormUtils";
+import { initialUsedByPurchaseLineIdFromUsageLines } from "../../utils/giftUsageLineFormUtils";
 import UsageItemLinesFieldArray from "./UsageItemLinesFieldArray";
 
 function toDialogDefaultValues(record) {
@@ -40,11 +40,11 @@ function toDialogDefaultValues(record) {
     counterpartyId: record.counterpartyId ?? null,
     recipientId: record.recipientId ?? null,
     remark: record.remark ?? "",
-    giftInventoryLines: (record.purchaseSlices ?? [])
+    giftInventoryLines: (record.usageLines ?? [])
       .filter(Boolean)
       .map((a) => ({
         category: a.category ?? "",
-        purchaseId: a.purchaseId,
+        purchaseLineId: a.purchaseLineId,
         quantity: a.quantity,
         unitPrice: a.unitPrice != null && a.unitPrice !== "" ? a.unitPrice : "",
       })),
@@ -58,10 +58,10 @@ export default function UsageRecordDialog({
   editingRecord = null,
 }) {
   const isEditMode = !!editingRecord?.id;
-  const initialUsedByPurchaseId = useMemo(
+  const initialUsedByPurchaseLineId = useMemo(
     () =>
-      initialUsedByPurchaseIdFromSlices(
-        editingRecord?.purchaseSlices,
+      initialUsedByPurchaseLineIdFromUsageLines(
+        editingRecord?.usageLines,
       ),
     [editingRecord],
   );
@@ -99,22 +99,10 @@ export default function UsageRecordDialog({
 
     const payload = {
       ...data,
-      giftInventoryLines: data.giftInventoryLines.map((line) => {
-        const purchaseId = toNullableNumber(line?.purchaseId, {
-          integer: true,
-        });
-        const productName =
-          typeof line?.productName === "string"
-            ? line.productName.trim()
-            : line?.productName;
-
-        return {
-          purchaseId,
-          // Backend requires exactly one of purchaseId/productName.
-          productName: purchaseId ? null : productName,
-          quantity: toNullableNumber(line?.quantity, { integer: true }),
-        };
-      }),
+      giftInventoryLines: data.giftInventoryLines.map((line) => ({
+        purchaseLineId: toNullableNumber(line?.purchaseLineId, { integer: true }),
+        quantity: toNullableNumber(line?.quantity, { integer: true }),
+      })),
     };
 
     try {
@@ -215,7 +203,7 @@ export default function UsageRecordDialog({
               control={control}
               errors={errors}
               clearErrors={clearErrors}
-              initialUsedByPurchaseId={initialUsedByPurchaseId}
+              initialUsedByPurchaseLineId={initialUsedByPurchaseLineId}
             />
           </DialogContent>
           <DialogActions>

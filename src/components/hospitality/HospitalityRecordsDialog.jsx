@@ -32,7 +32,7 @@ import RHFTextareaField from "../form/RHFTextareaField";
 import MasterDataDialog from "../master-data/MasterDataDialog";
 import RHFAutocomplete from "../form/RHFAutocomplete";
 import { toNullableNumber } from "../../utils/numberUtils";
-import { initialUsedByPurchaseIdFromSlices } from "../../utils/giftPurchaseSliceFormUtils";
+import { initialUsedByPurchaseLineIdFromUsageLines } from "../../utils/giftUsageLineFormUtils";
 
 const DEPTWITHQUOTA = ["SCYWB", "QCCZB"];
 
@@ -41,26 +41,24 @@ const DEPTWITHQUOTA = ["SCYWB", "QCCZB"];
 /**
  * Gift usage: API read model vs form write field.
  *
- * - {@code purchaseSlices}: returned by the backend on hospitality records (resolved slices for display).
+ * - {@code giftUsageLines}: returned by the backend on hospitality records (resolved usage lines for display).
  * - {@code giftInventoryLines}: react-hook-form field for the same lines in the UI. When opening the dialog we
- *   copy {@code purchaseSlices} into {@code giftInventoryLines} (see {@link toHospitalityFormDefaults}) so
- *   {@code UsageItemLinesFieldArray} can edit them. Each line keeps {@code category}, {@code purchaseId}, {@code quantity},
- *   and client-only {@code unitPrice} for totals; display fields come from the selected purchase option.
- * - On save, the client sends {@code giftInventoryLines} in the create/update body (server {@code GiftInventoryLineDTO}
- *   shape). This dialog only submits lines with {@code purchaseId} and {@code quantity} (always {@code productName: null});
- *   incomplete rows are dropped. {@code purchaseSlices} is not the write contract.
+ *   copy {@code giftUsageLines} into {@code giftInventoryLines} (see {@link toHospitalityFormDefaults}) so
+ *   {@code UsageItemLinesFieldArray} can edit them. Each line keeps {@code category}, {@code purchaseLineId},
+ *   {@code quantity}, and client-only {@code unitPrice} for totals.
+ * - On save, the client sends {@code giftInventoryLines} as {@code GiftInventoryLineDTO} ({@code purchaseLineId}, {@code quantity}).
  */
 
-/** Seeds form {@code giftInventoryLines} from API {@code purchaseSlices} when opening (see block comment above). */
+/** Seeds form {@code giftInventoryLines} from API {@code giftUsageLines} when opening. */
 function toHospitalityFormDefaults(values) {
   if (!values) return values;
-  const alloc = values.purchaseSlices;
+  const alloc = values.giftUsageLines;
   if (Array.isArray(alloc) && alloc.length > 0) {
     return {
       ...values,
       giftInventoryLines: alloc.filter(Boolean).map((a) => ({
         category: a.category ?? "",
-        purchaseId: a.purchaseId,
+        purchaseLineId: a.purchaseLineId,
         quantity: a.quantity,
         unitPrice: a.unitPrice != null && a.unitPrice !== "" ? a.unitPrice : "",
       })),
@@ -85,10 +83,10 @@ export default function HospitalityRecordDialog({
     defaultValues: toHospitalityFormDefaults(initialValues),
   });
 
-  const initialUsedByPurchaseId = useMemo(
+  const initialUsedByPurchaseLineId = useMemo(
     () =>
-      initialUsedByPurchaseIdFromSlices(
-        initialValues?.purchaseSlices,
+      initialUsedByPurchaseLineIdFromUsageLines(
+        initialValues?.giftUsageLines,
       ),
     [initialValues],
   );
@@ -165,17 +163,16 @@ export default function HospitalityRecordDialog({
         giftInventoryLines: Array.isArray(data.giftInventoryLines)
           ? data.giftInventoryLines
               .map((line) => {
-                const purchaseId = toNullableNumber(line?.purchaseId, {
+                const purchaseLineId = toNullableNumber(line?.purchaseLineId, {
                   integer: true,
                 });
                 const quantity = toNullableNumber(line?.quantity, {
                   integer: true,
                 });
-                if (!purchaseId || !quantity || quantity < 1) return null;
+                if (!purchaseLineId || !quantity || quantity < 1) return null;
                 return {
                   id: toNullableNumber(line?.id, { integer: true }),
-                  purchaseId,
-                  productName: null,
+                  purchaseLineId,
                   quantity,
                 };
               })
@@ -445,7 +442,7 @@ export default function HospitalityRecordDialog({
                 control={control}
                 errors={errors}
                 clearErrors={clearErrors}
-                initialUsedByPurchaseId={initialUsedByPurchaseId}
+                initialUsedByPurchaseLineId={initialUsedByPurchaseLineId}
               />
             )}
           </DialogContent>

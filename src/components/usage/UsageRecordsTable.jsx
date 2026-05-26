@@ -13,7 +13,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { NumberedTablePagination } from "../common/NumberedTablePagination";
 import { formatDisplayDate } from "../../utils/formatters";
-import { usageRecordFieldLabels as fieldLabels } from "../../constants/recordFieldLabels";
+import {
+  usageRecordFieldLabels as fieldLabels,
+  purchaseRecordFieldLabels as purchaseLabels,
+} from "../../constants/recordFieldLabels";
 
 /** Aligns with purchase slice fields used in UsageItemLinesFieldArray / API slice DTO. */
 function formatPurchaseDateForSlice(value) {
@@ -68,7 +71,7 @@ export default function UsageRecordsTable({
               {fieldLabels.recipient}
             </TableCell>
             <TableCell align="center" sx={{ minWidth: 360 }}>
-              {fieldLabels.purchaseSlices}
+              {fieldLabels.usageLines}
             </TableCell>
             <TableCell sx={{ minWidth: 120 }}>
               {fieldLabels.hospitalityRecordId}
@@ -120,8 +123,11 @@ export default function UsageRecordsTable({
                   <TableCell>{record.departmentName}</TableCell>
                   <TableCell>{record.counterpartyName}</TableCell>
                   <TableCell>{record.recipientName}</TableCell>
-                  <TableCell align="center" sx={{ verticalAlign: "top", py: 0.5 }}>
-                    {record.purchaseSlices?.length ? (
+                  <TableCell
+                    align="center"
+                    sx={{ verticalAlign: "top", py: 0.5 }}
+                  >
+                    {record.usageLines?.length ? (
                       <Table
                         size="small"
                         sx={{
@@ -149,16 +155,22 @@ export default function UsageRecordsTable({
                       >
                         <TableHead>
                           <TableRow>
-                            <TableCell>品名</TableCell>
-                            <TableCell>规格</TableCell>
-                            <TableCell>采购日期</TableCell>
-                            <TableCell align="right">剩余</TableCell>
-                            <TableCell align="right">领用数量</TableCell>
+                            <TableCell>{purchaseLabels.productName}</TableCell>
+                            <TableCell>
+                              {purchaseLabels.specification}
+                            </TableCell>
+                            <TableCell>{purchaseLabels.purchaseDate}</TableCell>
+                            <TableCell align="right">
+                              {purchaseLabels.remainingQuantity}
+                            </TableCell>
+                            <TableCell align="right">
+                              {fieldLabels.usedQuantity}
+                            </TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {record.purchaseSlices.map((a, i) => (
-                            <TableRow key={`${a.purchaseId ?? "row"}-${i}`}>
+                          {record.usageLines.map((a, i) => (
+                            <TableRow key={`${a.purchaseLineId ?? "row"}-${i}`}>
                               <TableCell sx={{ wordBreak: "break-word" }}>
                                 {a.productName ?? "—"}
                               </TableCell>
@@ -166,14 +178,18 @@ export default function UsageRecordsTable({
                                 {a.specification ?? "—"}
                               </TableCell>
                               <TableCell sx={{ whiteSpace: "nowrap" }}>
-                                {formatPurchaseDateForSlice(
-                                  a.purchaseDate,
-                                )}
+                                {formatPurchaseDateForSlice(a.purchaseDate)}
                               </TableCell>
-                              <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
+                              <TableCell
+                                align="right"
+                                sx={{ whiteSpace: "nowrap" }}
+                              >
                                 {Math.max(0, Number(a.remainingQuantity ?? 0))}
                               </TableCell>
-                              <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
+                              <TableCell
+                                align="right"
+                                sx={{ whiteSpace: "nowrap" }}
+                              >
                                 {a.quantity ?? "—"}
                               </TableCell>
                             </TableRow>

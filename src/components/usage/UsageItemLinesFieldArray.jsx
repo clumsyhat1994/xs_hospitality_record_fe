@@ -15,6 +15,9 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import purchaseRecordApi from "../../api/purchaseRecordApi";
+import {
+  flattenPurchaseRecordsToLines,
+} from "../../utils/giftUsageLineFormUtils";
 import RHFCellTextField from "../form/RHFCellTextField";
 import RHFAutocomplete from "../form/RHFAutocomplete";
 
@@ -35,7 +38,7 @@ function getDateYearsAgo(baseDate, years) {
   return date;
 }
 
-function getPurchaseRecordLabel(option) {
+function getPurchaseLineLabel(option) {
   return `${option?.productName ?? "-"} | 规格: ${
     option?.specification ?? "-"
   } | 采购日期: ${option?.purchaseDate ?? "-"} | 剩余: ${Math.max(
@@ -44,27 +47,20 @@ function getPurchaseRecordLabel(option) {
   )}`;
 }
 
-/**
- * API `remainingQuantity` is net of persisted usage; add back this usage's baseline so form totals don't double-count.
- */
-function purchaseRemainingCeiling(record, initialUsedByPurchaseId) {
-  if (!record?.id) return 0;
+function purchaseLineRemainingCeiling(line, initialUsedByPurchaseLineId) {
+  if (!line?.id) return 0;
   const baseline =
-    Number(initialUsedByPurchaseId[String(record.id)] ?? 0) || 0;
-  return Number(record.remainingQuantity ?? 0) + baseline;
+    Number(initialUsedByPurchaseLineId[String(line.id)] ?? 0) || 0;
+  return Number(line.remainingQuantity ?? 0) + baseline;
 }
 
-/** Purchases already saved on this usage (edit); backend inStockOnly omits remaining 0 unless these ids are passed. */
-function buildIncludePurchaseIdsForUsage(initialUsedByPurchaseId) {
-  return Object.keys(initialUsedByPurchaseId ?? {})
+function buildIncludePurchaseLineIdsForUsage(initialUsedByPurchaseLineId) {
+  return Object.keys(initialUsedByPurchaseLineId ?? {})
     .map((idStr) => Number(idStr))
     .filter((n) => Number.isFinite(n) && n > 0);
 }
 
-async function fetchEligiblePurchaseRecordsByCategory(
-  category,
-  includeIds = [],
-) {
+async function fetchEligiblePurchaseLinesByCategory(category, includeLineIds = []) {
   const today = new Date();
   const twoYearsAgo = getDateYearsAgo(today, 2);
 
@@ -79,7 +75,7 @@ async function fetchEligiblePurchaseRecordsByCategory(
     purchaseDateTo: formatDate(today),
     inStockOnly: true,
   };
-  const listOptions = includeIds.length > 0 ? { includeIds } : {};
+  const listOptions = includeLineIds.length > 0 ? { includeLineIds } : {};
 
   while (categoryRecords.length < totalElements) {
     const res = await purchaseRecordApi.filteredList(
@@ -99,88 +95,82 @@ async function fetchEligiblePurchaseRecordsByCategory(
     page += 1;
   }
 
-  return categoryRecords;
+  return flattenPurchaseRecordsToLines(categoryRecords);
 }
 
 function GiftInventoryLineRow({
   fieldId,
   index,
   onRemove,
-  purchaseRecords,
-  loadCategoryRecords,
-  loadingCategoryRecords,
-  initialUsedByPurchaseId,
+  purchaseLinesByCategory,
+  loadCategoryLines,
+  loadingCategoryLines,
+  initialUsedByPurchaseLineId,
   allGiftInventoryLines,
 }) {
   const { setValue } = useFormContext();
   const line = allGiftInventoryLines?.[index];
   const selectedCategory = line?.category;
-  const selectedPurchaseId = line?.purchaseId;
-  const categoryPurchaseRecords = selectedCategory
-    ? (purchaseRecords[selectedCategory] ?? [])
+  const selectedPurchaseLineId = line?.purchaseLineId;
+  const categoryPurchaseLines = selectedCategory
+    ? (purchaseLinesByCategory[selectedCategory] ?? [])
     : [];
-  // UI keeps each purchaseId on at most one row, so no cross-row draft totals on the same purchase.
-  const categoryPurchaseRecordsWithRemaining = categoryPurchaseRecords.map(
-    (record) => {
-      const ceiling = purchaseRemainingCeiling(
-        record,
-        initialUsedByPurchaseId,
-      );
-      return {
-        ...record,
-        effectiveRemainingQuantity: Math.max(0, ceiling),
-      };
-    },
-  );
+  const categoryPurchaseLinesWithRemaining = categoryPurchaseLines.map((purchaseLine) => {
+    const ceiling = purchaseLineRemainingCeiling(
+      purchaseLine,
+      initialUsedByPurchaseLineId,
+    );
+    return {
+      ...purchaseLine,
+      effectiveRemainingQuantity: Math.max(0, ceiling),
+    };
+  });
 
-  const purchaseIdsTakenByOtherRows = useMemo(() => {
+  const purchaseLineIdsTakenByOtherRows = useMemo(() => {
     const taken = new Set();
     (allGiftInventoryLines ?? []).forEach((row, i) => {
       if (i === index) return;
-      const pid = row?.purchaseId;
+      const pid = row?.purchaseLineId;
       if (pid == null || String(pid).trim() === "") return;
       taken.add(String(pid));
     });
     return taken;
   }, [allGiftInventoryLines, index]);
 
-  /** Hide purchases already chosen on other rows; keep this row's selection so Autocomplete can resolve. */
-  const purchaseOptionsForRow = useMemo(
+  const purchaseLineOptionsForRow = useMemo(
     () =>
-      categoryPurchaseRecordsWithRemaining.filter(
+      categoryPurchaseLinesWithRemaining.filter(
         (r) =>
-          !purchaseIdsTakenByOtherRows.has(String(r.id)) ||
-          String(r.id) === String(selectedPurchaseId ?? ""),
+          !purchaseLineIdsTakenByOtherRows.has(String(r.id)) ||
+          String(r.id) === String(selectedPurchaseLineId ?? ""),
       ),
     [
-      categoryPurchaseRecordsWithRemaining,
-      purchaseIdsTakenByOtherRows,
-      selectedPurchaseId,
+      categoryPurchaseLinesWithRemaining,
+      purchaseLineIdsTakenByOtherRows,
+      selectedPurchaseLineId,
     ],
   );
 
-  /** Selected row from `options` — same object Autocomplete uses for labels. */
-  const selectedPurchaseOption =
-    categoryPurchaseRecordsWithRemaining.find(
-      (record) => String(record.id) === String(selectedPurchaseId ?? ""),
+  const selectedPurchaseLineOption =
+    categoryPurchaseLinesWithRemaining.find(
+      (purchaseLine) => String(purchaseLine.id) === String(selectedPurchaseLineId ?? ""),
     ) ?? null;
-  const selectedPurchaseLabel =
-    !selectedPurchaseId || !selectedPurchaseOption
+  const selectedPurchaseLineLabel =
+    !selectedPurchaseLineId || !selectedPurchaseLineOption
       ? ""
-      : getPurchaseRecordLabel(selectedPurchaseOption);
-  // Enriched list is 1:1 map of raw list — option exists iff id is in category data.
+      : getPurchaseLineLabel(selectedPurchaseLineOption);
   const maxAllowedQuantity = Math.max(
     0,
-    selectedPurchaseOption != null
-      ? Number(selectedPurchaseOption.effectiveRemainingQuantity ?? 0)
-      : initialUsedByPurchaseId[String(selectedPurchaseId ?? "")] || 0,
+    selectedPurchaseLineOption != null
+      ? Number(selectedPurchaseLineOption.effectiveRemainingQuantity ?? 0)
+      : initialUsedByPurchaseLineId[String(selectedPurchaseLineId ?? "")] || 0,
   );
 
   useEffect(() => {
     if (selectedCategory) {
-      loadCategoryRecords(selectedCategory);
+      loadCategoryLines(selectedCategory);
     }
-  }, [loadCategoryRecords, selectedCategory]);
+  }, [loadCategoryLines, selectedCategory]);
 
   return (
     <TableRow
@@ -214,7 +204,7 @@ function GiftInventoryLineRow({
           getOptionValue={(option) => option.value}
           rules={{ required: "请选择礼品类型" }}
           afterFieldValueChange={() => {
-            setValue(`giftInventoryLines.${index}.purchaseId`, "");
+            setValue(`giftInventoryLines.${index}.purchaseLineId`, "");
             setValue(`giftInventoryLines.${index}.quantity`, "");
             setValue(`giftInventoryLines.${index}.unitPrice`, "");
           }}
@@ -225,15 +215,15 @@ function GiftInventoryLineRow({
       <TableCell sx={{ width: "420px", pt: 0.8, pb: 0, px: 1 }}>
         {selectedCategory && (
           <RHFAutocomplete
-            name={`giftInventoryLines.${index}.purchaseId`}
-            label="采购记录"
-            options={purchaseOptionsForRow}
+            name={`giftInventoryLines.${index}.purchaseLineId`}
+            label="采购明细"
+            options={purchaseLineOptionsForRow}
             loading={Boolean(
-              selectedCategory && loadingCategoryRecords[selectedCategory],
+              selectedCategory && loadingCategoryLines[selectedCategory],
             )}
             getOptionValue={(option) => option.id}
-            getOptionLabel={getPurchaseRecordLabel}
-            rules={{ required: "请选择采购记录" }}
+            getOptionLabel={getPurchaseLineLabel}
+            rules={{ required: "请选择采购明细" }}
             afterFieldValueChange={(next) => {
               setValue(`giftInventoryLines.${index}.quantity`, "");
               const price =
@@ -245,18 +235,18 @@ function GiftInventoryLineRow({
             required={false}
           />
         )}
-        {selectedPurchaseLabel && (
+        {selectedPurchaseLineLabel && (
           <Typography
             variant="caption"
             sx={{ mt: 0.5, display: "block", color: "text.secondary" }}
           >
-            {selectedPurchaseLabel}
+            {selectedPurchaseLineLabel}
           </Typography>
         )}
       </TableCell>
 
       <TableCell sx={{ pt: 0.8, pb: 0, px: 1 }}>
-        {selectedPurchaseId && (
+        {selectedPurchaseLineId && (
           <RHFCellTextField
             name={`giftInventoryLines.${index}.quantity`}
             label="领用数量"
@@ -304,15 +294,13 @@ export default function UsageItemLinesFieldArray({
   control,
   errors,
   clearErrors,
-  initialUsedByPurchaseId = {},
+  initialUsedByPurchaseLineId = {},
 }) {
   const { fields, append, remove } = useFieldArray({
     control,
     name: "giftInventoryLines",
   });
-  const [purchaseRecordsByCategory, setPurchaseRecordsByCategory] = useState(
-    {},
-  );
+  const [purchaseLinesByCategory, setPurchaseLinesByCategory] = useState({});
   const [loadingByCategory, setLoadingByCategory] = useState({});
   const giftInventoryLines = useWatch({
     control,
@@ -322,7 +310,7 @@ export default function UsageItemLinesFieldArray({
   const handleAdd = () => {
     append({
       category: "",
-      purchaseId: "",
+      purchaseLineId: "",
       quantity: "",
       unitPrice: "",
     });
@@ -334,25 +322,25 @@ export default function UsageItemLinesFieldArray({
     clearErrors("giftInventoryLines");
   };
 
-  const loadCategoryRecords = async (category) => {
+  const loadCategoryLines = async (category) => {
     if (!category) return;
-    if (purchaseRecordsByCategory[category]) return;
+    if (purchaseLinesByCategory[category]) return;
     if (loadingByCategory[category]) return;
     setLoadingByCategory((prev) => ({ ...prev, [category]: true }));
     try {
-      const includeIds = buildIncludePurchaseIdsForUsage(
-        initialUsedByPurchaseId,
+      const includeLineIds = buildIncludePurchaseLineIdsForUsage(
+        initialUsedByPurchaseLineId,
       );
-      const records = await fetchEligiblePurchaseRecordsByCategory(
+      const lines = await fetchEligiblePurchaseLinesByCategory(
         category,
-        includeIds,
+        includeLineIds,
       );
-      setPurchaseRecordsByCategory((prev) => ({
+      setPurchaseLinesByCategory((prev) => ({
         ...prev,
-        [category]: records,
+        [category]: lines,
       }));
     } catch (err) {
-      console.error("加载可领用采购记录失败", err);
+      console.error("加载可领用采购明细失败", err);
     } finally {
       setLoadingByCategory((prev) => ({ ...prev, [category]: false }));
     }
@@ -370,10 +358,10 @@ export default function UsageItemLinesFieldArray({
                 fieldId={field.id}
                 index={index}
                 onRemove={handleRemove}
-                purchaseRecords={purchaseRecordsByCategory}
-                loadCategoryRecords={loadCategoryRecords}
-                loadingCategoryRecords={loadingByCategory}
-                initialUsedByPurchaseId={initialUsedByPurchaseId}
+                purchaseLinesByCategory={purchaseLinesByCategory}
+                loadCategoryLines={loadCategoryLines}
+                loadingCategoryLines={loadingByCategory}
+                initialUsedByPurchaseLineId={initialUsedByPurchaseLineId}
                 allGiftInventoryLines={giftInventoryLines}
               />
             ))}

@@ -7,6 +7,7 @@ import purchaseRecordApi from "../../api/purchaseRecordApi";
 import PurchaseRecordsToolbar from "./PurchaseRecordsToolbar";
 import PurchaseRecordsTable from "./PurchaseRecordsTable";
 import PurchaseRecordDialog from "./PurchaseRecordDialog";
+import PurchaseRelatedUsagesDialog from "./PurchaseRelatedUsagesDialog";
 import UsageRecordDialog from "../usage/UsageRecordDialog";
 
 const emptyRecord = {
@@ -17,10 +18,15 @@ const emptyRecord = {
   invoiceDate: "",
   invoiceNumber: "",
   supplier: "",
-  productName: "",
-  specification: "",
-  unitPrice: null,
-  purchasedQuantity: null,
+  lines: [
+    {
+      id: null,
+      productName: "",
+      specification: "",
+      unitPrice: null,
+      purchasedQuantity: null,
+    },
+  ],
 };
 
 export default function PurchaseRecords() {
@@ -30,6 +36,7 @@ export default function PurchaseRecords() {
   const [records, setRecords] = useState([]);
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
   const [usageDialogOpen, setUsageDialogOpen] = useState(false);
+  const [relatedUsagesPurchase, setRelatedUsagesPurchase] = useState(null);
   const [editingRecord, setEditingRecord] = useState(null);
   const [draftFilters, setDraftFilters] = useState({
     category: "",
@@ -52,8 +59,12 @@ export default function PurchaseRecords() {
       supplierContains: searchParams.get("supplierContains") ?? "",
       productNameContains: searchParams.get("productNameContains") ?? "",
     };
-    const urlPage = searchParams.get("page") ? Number(searchParams.get("page")) : 0;
-    const urlSize = searchParams.get("size") ? Number(searchParams.get("size")) : 10;
+    const urlPage = searchParams.get("page")
+      ? Number(searchParams.get("page"))
+      : 0;
+    const urlSize = searchParams.get("size")
+      ? Number(searchParams.get("size"))
+      : 10;
 
     setFilters(urlFilters);
     setDraftFilters(urlFilters);
@@ -65,7 +76,9 @@ export default function PurchaseRecords() {
     async (signal) => {
       setLoading(true);
       try {
-        const res = await purchaseRecordApi.filteredList(page, size, filters, { signal });
+        const res = await purchaseRecordApi.filteredList(page, size, filters, {
+          signal,
+        });
         const data = res.data;
         setRecords(data.content ?? []);
         setTotalElements(data.totalElements ?? 0);
@@ -77,7 +90,7 @@ export default function PurchaseRecords() {
         if (!signal?.aborted) setLoading(false);
       }
     },
-    [page, size, filters]
+    [page, size, filters],
   );
 
   useEffect(() => {
@@ -121,6 +134,10 @@ export default function PurchaseRecords() {
   const handleEditRow = (record) => {
     setEditingRecord(record);
     setPurchaseDialogOpen(true);
+  };
+
+  const handleViewUsages = (record) => {
+    setRelatedUsagesPurchase(record);
   };
 
   const handleDeleteRow = async (id) => {
@@ -172,6 +189,7 @@ export default function PurchaseRecords() {
           records={records}
           onEditRow={handleEditRow}
           onDeleteRow={handleDeleteRow}
+          onViewUsages={handleViewUsages}
           page={page}
           setPage={setPageUrl}
           size={size}
@@ -191,6 +209,11 @@ export default function PurchaseRecords() {
         open={usageDialogOpen}
         onClose={() => setUsageDialogOpen(false)}
         onSave={handleUsageDialogSave}
+      />
+      <PurchaseRelatedUsagesDialog
+        open={relatedUsagesPurchase != null}
+        purchaseRecord={relatedUsagesPurchase}
+        onClose={() => setRelatedUsagesPurchase(null)}
       />
     </Box>
   );

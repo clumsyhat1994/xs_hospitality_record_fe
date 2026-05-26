@@ -2,6 +2,7 @@ export const sharedRecordFieldLabels = {
   actions: "操作",
   invoiceDate: "发票日期",
   invoiceNumberString: "发票号",
+  invoiceAmount: " 发票金额（元）",
   remark: "备注",
 };
 
@@ -13,7 +14,6 @@ export const hospitalityRecordFieldLabels = {
   handlerName: "经手人",
   hospitalityType: "接待类型",
   location: "地点",
-  invoiceAmount: " 发票金额（元）",
   totalAmount: "总接待金额（含酒水）",
   theirCount: " 来访人数",
   ourCount: "我方人数",
@@ -37,7 +37,8 @@ export const usageRecordFieldLabels = {
   department: "部门",
   counterparty: "招待对象",
   recipient: "领用人",
-  purchaseSlices: "领用明细",
+  usageLines: "领用明细",
+  usedQuantity: "领用数量",
   hospitalityRecordId: "招待记录",
   createdAt: "创建时间",
 };
@@ -51,7 +52,7 @@ export const purchaseRecordFieldLabels = {
   unitPrice: "单价（元）",
   purchasedQuantity: "采购数量",
   remainingQuantity: "剩余数量",
-  totalAmount: "总金额（元）",
+  totalAmount: "金额（元）",
   applicationDate: "申请日期",
   purchaseDate: "采购日期",
 };

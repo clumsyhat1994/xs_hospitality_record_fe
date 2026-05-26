@@ -8,6 +8,7 @@ import {
   Grid,
   Alert,
   Box,
+  Typography,
 } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import RHFTextField from "../form/RHFTextField";
@@ -17,6 +18,7 @@ import purchaseRecordApi from "../../api/purchaseRecordApi";
 import { toNullableNumber } from "../../utils/numberUtils";
 import { purchaseRecordFieldLabels as fieldLabels } from "../../constants/recordFieldLabels";
 import { validationMessages } from "../../constants/validationMessages";
+import PurchaseLinesFieldArray from "./PurchaseLinesFieldArray";
 
 const categoryOptions = [
   { value: "", label: "请选择类别" },
@@ -32,6 +34,27 @@ function cleanPayload(data) {
   );
 }
 
+function normalizeLines(lines) {
+  if (!Array.isArray(lines) || lines.length === 0) {
+    return [
+      {
+        id: null,
+        productName: "",
+        specification: "",
+        unitPrice: null,
+        purchasedQuantity: null,
+      },
+    ];
+  }
+  return lines.map((line) => ({
+    id: line?.id ?? null,
+    productName: line?.productName ?? "",
+    specification: line?.specification ?? "",
+    unitPrice: line?.unitPrice ?? null,
+    purchasedQuantity: line?.purchasedQuantity ?? null,
+  }));
+}
+
 export default function PurchaseRecordDialog({
   open,
   initialValues,
@@ -40,7 +63,10 @@ export default function PurchaseRecordDialog({
   onSave,
 }) {
   const methods = useForm({
-    defaultValues: initialValues,
+    defaultValues: {
+      ...initialValues,
+      lines: normalizeLines(initialValues?.lines),
+    },
   });
 
   const {
@@ -56,19 +82,33 @@ export default function PurchaseRecordDialog({
   useEffect(() => {
     if (!open) return;
     setSubmitError("");
-    reset(initialValues);
+    reset({
+      ...initialValues,
+      lines: normalizeLines(initialValues?.lines),
+    });
   }, [open, initialValues, reset]);
 
   const submit = async (data) => {
     setSubmitError("");
     clearErrors();
 
-    const normalized = {
+    const lines = (data.lines ?? []).map((line) => {
+      const normalized = {
+        productName: line.productName?.trim(),
+        specification: line.specification?.trim(),
+        unitPrice: toNullableNumber(line.unitPrice),
+        purchasedQuantity: toNullableNumber(line.purchasedQuantity, { integer: true }),
+      };
+      if (line.id) {
+        return { id: line.id, ...normalized };
+      }
+      return normalized;
+    });
+
+    const payload = cleanPayload({
       ...data,
-      unitPrice: toNullableNumber(data.unitPrice),
-      purchasedQuantity: toNullableNumber(data.purchasedQuantity, { integer: true }),
-    };
-    const payload = cleanPayload(normalized);
+      lines,
+    });
 
     try {
       if (isEditMode) {
@@ -137,32 +177,18 @@ export default function PurchaseRecordDialog({
               <Grid size={{ xs: 12, sm: 6 }}>
                 <RHFTextField name="supplier" label={fieldLabels.supplier} />
               </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <RHFTextField name="productName" label={fieldLabels.productName} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <RHFTextField name="specification" label={fieldLabels.specification} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <RHFTextField name="unitPrice" label={fieldLabels.unitPrice} type="number" />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <RHFTextField
-                  name="purchasedQuantity"
-                  label={fieldLabels.purchasedQuantity}
-                  type="number"
-                />
+              <Grid size={12}>
+                <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                  采购明细
+                </Typography>
+                <PurchaseLinesFieldArray />
               </Grid>
             </Grid>
           </DialogContent>
           <DialogActions sx={{ flexDirection: "column", alignItems: "stretch", px: 3, pb: 2 }}>
             <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, width: "100%" }}>
               <Button onClick={onClose}>取消</Button>
-              <Button
-                variant="contained"
-                disabled={isSubmitting}
-                onClick={handleSubmit(submit)}
-              >
+              <Button variant="contained" disabled={isSubmitting} onClick={handleSubmit(submit)}>
                 {isSubmitting ? "保存中..." : "保存"}
               </Button>
             </Box>
