@@ -8,9 +8,12 @@ import {
   Skeleton,
   IconButton,
   Stack,
+  Tooltip,
+  Box,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { NumberedTablePagination } from "../common/NumberedTablePagination";
 import { formatDisplayDate } from "../../utils/formatters";
 import {
@@ -23,6 +26,109 @@ function formatPurchaseDateForSlice(value) {
   if (!value) return "-";
   if (typeof value === "string") return value.slice(0, 10);
   return formatDisplayDate(value);
+}
+
+const usageLineCellSx = {
+  fontSize: "0.8125rem",
+  verticalAlign: "top",
+};
+
+const HOSPITALITY_LINKED_TOOLTIP =
+  "该领用记录已关联招待记录，请在招待记录中修改。";
+
+/** Inserts line breaks after commas for multi-line tooltips. */
+function tooltipTitleAtCommas(text) {
+  return text.replace(/([，,])\s*/g, "$1\n").trimEnd();
+}
+
+function RecordLeadingCells({ record, rowSpan, onEditRow, onDeleteRow }) {
+  return (
+    <>
+      <TableCell rowSpan={rowSpan}>
+        {record.hospitalityRecordId == null ? (
+          <Stack direction="row" spacing={1}>
+            <IconButton size="small" onClick={() => onEditRow(record)}>
+              <EditIcon fontSize="small" />
+            </IconButton>
+            <IconButton
+              size="small"
+              color="error"
+              onClick={() => onDeleteRow(record.id)}
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Stack>
+        ) : (
+          // Linked to a hospitality record — edit usage via that record, not here.
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            <Tooltip
+              title={tooltipTitleAtCommas(HOSPITALITY_LINKED_TOOLTIP)}
+              arrow
+              placement="top"
+              slotProps={{
+                tooltip: {
+                  sx: { fontSize: "0.875rem", whiteSpace: "pre-line" },
+                },
+              }}
+            >
+              <InfoOutlinedIcon
+                fontSize="small"
+                color="disabled"
+                sx={{ cursor: "help" }}
+              />
+            </Tooltip>
+          </Box>
+        )}
+      </TableCell>
+      <TableCell rowSpan={rowSpan}>
+        {formatDisplayDate(record.usageDate)}
+      </TableCell>
+      <TableCell rowSpan={rowSpan}>{record.departmentName}</TableCell>
+      <TableCell rowSpan={rowSpan}>{record.counterpartyName}</TableCell>
+      <TableCell rowSpan={rowSpan}>{record.recipientName}</TableCell>
+    </>
+  );
+}
+
+function RecordTrailingCells({ record, rowSpan }) {
+  return (
+    <>
+      <TableCell rowSpan={rowSpan} align="center">
+        {record.remark ?? ""}
+      </TableCell>
+      <TableCell rowSpan={rowSpan}>
+        {formatDisplayDate(record.createdAt)}
+      </TableCell>
+    </>
+  );
+}
+
+function UsageLineCells({ line }) {
+  return (
+    <>
+      <TableCell sx={{ ...usageLineCellSx, wordBreak: "break-word" }}>
+        {line.productName ?? "—"}
+      </TableCell>
+      <TableCell sx={{ ...usageLineCellSx, wordBreak: "break-word" }}>
+        {line.specification ?? "—"}
+      </TableCell>
+      <TableCell sx={{ ...usageLineCellSx, whiteSpace: "nowrap" }}>
+        {formatPurchaseDateForSlice(line.purchaseDate)}
+      </TableCell>
+      <TableCell
+        align="right"
+        sx={{ ...usageLineCellSx, whiteSpace: "nowrap" }}
+      >
+        {Math.max(0, Number(line.remainingQuantity ?? 0))}
+      </TableCell>
+      <TableCell
+        align="right"
+        sx={{ ...usageLineCellSx, whiteSpace: "nowrap" }}
+      >
+        {line.quantity ?? "—"}
+      </TableCell>
+    </>
+  );
 }
 
 export default function UsageRecordsTable({
@@ -54,6 +160,7 @@ export default function UsageRecordsTable({
             sx={{
               "& .MuiTableCell-root": {
                 py: 3,
+                borderBottom: 0,
               },
             }}
           >
@@ -70,16 +177,49 @@ export default function UsageRecordsTable({
             <TableCell sx={{ minWidth: 100 }}>
               {fieldLabels.recipient}
             </TableCell>
-            <TableCell align="center" sx={{ minWidth: 360 }}>
+            <TableCell colSpan={5} align="center" sx={{ minWidth: 360 }}>
               {fieldLabels.usageLines}
             </TableCell>
-            <TableCell sx={{ minWidth: 120 }}>
-              {fieldLabels.hospitalityRecordId}
+            <TableCell align="center" sx={{ minWidth: 200 }}>
+              {fieldLabels.remark}
             </TableCell>
-            <TableCell sx={{ minWidth: 200 }}>{fieldLabels.remark}</TableCell>
             <TableCell sx={{ minWidth: 120 }}>
               {fieldLabels.createdAt}
             </TableCell>
+          </TableRow>
+          <TableRow
+            sx={{
+              "& .MuiTableCell-root": {
+                pt: 0,
+                pb: 1,
+                color: "text.secondary",
+                fontWeight: 600,
+                fontSize: "0.8125rem",
+                lineHeight: 1.35,
+                whiteSpace: "nowrap",
+                borderTop: 0,
+                borderBottom: 1,
+                borderColor: "divider",
+              },
+            }}
+          >
+            <TableCell colSpan={5} sx={{ p: 0, border: 0 }} />
+            <TableCell sx={{ minWidth: 100 }}>
+              {purchaseLabels.productName}
+            </TableCell>
+            <TableCell sx={{ minWidth: 80 }}>
+              {purchaseLabels.specification}
+            </TableCell>
+            <TableCell sx={{ minWidth: 100 }}>
+              {purchaseLabels.purchaseDate}
+            </TableCell>
+            <TableCell align="right" sx={{ minWidth: 72 }}>
+              {purchaseLabels.remainingQuantity}
+            </TableCell>
+            <TableCell align="right" sx={{ minWidth: 72 }}>
+              {fieldLabels.usedQuantity}
+            </TableCell>
+            <TableCell colSpan={2} sx={{ p: 0, border: 0 }} />
           </TableRow>
         </TableHead>
 
@@ -87,7 +227,7 @@ export default function UsageRecordsTable({
           {loading ? (
             Array.from({ length: 10 }).map((_, index) => (
               <TableRow key={index}>
-                {Array.from({ length: 9 }).map((__, i) => (
+                {Array.from({ length: 12 }).map((__, i) => (
                   <TableCell key={i}>
                     <Skeleton height={26} />
                   </TableCell>
@@ -96,123 +236,53 @@ export default function UsageRecordsTable({
             ))
           ) : (
             <>
-              {records.map((record) => (
-                <TableRow key={record.id} hover>
-                  <TableCell>
-                    {record.hospitalityRecordId == null ? (
-                      <Stack direction="row" spacing={1}>
-                        <IconButton
-                          size="small"
-                          onClick={() => onEditRow(record)}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => onDeleteRow(record.id)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Stack>
-                    ) : (
-                      "—"
-                    )}
-                  </TableCell>
-                  <TableCell>{formatDisplayDate(record.usageDate)}</TableCell>
-                  <TableCell>{record.departmentName}</TableCell>
-                  <TableCell>{record.counterpartyName}</TableCell>
-                  <TableCell>{record.recipientName}</TableCell>
-                  <TableCell
-                    align="center"
-                    sx={{ verticalAlign: "top", py: 0.5 }}
+              {records.flatMap((record) => {
+                const lines = record.usageLines ?? [];
+
+                if (!lines.length) {
+                  return [
+                    <TableRow key={record.id} hover>
+                      <RecordLeadingCells
+                        record={record}
+                        rowSpan={1}
+                        onEditRow={onEditRow}
+                        onDeleteRow={onDeleteRow}
+                      />
+                      <TableCell colSpan={5} align="center">
+                        —
+                      </TableCell>
+                      <RecordTrailingCells record={record} rowSpan={1} />
+                    </TableRow>,
+                  ];
+                }
+
+                return lines.map((line, lineIndex) => (
+                  <TableRow
+                    key={`${record.id}-${line.purchaseLineId ?? lineIndex}`}
+                    hover
                   >
-                    {record.usageLines?.length ? (
-                      <Table
-                        size="small"
-                        sx={{
-                          width: "max-content",
-                          maxWidth: "100%",
-                          mx: "auto",
-                          "& .MuiTableCell-root": {
-                            py: 0.35,
-                            px: 1,
-                            fontSize: "0.8125rem",
-                            lineHeight: 1.35,
-                            borderBottom: "none",
-                          },
-                          "& thead .MuiTableCell-root": {
-                            color: "text.secondary",
-                            fontWeight: 600,
-                            borderBottom: 1,
-                            borderColor: "divider",
-                            whiteSpace: "nowrap",
-                          },
-                          "& tbody .MuiTableCell-root": {
-                            verticalAlign: "top",
-                          },
-                        }}
-                      >
-                        <TableHead>
-                          <TableRow>
-                            <TableCell>{purchaseLabels.productName}</TableCell>
-                            <TableCell>
-                              {purchaseLabels.specification}
-                            </TableCell>
-                            <TableCell>{purchaseLabels.purchaseDate}</TableCell>
-                            <TableCell align="right">
-                              {purchaseLabels.remainingQuantity}
-                            </TableCell>
-                            <TableCell align="right">
-                              {fieldLabels.usedQuantity}
-                            </TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {record.usageLines.map((a, i) => (
-                            <TableRow key={`${a.purchaseLineId ?? "row"}-${i}`}>
-                              <TableCell sx={{ wordBreak: "break-word" }}>
-                                {a.productName ?? "—"}
-                              </TableCell>
-                              <TableCell sx={{ wordBreak: "break-word" }}>
-                                {a.specification ?? "—"}
-                              </TableCell>
-                              <TableCell sx={{ whiteSpace: "nowrap" }}>
-                                {formatPurchaseDateForSlice(a.purchaseDate)}
-                              </TableCell>
-                              <TableCell
-                                align="right"
-                                sx={{ whiteSpace: "nowrap" }}
-                              >
-                                {Math.max(0, Number(a.remainingQuantity ?? 0))}
-                              </TableCell>
-                              <TableCell
-                                align="right"
-                                sx={{ whiteSpace: "nowrap" }}
-                              >
-                                {a.quantity ?? "—"}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    ) : (
-                      "—"
+                    {lineIndex === 0 && (
+                      <RecordLeadingCells
+                        record={record}
+                        rowSpan={lines.length}
+                        onEditRow={onEditRow}
+                        onDeleteRow={onDeleteRow}
+                      />
                     )}
-                  </TableCell>
-                  <TableCell>
-                    {record.hospitalityRecordId != null
-                      ? record.hospitalityRecordId
-                      : "—"}
-                  </TableCell>
-                  <TableCell>{record.remark ?? ""}</TableCell>
-                  <TableCell>{formatDisplayDate(record.createdAt)}</TableCell>
-                </TableRow>
-              ))}
+                    <UsageLineCells line={line} />
+                    {lineIndex === 0 && (
+                      <RecordTrailingCells
+                        record={record}
+                        rowSpan={lines.length}
+                      />
+                    )}
+                  </TableRow>
+                ));
+              })}
 
               {records.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={9} align="left">
+                  <TableCell colSpan={12} align="left">
                     暂无领用记录
                   </TableCell>
                 </TableRow>

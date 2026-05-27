@@ -8,7 +8,6 @@ import {
   IconButton,
   Stack,
   Skeleton,
-  Tooltip,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -60,7 +59,7 @@ export default function PurchaseRecordsTable({
               },
             }}
           >
-            <TableCell sx={{ minWidth: 130 }} padding="checkbox" align="center">
+            <TableCell sx={{ minWidth: 90 }} padding="checkbox" align="center">
               操作
             </TableCell>
             <TableCell sx={{ minWidth: 110 }}>
@@ -85,6 +84,9 @@ export default function PurchaseRecordsTable({
             <TableCell align="right" sx={{ minWidth: 100 }}>
               {fieldLabels.remainingQuantity}
             </TableCell>
+            <TableCell sx={{ minWidth: 90 }} padding="checkbox" align="center">
+              领用记录
+            </TableCell>
             <TableCell sx={{ minWidth: 120 }}>
               {fieldLabels.applicationDate}
             </TableCell>
@@ -108,11 +110,18 @@ export default function PurchaseRecordsTable({
                   <Stack direction="row" spacing={1}>
                     <Skeleton variant="circular" width={28} height={28} />
                     <Skeleton variant="circular" width={28} height={28} />
-                    <Skeleton variant="circular" width={28} height={28} />
                   </Stack>
                 </TableCell>
-                {Array.from({ length: 12 }).map((__, i) => (
+                {Array.from({ length: 8 }).map((__, i) => (
                   <TableCell key={i}>
+                    <Skeleton height={26} />
+                  </TableCell>
+                ))}
+                <TableCell padding="checkbox" align="center">
+                  <Skeleton variant="circular" width={28} height={28} />
+                </TableCell>
+                {Array.from({ length: 4 }).map((__, i) => (
+                  <TableCell key={`tail-${i}`}>
                     <Skeleton height={26} />
                   </TableCell>
                 ))}
@@ -127,17 +136,9 @@ export default function PurchaseRecordsTable({
                     : [null];
                 return lines.map((line, lineIndex) => (
                   <TableRow key={`${record.id}-${line?.id ?? lineIndex}`} hover>
-                    <TableCell padding="checkbox">
+                    <TableCell padding="checkbox" align="center">
                       {lineIndex === 0 ? (
                         <Stack direction="row" spacing={1}>
-                          <Tooltip title="领用记录">
-                            <IconButton
-                              size="small"
-                              onClick={() => onViewUsages?.(record)}
-                            >
-                              <ListAltIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
                           <IconButton
                             size="small"
                             onClick={() => onEditRow(record)}
@@ -178,6 +179,16 @@ export default function PurchaseRecordsTable({
                     <TableCell align="right">
                       {line?.remainingQuantity ?? "—"}
                     </TableCell>
+                    <TableCell padding="checkbox" align="center">
+                      {line?.id != null ? (
+                        <IconButton
+                          size="small"
+                          onClick={() => onViewUsages?.(record, line)}
+                        >
+                          <ListAltIcon fontSize="small" />
+                        </IconButton>
+                      ) : null}
+                    </TableCell>
                     <TableCell>
                       {lineIndex === 0
                         ? formatDisplayDate(record.applicationDate)
@@ -202,7 +213,7 @@ export default function PurchaseRecordsTable({
 
               {records.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={13} align="left">
+                  <TableCell colSpan={14} align="left">
                     我采购记录呢？
                   </TableCell>
                 </TableRow>

@@ -22,41 +22,32 @@ import {
   purchaseRecordFieldLabels as purchaseLabels,
 } from "../../constants/recordFieldLabels";
 
-function renderCategory(value) {
-  const map = {
-    BEVERAGE: "酒水",
-    BUSINESS_GIFT: "商务礼品",
-    TEA: "茶叶",
-    FRUIT: "水果",
-  };
-  return map[value] ?? value ?? "";
-}
-
-function usageLinesForPurchase(usage, purchaseRecordId) {
-  if (!purchaseRecordId) return [];
+function usageLinesForPurchaseLine(usage, purchaseLineId) {
+  if (!purchaseLineId) return [];
   return (usage.usageLines ?? []).filter(
-    (line) => line.purchaseRecordId === purchaseRecordId,
+    (line) => line.purchaseLineId === purchaseLineId,
   );
 }
 
 export default function PurchaseRelatedUsagesDialog({
   open,
   purchaseRecord,
+  purchaseLine,
   onClose,
 }) {
   const [usages, setUsages] = useState([]);
   const [loading, setLoading] = useState(false);
-  const purchaseRecordId = purchaseRecord?.id;
+  const purchaseLineId = purchaseLine?.id;
 
   useEffect(() => {
-    if (!open || purchaseRecordId == null) {
+    if (!open || purchaseLineId == null) {
       return undefined;
     }
     const controller = new AbortController();
     setUsages([]);
     setLoading(true);
     usageRecordApi
-      .filteredList(0, 500, { purchaseRecordId }, { signal: controller.signal })
+      .filteredList(0, 500, { purchaseLineId }, { signal: controller.signal })
       .then((res) => {
         setUsages(res.data?.content ?? []);
       })
@@ -69,19 +60,54 @@ export default function PurchaseRelatedUsagesDialog({
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [open, purchaseRecordId]);
+  }, [open, purchaseLineId]);
 
-  const titleSupplier = purchaseRecord?.supplier?.trim() || "—";
-  const titleCategory = renderCategory(purchaseRecord?.category);
-  const titleInvoice = purchaseRecord?.invoiceNumber?.trim() || "—";
+  const lineSummary = [
+    [purchaseLabels.supplier, purchaseRecord?.supplier?.trim() || "—"],
+    [purchaseLabels.productName, purchaseLine?.productName?.trim() || "—"],
+    [purchaseLabels.specification, purchaseLine?.specification?.trim() || "—"],
+    [
+      purchaseLabels.purchasedQuantity,
+      purchaseLine?.purchasedQuantity ?? "—",
+    ],
+    [
+      purchaseLabels.remainingQuantity,
+      purchaseLine?.remainingQuantity ?? "—",
+    ],
+    [
+      purchaseLabels.purchaseDate,
+      purchaseRecord?.purchaseDate
+        ? formatDisplayDate(purchaseRecord.purchaseDate)
+        : "—",
+    ],
+  ];
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
       <DialogTitle>领用记录</DialogTitle>
-      <DialogContent dividers>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          采购：{titleCategory} · {titleSupplier} · 发票 {titleInvoice}
-        </Typography>
+      <Box
+        sx={{
+          px: 3,
+          pb: 2,
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 1.5,
+          typography: "body2",
+          color: "text.secondary",
+        }}
+      >
+        {lineSummary.map(([label, value]) => (
+          <Typography
+            key={label}
+            component="span"
+            variant="body2"
+            color="text.secondary"
+          >
+            {label}：{value}
+          </Typography>
+        ))}
+      </Box>
+      <DialogContent dividers sx={{ borderBottom: "none" }}>
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
             <CircularProgress size={32} />
@@ -104,7 +130,7 @@ export default function PurchaseRelatedUsagesDialog({
               </TableHead>
               <TableBody>
                 {usages.flatMap((usage) => {
-                  const lines = usageLinesForPurchase(usage, purchaseRecordId);
+                  const lines = usageLinesForPurchaseLine(usage, purchaseLineId);
                   if (!lines.length) return [];
                   return lines.map((line, lineIndex) => (
                     <TableRow
@@ -146,7 +172,7 @@ export default function PurchaseRelatedUsagesDialog({
                 {!loading &&
                   usages.every(
                     (u) =>
-                      usageLinesForPurchase(u, purchaseRecordId).length === 0,
+                      usageLinesForPurchaseLine(u, purchaseLineId).length === 0,
                   ) && (
                     <TableRow>
                       <TableCell colSpan={9}>暂无领用记录</TableCell>

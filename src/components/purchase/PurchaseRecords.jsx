@@ -36,7 +36,7 @@ export default function PurchaseRecords() {
   const [records, setRecords] = useState([]);
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
   const [usageDialogOpen, setUsageDialogOpen] = useState(false);
-  const [relatedUsagesPurchase, setRelatedUsagesPurchase] = useState(null);
+  const [relatedUsagesTarget, setRelatedUsagesTarget] = useState(null);
   const [editingRecord, setEditingRecord] = useState(null);
   const [draftFilters, setDraftFilters] = useState({
     category: "",
@@ -136,12 +136,12 @@ export default function PurchaseRecords() {
     setPurchaseDialogOpen(true);
   };
 
-  const handleViewUsages = (record) => {
-    setRelatedUsagesPurchase(record);
+  const handleViewUsages = (record, line) => {
+    setRelatedUsagesTarget({ purchaseRecord: record, purchaseLine: line });
   };
 
   const handleDeleteRow = async (id) => {
-    if (!window.confirm("确定删除这条采购记录吗?")) return;
+    if (!window.confirm("确定删除这条采购记录以及所有相关采购明细吗?")) return;
     await purchaseRecordApi.deleteOne(id);
     setRecords((prev) => prev.filter((r) => r.id !== id));
   };
@@ -211,9 +211,10 @@ export default function PurchaseRecords() {
         onSave={handleUsageDialogSave}
       />
       <PurchaseRelatedUsagesDialog
-        open={relatedUsagesPurchase != null}
-        purchaseRecord={relatedUsagesPurchase}
-        onClose={() => setRelatedUsagesPurchase(null)}
+        open={relatedUsagesTarget != null}
+        purchaseRecord={relatedUsagesTarget?.purchaseRecord}
+        purchaseLine={relatedUsagesTarget?.purchaseLine}
+        onClose={() => setRelatedUsagesTarget(null)}
       />
     </Box>
   );
