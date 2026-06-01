@@ -125,7 +125,8 @@ export default function HospitalityRecords() {
       const blob = new Blob([res.data], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      downloadBlob(blob, "hospitality-records.xlsx");
+      const dateStr = new Date().toISOString().slice(0, 10);
+      downloadBlob(blob, `hospitality-records-${dateStr}.xlsx`);
     } catch (err) {
       console.error("Export failed", err);
       window.alert("导出失败，请联系系统管理员。");

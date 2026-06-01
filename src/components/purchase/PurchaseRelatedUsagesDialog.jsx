@@ -124,7 +124,6 @@ export default function PurchaseRelatedUsagesDialog({
                   <TableCell>{purchaseLabels.productName}</TableCell>
                   <TableCell>{purchaseLabels.specification}</TableCell>
                   <TableCell align="right">{usageLabels.usedQuantity}</TableCell>
-                  <TableCell>{usageLabels.hospitalityRecordId}</TableCell>
                   <TableCell>{usageLabels.remark}</TableCell>
                 </TableRow>
               </TableHead>
@@ -157,13 +156,6 @@ export default function PurchaseRelatedUsagesDialog({
                         {line.quantity ?? "—"}
                       </TableCell>
                       <TableCell>
-                        {lineIndex === 0
-                          ? usage.hospitalityRecordId != null
-                            ? usage.hospitalityRecordId
-                            : "—"
-                          : ""}
-                      </TableCell>
-                      <TableCell>
                         {lineIndex === 0 ? (usage.remark ?? "") : ""}
                       </TableCell>
                     </TableRow>
@@ -175,7 +167,9 @@ export default function PurchaseRelatedUsagesDialog({
                       usageLinesForPurchaseLine(u, purchaseLineId).length === 0,
                   ) && (
                     <TableRow>
-                      <TableCell colSpan={9}>暂无领用记录</TableCell>
+                      <TableCell colSpan={8} align="center">
+                        暂无领用记录
+                      </TableCell>
                     </TableRow>
                   )}
               </TableBody>

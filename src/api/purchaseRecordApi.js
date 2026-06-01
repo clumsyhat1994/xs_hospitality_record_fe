@@ -41,6 +41,22 @@ const purchaseRecordApi = {
   create: (payload) => api.post(endpoint, payload),
   update: (id, payload) => api.put(`${endpoint}/${id}`, payload),
   deleteOne: (id) => api.delete(`${endpoint}/${id}`),
+  export: (filters = {}) => {
+    const params = new URLSearchParams();
+    for (const [k, v] of Object.entries(filters)) {
+      if (v == null) continue;
+      const str =
+        typeof v === "number" || typeof v === "boolean"
+          ? String(v)
+          : String(v).trim();
+      if (str === "") continue;
+      params.set(k, str);
+    }
+    return api.get(`${endpoint}/export`, {
+      params,
+      responseType: "blob",
+    });
+  },
 };
 
 export default purchaseRecordApi;

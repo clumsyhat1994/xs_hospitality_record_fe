@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import moduleRoutes from "../../constants/moduleRoutes";
 import { setParams } from "../../utils/queryParamsHelper";
 import purchaseRecordApi from "../../api/purchaseRecordApi";
+import { downloadBlob } from "../../utils/downloadBlob";
 import PurchaseRecordsToolbar from "./PurchaseRecordsToolbar";
 import PurchaseRecordsTable from "./PurchaseRecordsTable";
 import PurchaseRecordDialog from "./PurchaseRecordDialog";
@@ -122,6 +123,20 @@ export default function PurchaseRecords() {
     navigate(moduleRoutes.PURCHASE_RECORDS, { replace: true });
   };
 
+  const handleExport = async () => {
+    try {
+      const res = await purchaseRecordApi.export(filters);
+      const blob = new Blob([res.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const dateStr = new Date().toISOString().slice(0, 10);
+      downloadBlob(blob, `purchase-records-${dateStr}.xlsx`);
+    } catch (err) {
+      console.error("Export failed", err);
+      window.alert("导出失败，请联系系统管理员。");
+    }
+  };
+
   const handleCreatePurchaseClick = () => {
     setEditingRecord(null);
     setPurchaseDialogOpen(true);
@@ -184,6 +199,7 @@ export default function PurchaseRecords() {
           onClear={handleClear}
           onCreatePurchase={handleCreatePurchaseClick}
           onCreateUsage={handleCreateUsageClick}
+          onExport={handleExport}
         />
         <PurchaseRecordsTable
           records={records}

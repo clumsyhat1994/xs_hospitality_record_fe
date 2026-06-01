@@ -5,10 +5,12 @@ import {
   TextField,
   Button,
   Collapse,
+  Tooltip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
+import DownloadIcon from "@mui/icons-material/Download";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import BaseSelect from "../form/BaseSelect";
 import { useState } from "react";
@@ -29,6 +31,7 @@ export default function PurchaseRecordsToolbar({
   onClear,
   onCreatePurchase,
   onCreateUsage,
+  onExport,
 }) {
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
 
@@ -155,6 +158,15 @@ export default function PurchaseRecordsToolbar({
           pt: 3,
         }}
       >
+        <Tooltip title="导出当前筛选结果为 Excel 文件">
+          <Button
+            variant="outlined"
+            startIcon={<DownloadIcon />}
+            onClick={onExport}
+          >
+            {buttonLabels.exportExcel}
+          </Button>
+        </Tooltip>
         <Button
           variant="outlined"
           startIcon={<AddIcon />}
