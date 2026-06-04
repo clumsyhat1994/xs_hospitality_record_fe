@@ -31,7 +31,7 @@ export function flattenPurchaseRecordsToLines(records) {
         purchaseRecordId: record.id,
         category: record.category,
         purchaseDate: record.purchaseDate,
-        supplier: record.supplier,
+        supplierName: record.supplierName,
         invoiceNumber: record.invoiceNumber,
       });
     }

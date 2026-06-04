@@ -4,6 +4,10 @@ import masterDataApi from "../api/masterDataApi";
 const MasterDataContext = createContext({
   counterparties: [],
   setCounterparties: () => {},
+  customers: [],
+  setCustomers: () => {},
+  suppliers: [],
+  setSuppliers: () => {},
   departments: [],
   setDepartments: () => {},
   hospitalityTypes: [],
@@ -14,46 +18,45 @@ const MasterDataContext = createContext({
   setOurHostPositions: () => {},
   counterpartyTypes: [],
   setCounterpartyTypes: () => {},
+  counterpartyRoles: [],
+  setCounterpartyRoles: () => {},
   handlers: [],
   setHandlers: () => {},
-  //theirHostPositions: [],
-  //setTheirHostPositions: () => {},
 });
 
 export function MasterDataProvider({ children }) {
   const [counterparties, setCounterparties] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [hospitalityTypes, setHospitalityTypes] = useState([]);
   const [positions, setPositions] = useState([]);
   const [ourHostPositions, setOurHostPositions] = useState([]);
-  //const [theirHostPositions, setTheirHostPositions] = useState([]);
   const [counterpartyTypes, setCounterpartyTypes] = useState([]);
+  const [counterpartyRoles, setCounterpartyRoles] = useState([]);
   const [handlers, setHandlers] = useState([]);
   useEffect(() => {
     Promise.all([
       masterDataApi.searchDepartments(),
-      //masterDataApi.listDepartments(),
       masterDataApi.searchHospitalityTypes(),
-      //masterDataApi.listHospitalityTypes(),
       masterDataApi.searchCounterParties(),
-      //masterDataApi.listCounterParties(),
+      masterDataApi.searchCustomers(),
+      masterDataApi.searchSuppliers(),
       masterDataApi.searchPositions(),
-      //masterDataApi.listPositions(),
       masterDataApi.searchCounterpartyTypes(),
+      masterDataApi.searchCounterpartyRoles(),
       masterDataApi.searchHandlers(),
     ])
-      .then(([dep, types, cp, pos, cpt, hdr]) => {
-        // setDepartments(dep.data?.content || []);
-        //setHospitalityTypes(types.data?.content || []);
-        // setCounterparties(cp.data?.content || []);
-        // setPositions(pos.data?.content || []);
+      .then(([dep, types, cp, cust, supp, pos, cpt, cpr, hdr]) => {
         setDepartments(dep.data || []);
         setHospitalityTypes(types.data || []);
         setCounterparties(cp.data || []);
+        setCustomers(cust.data || []);
+        setSuppliers(supp.data || []);
         setPositions(pos.data || []);
         setOurHostPositions(pos.data || []);
-        //setTheirHostPositions(pos.data || []);
         setCounterpartyTypes(cpt.data || []);
+        setCounterpartyRoles(cpr.data || []);
         setHandlers(hdr.data || []);
       })
       .catch((err) => {
@@ -66,6 +69,10 @@ export function MasterDataProvider({ children }) {
       value={{
         counterparties,
         setCounterparties,
+        customers,
+        setCustomers,
+        suppliers,
+        setSuppliers,
         departments,
         setDepartments,
         hospitalityTypes,
@@ -74,10 +81,10 @@ export function MasterDataProvider({ children }) {
         setPositions,
         ourHostPositions,
         setOurHostPositions,
-        //theirHostPositions,
-        //setTheirHostPositions,
         counterpartyTypes,
         setCounterpartyTypes,
+        counterpartyRoles,
+        setCounterpartyRoles,
         handlers,
         setHandlers,
       }}

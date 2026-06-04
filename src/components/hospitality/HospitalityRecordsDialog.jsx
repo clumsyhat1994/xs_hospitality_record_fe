@@ -113,8 +113,8 @@ export default function HospitalityRecordDialog({
     setHospitalityTypes,
     ourHostPositions,
     setOurHostPositions,
-    counterparties,
-    setCounterparties,
+    customers,
+    setCustomers,
     handlers,
     setHandlers,
   } = useMasterData();
@@ -247,10 +247,10 @@ export default function HospitalityRecordDialog({
               <RHFComboBox
                 name="counterpartyId"
                 //control={control}
-                options={counterparties ?? []}
-                setOptions={setCounterparties}
+                options={customers ?? []}
+                setOptions={setCustomers}
                 label={fieldLabels.counterparty}
-                fetchOptions={masterDataApi.searchCounterParties}
+                fetchOptions={masterDataApi.searchCustomers}
                 sm={8}
               />
 

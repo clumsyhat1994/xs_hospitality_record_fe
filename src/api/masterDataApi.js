@@ -31,6 +31,28 @@ const masterDataApi = {
         includeId: includeId === "" ? undefined : includeId,
       },
     }),
+  searchCounterPartiesByRole: (keyword, includeId, role) =>
+    api.get("/api/counterparty/search-by-role", {
+      params: {
+        q: keyword,
+        includeId: includeId === "" ? undefined : includeId,
+        role: role === "" ? undefined : role,
+      },
+    }),
+  searchSuppliers: (keyword, includeId) =>
+    api.get("/api/counterparty/search-suppliers", {
+      params: {
+        q: keyword,
+        includeId: includeId === "" ? undefined : includeId,
+      },
+    }),
+  searchCustomers: (keyword, includeId) =>
+    api.get("/api/counterparty/search-customers", {
+      params: {
+        q: keyword,
+        includeId: includeId === "" ? undefined : includeId,
+      },
+    }),
   activateCounterparty: (id) => {
     api.patch(`/api/counterparty/${id}/activate`);
   },
@@ -60,6 +82,7 @@ const masterDataApi = {
         includeId: includeId === "" ? undefined : includeId,
       },
     }),
+  searchCounterpartyRoles: () => api.get("/api/counterparty-role/search"),
   createHandler: (payload) => api.post(`/api/employee`, payload),
   searchHandlers: (keyword, includeId) =>
     api.get("/api/employee/search", {

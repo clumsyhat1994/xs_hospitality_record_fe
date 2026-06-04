@@ -63,7 +63,7 @@ export default function PurchaseRelatedUsagesDialog({
   }, [open, purchaseLineId]);
 
   const lineSummary = [
-    [purchaseLabels.supplier, purchaseRecord?.supplier?.trim() || "—"],
+    [purchaseLabels.supplier, purchaseRecord?.supplierName?.trim() || "—"],
     [purchaseLabels.productName, purchaseLine?.productName?.trim() || "—"],
     [purchaseLabels.specification, purchaseLine?.specification?.trim() || "—"],
     [

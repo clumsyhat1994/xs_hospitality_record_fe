@@ -159,7 +159,7 @@ export default function PurchaseRecordsTable({
                       {lineIndex === 0 ? renderCategory(record.category) : ""}
                     </TableCell>
                     <TableCell>
-                      {lineIndex === 0 ? record.supplier : ""}
+                      {lineIndex === 0 ? (record.supplierName ?? "") : ""}
                     </TableCell>
                     <TableCell>{line?.productName ?? "—"}</TableCell>
                     <TableCell>{line?.specification ?? "—"}</TableCell>

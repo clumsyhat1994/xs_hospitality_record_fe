@@ -82,8 +82,8 @@ export default function UsageRecordDialog({
 
   const {
     departments,
-    counterparties,
-    setCounterparties,
+    customers,
+    setCustomers,
     handlers,
     setHandlers,
   } = useMasterData();
@@ -179,9 +179,9 @@ export default function UsageRecordDialog({
               <RHFComboBox
                 name="counterpartyId"
                 label="招待对象"
-                options={counterparties ?? []}
-                setOptions={setCounterparties}
-                fetchOptions={masterDataApi.searchCounterParties}
+                options={customers ?? []}
+                setOptions={setCustomers}
+                fetchOptions={masterDataApi.searchCustomers}
               />
               <RHFComboBox
                 name="recipientId"

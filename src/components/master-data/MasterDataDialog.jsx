@@ -94,6 +94,8 @@ export default function MasterDataDialog({
                     control={control}
                     label={field.label}
                     options={field.options}
+                    getOptionLabel={field.getOptionLabel}
+                    rules={field.rules}
                     sm={field.sm ?? 6}
                   />
                 </Grid>

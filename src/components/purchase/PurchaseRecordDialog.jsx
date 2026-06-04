@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import masterDataApi from "../../api/masterDataApi";
+import { useMasterData } from "../../context/MasterDataContext";
 import {
   Dialog,
   DialogTitle,
@@ -13,6 +15,7 @@ import {
 import { FormProvider, useForm } from "react-hook-form";
 import RHFTextField from "../form/RHFTextField";
 import RHFSelect from "../form/RHFSelect";
+import RHFComboBox from "../form/RHFComboBox";
 import { FormModeProvider } from "../../context/FormModeContext";
 import purchaseRecordApi from "../../api/purchaseRecordApi";
 import { toNullableNumber } from "../../utils/numberUtils";
@@ -78,6 +81,7 @@ export default function PurchaseRecordDialog({
   } = methods;
 
   const [submitError, setSubmitError] = useState("");
+  const { suppliers, setSuppliers } = useMasterData();
 
   useEffect(() => {
     if (!open) return;
@@ -174,9 +178,14 @@ export default function PurchaseRecordDialog({
               <Grid size={{ xs: 12, sm: 6 }}>
                 <RHFTextField name="invoiceNumber" label={fieldLabels.invoiceNumberString} />
               </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <RHFTextField name="supplier" label={fieldLabels.supplier} />
-              </Grid>
+              <RHFComboBox
+                name="supplierId"
+                label={fieldLabels.supplier}
+                options={suppliers}
+                setOptions={setSuppliers}
+                fetchOptions={masterDataApi.searchSuppliers}
+                sm={6}
+              />
               <Grid size={12}>
                 <Typography variant="subtitle2" sx={{ mt: 1 }}>
                   采购明细

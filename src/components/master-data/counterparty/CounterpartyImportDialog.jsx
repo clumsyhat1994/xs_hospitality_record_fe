@@ -89,12 +89,18 @@ export default function CounterpartyImportDialog({ open, onClose, onSuccess }) {
             "counterpartytypes",
             "归属地",
           ]);
+          const rolesCell = pickField(r, [
+            "roles",
+            "counterpartyroles",
+            "角色",
+          ]);
           const activeCell = pickField(r, ["active", "启用", "是否启用"]);
 
           return {
             name: String(name ?? "")
               .trim()
               .replace(/\s+/g, ""),
+            counterpartyRoleNames: splitTypes(rolesCell),
             counterpartyTypeNames: splitTypes(typesCell),
             active: parseBool(activeCell),
           };
@@ -198,6 +204,7 @@ export default function CounterpartyImportDialog({ open, onClose, onSuccess }) {
                 <TableHead>
                   <TableRow>
                     <TableCell>单位名称</TableCell>
+                    <TableCell>角色</TableCell>
                     <TableCell>归属地</TableCell>
                     <TableCell>是否启用</TableCell>
                   </TableRow>
@@ -206,6 +213,9 @@ export default function CounterpartyImportDialog({ open, onClose, onSuccess }) {
                   {preview.map((r, idx) => (
                     <TableRow key={idx}>
                       <TableCell>{r.name}</TableCell>
+                      <TableCell>
+                        {(r.counterpartyRoleNames ?? []).join(", ")}
+                      </TableCell>
                       <TableCell>
                         {(r.counterpartyTypeNames ?? []).join(", ")}
                       </TableCell>

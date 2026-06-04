@@ -12,10 +12,9 @@ import { downloadBlob } from "../../../utils/downloadBlob";
 import CounterpartyImportDialog from "./CounterpartyImportDialog";
 import { masterDataButtonLabels as buttonLabels } from "../../../constants/buttonLabels";
 
-const emptyRow = {
-  name: "",
-  counterpartyTypeIds: [],
-};
+function counterpartyRoleLabel(role) {
+  return role?.label || role?.name || "";
+}
 
 export default function CounterpartyPage() {
   const [rows, setRows] = useState([]);
@@ -30,7 +29,13 @@ export default function CounterpartyPage() {
   const [editingRow, setEditingRow] = useState(null);
   const [importOpen, setImportOpen] = useState(false);
   const debounceRef = useRef(null);
-  const { counterpartyTypes } = useMasterData();
+  const { counterpartyTypes, counterpartyRoles } = useMasterData();
+
+  const emptyRow = {
+    name: "",
+    counterpartyRoleIds: [],
+    counterpartyTypeIds: [],
+  };
 
   const loadData = useCallback(
     async (keyword = "") => {
@@ -47,7 +52,7 @@ export default function CounterpartyPage() {
         setLoading(false);
       }
     },
-    [page, size]
+    [page, size],
   );
 
   useEffect(() => {
@@ -70,7 +75,8 @@ export default function CounterpartyPage() {
   const handleEdit = (row) => {
     setEditingRow({
       ...row,
-      counterpartyTypeIds: row.counterpartyTypes.map((type) => type.id),
+      counterpartyRoleIds: (row.counterpartyRoles ?? []).map((role) => role.id),
+      counterpartyTypeIds: (row.counterpartyTypes ?? []).map((type) => type.id),
     });
     setDialogOpen(true);
   };
@@ -99,7 +105,7 @@ export default function CounterpartyPage() {
   const handleToggleActive = async (row) => {
     const id = row.id;
     setRows((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, active: !r.active } : r))
+      prev.map((r) => (r.id === id ? { ...r, active: !r.active } : r)),
     );
     setTogglingIds((prev) => new Set(prev).add(id));
     try {
@@ -108,7 +114,7 @@ export default function CounterpartyPage() {
     } catch (err) {
       // rollback if failed
       setRows((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, active: row.active } : r))
+        prev.map((r) => (r.id === id ? { ...r, active: row.active } : r)),
       );
       console.error(err);
     } finally {
@@ -118,8 +124,6 @@ export default function CounterpartyPage() {
         return next;
       });
     }
-
-   
   };
 
   const handleExport = async () => {
@@ -139,11 +143,18 @@ export default function CounterpartyPage() {
   const columns = [
     { fieldName: "name", headerName: "公司名称", width: 300 },
     {
+      fieldName: "counterpartyRoles",
+      width: 120,
+      headerName: "角色",
+      renderCell: (value) =>
+        (value ?? []).map((o) => counterpartyRoleLabel(o)).join("、"),
+    },
+    {
       fieldName: "counterpartyTypes",
       width: 250,
       headerName: "归属地",
       renderCell: (value) => {
-        return value.map((o) => o.name).join("、");
+        return (value ?? []).map((o) => o.name).join("、");
       },
     },
     {
@@ -161,10 +172,18 @@ export default function CounterpartyPage() {
   const dialogTextFields = [{ fieldName: "name", label: "公司名称" }];
   const dialogMuiltiAutoCompleteFields = [
     {
+      fieldName: "counterpartyRoleIds",
+      label: "角色",
+      options: counterpartyRoles,
+      getOptionLabel: (opt) => counterpartyRoleLabel(opt),
+      sm: 6,
+    },
+    {
       fieldName: "counterpartyTypeIds",
       label: "归属地",
       options: counterpartyTypes,
       sm: 6,
+      rules: { required: false },
     },
   ];
 
@@ -203,7 +222,8 @@ export default function CounterpartyPage() {
                   />
 
                   <Typography variant="caption">
-                    归属地支持分隔符：, ， ; ； 、<br />
+                    角色必填（客户/供应商）；归属地支持分隔符：, ， ; ； 、
+                    <br />
                     “是否启用”可为空，默认启用
                   </Typography>
                 </Stack>

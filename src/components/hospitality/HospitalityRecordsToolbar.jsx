@@ -36,8 +36,8 @@ export default function HospitalityRecordsToolbar({
   onExport,
 }) {
   const {
-    counterparties,
-    setCounterparties,
+    customers,
+    setCustomers,
     handlers,
     setHandlers,
     departments,
@@ -173,9 +173,9 @@ export default function HospitalityRecordsToolbar({
                   onChange={(v) => {
                     onDraftFilterChange("counterpartyId", v);
                   }}
-                  options={counterparties}
-                  setOptions={setCounterparties}
-                  fetchOptions={masterDataApi.searchCounterParties}
+                  options={customers}
+                  setOptions={setCustomers}
+                  fetchOptions={masterDataApi.searchCustomers}
                 />
 
                 {isAdmin && (

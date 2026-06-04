@@ -18,7 +18,7 @@ const emptyRecord = {
   purchaseDate: "",
   invoiceDate: "",
   invoiceNumber: "",
-  supplier: "",
+  supplierId: null,
   lines: [
     {
       id: null,
