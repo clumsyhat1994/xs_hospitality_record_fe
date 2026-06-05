@@ -1,5 +1,6 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { Box, Button, Paper, Stack, Tooltip, Typography } from "@mui/material";
+import BaseSelect from "../../form/BaseSelect";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import Chip from "@mui/material/Chip";
 import MasterDataToolbar from "../MasterDataToolbar";
@@ -23,6 +24,7 @@ export default function CounterpartyPage() {
   const [size, setSize] = useState(20);
   const [searchName, setSearchName] = useState("");
   const [keyword, setKeyword] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
   const [loading, setLoading] = useState(false);
   const [togglingIds, setTogglingIds] = useState(new Set());
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -37,27 +39,29 @@ export default function CounterpartyPage() {
     counterpartyTypeIds: [],
   };
 
-  const loadData = useCallback(
-    async (keyword = "") => {
-      setLoading(true);
-      try {
-        const res = await masterDataApi.listCounterParties(page, size, keyword);
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await masterDataApi.listCounterParties(
+        page,
+        size,
+        keyword,
+        roleFilter,
+      );
 
-        const data = res.data;
-        setRows(data.content || data); // if backend returns plain list, this still works
-        setTotal(data.totalElements ?? 0);
-      } catch (err) {
-        console.error("Failed to load counterparties", err);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [page, size],
-  );
+      const data = res.data;
+      setRows(data.content || data); // if backend returns plain list, this still works
+      setTotal(data.totalElements ?? 0);
+    } catch (err) {
+      console.error("Failed to load counterparties", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, size, keyword, roleFilter]);
 
   useEffect(() => {
-    loadData(keyword);
-  }, [loadData, keyword]);
+    loadData();
+  }, [loadData]);
 
   useEffect(() => {
     return () => {
@@ -169,6 +173,17 @@ export default function CounterpartyPage() {
         ),
     },
   ];
+  const roleFilterOptions = useMemo(
+    () => [
+      { value: "", label: "全部角色" },
+      ...counterpartyRoles.map((role) => ({
+        value: role.name,
+        label: counterpartyRoleLabel(role),
+      })),
+    ],
+    [counterpartyRoles],
+  );
+
   const dialogTextFields = [{ fieldName: "name", label: "公司名称" }];
   const dialogMuiltiAutoCompleteFields = [
     {
@@ -193,7 +208,23 @@ export default function CounterpartyPage() {
         <MasterDataToolbar
           title="往来单位"
           searchPlaceholder="按名称搜索"
+          searchSx={{ width: 270 }}
           searchValue={searchName}
+          extraFilters={
+            <BaseSelect
+              label="角色"
+              options={roleFilterOptions}
+              fieldValue={roleFilter}
+              onChange={(e) => {
+                setRoleFilter(e.target.value);
+                setPage(0);
+              }}
+              getOptionLabel={(opt) => opt.label}
+              getOptionValue={(opt) => opt.value}
+              fullWidth={false}
+              sx={{ width: 150, flexShrink: 0 }}
+            />
+          }
           onSearchChange={handleSearchChange}
           onSearchSubmit={() => {
             if (debounceRef.current) {
@@ -274,7 +305,7 @@ export default function CounterpartyPage() {
           }}
           onSaveSuccess={() => {
             setKeyword("");
-            loadData(keyword);
+            loadData();
           }}
           save={(data) =>
             editingRow?.id == null
@@ -288,7 +319,7 @@ export default function CounterpartyPage() {
           open={importOpen}
           onClose={() => setImportOpen(false)}
           onSuccess={() => {
-            loadData(keyword);
+            loadData();
             setImportOpen(false);
           }}
         />

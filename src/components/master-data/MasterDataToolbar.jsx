@@ -14,12 +14,15 @@ import { masterDataButtonLabels as buttonLabels } from "../../constants/buttonLa
 export default function MasterDataToolbar({
   title,
   searchPlaceholder = "按名称搜索",
+  searchLabel = "名称",
   searchValue,
   onSearchChange,
   onSearchSubmit,
   onCreate,
   onExport,
   extraActions,
+  extraFilters,
+  searchSx,
 }) {
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
@@ -37,13 +40,20 @@ export default function MasterDataToolbar({
     >
       <Typography variant="h6">{title}</Typography>
       <Stack direction="row" spacing={2} alignItems="center">
+        {extraFilters}
         <TextField
-          sx={{ padding: 0 }}
+          sx={{ padding: 0, flexShrink: 0, ...searchSx }}
           size="small"
+          label={searchLabel}
           placeholder={searchPlaceholder}
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
           onKeyDown={handleKeyDown}
+          slotProps={{
+            inputLabel: {
+              shrink: true,
+            },
+          }}
         />
 
         <Button variant="contained" startIcon={<AddIcon />} onClick={onCreate}>

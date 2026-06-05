@@ -17,8 +17,15 @@ const masterDataApi = {
         includeId: includeId === "" ? undefined : includeId,
       },
     }),
-  listCounterParties: (page = 0, size = 50, keyword) => {
-    return api.get("/api/counterparty", { params: { page, size, q: keyword } });
+  listCounterParties: (page = 0, size = 50, keyword, role) => {
+    return api.get("/api/counterparty", {
+      params: {
+        page,
+        size,
+        q: keyword,
+        role: role === "" ? undefined : role,
+      },
+    });
   },
   createCounterParty: (payload) => api.post(`/api/counterparty`, payload),
   updateCounterParty: (id, payload) =>
