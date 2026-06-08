@@ -5,6 +5,7 @@ import moduleRoutes from "../../constants/moduleRoutes";
 import { setParams } from "../../utils/queryParamsHelper";
 import purchaseRecordApi from "../../api/purchaseRecordApi";
 import { downloadBlob } from "../../utils/downloadBlob";
+import { getBackendErrorMessage } from "../../utils/errorUtils";
 import PurchaseRecordsToolbar from "./PurchaseRecordsToolbar";
 import PurchaseRecordsTable from "./PurchaseRecordsTable";
 import PurchaseRecordDialog from "./PurchaseRecordDialog";
@@ -157,8 +158,12 @@ export default function PurchaseRecords() {
 
   const handleDeleteRow = async (id) => {
     if (!window.confirm("确定删除这条采购记录以及所有相关采购明细吗?")) return;
-    await purchaseRecordApi.deleteOne(id);
-    setRecords((prev) => prev.filter((r) => r.id !== id));
+    try {
+      await purchaseRecordApi.deleteOne(id);
+      setRecords((prev) => prev.filter((r) => r.id !== id));
+    } catch (err) {
+      window.alert(getBackendErrorMessage(err));
+    }
   };
 
   const handlePurchaseDialogSave = async () => {

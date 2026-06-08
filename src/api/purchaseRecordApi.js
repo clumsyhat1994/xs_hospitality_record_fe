@@ -38,9 +38,12 @@ const purchaseRecordApi = {
     }
     return api.get(endpoint, { params, signal });
   },
-  create: (payload) => api.post(endpoint, payload),
-  update: (id, payload) => api.put(`${endpoint}/${id}`, payload),
-  deleteOne: (id) => api.delete(`${endpoint}/${id}`),
+  create: (payload) =>
+    api.post(endpoint, payload, { skipGlobalErrorAlert: true }),
+  update: (id, payload) =>
+    api.put(`${endpoint}/${id}`, payload, { skipGlobalErrorAlert: true }),
+  deleteOne: (id) =>
+    api.delete(`${endpoint}/${id}`, { skipGlobalErrorAlert: true }),
   export: (filters = {}) => {
     const params = new URLSearchParams();
     for (const [k, v] of Object.entries(filters)) {

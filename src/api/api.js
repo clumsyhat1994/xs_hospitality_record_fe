@@ -1,7 +1,10 @@
 import axios from "axios";
 import endpoints from "../constants/Endpoints";
+import { getBackendErrorMessage } from "../utils/errorUtils";
 
-axios.interceptors.request.use(
+const api = axios.create();
+
+api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("authToken");
     const isAuth = config.url?.includes(endpoints.LOGIN);
@@ -14,7 +17,7 @@ axios.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-axios.interceptors.response.use(
+api.interceptors.response.use(
   (response) => response,
   (error) => {
     const url = error.config?.url ?? "";
@@ -23,17 +26,16 @@ axios.interceptors.response.use(
       console.warn("401 Unauthorized");
       window.location.href = "/login";
     } else if (
+      !error.config?.skipGlobalErrorAlert &&
       error.response &&
       error.response.status !== 422 &&
       error.response.status !== 401 &&
       error.response.status !== 409
-      // (error.response.status === 500 ||
-      //   error.response.status === 403 ||
-      //   error.response.status === 400)
     ) {
-      window.alert(error.response.data?.message ?? error.message);
+      window.alert(getBackendErrorMessage(error));
     }
     return Promise.reject(error);
   },
 );
-export default axios;
+
+export default api;

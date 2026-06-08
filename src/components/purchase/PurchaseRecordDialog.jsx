@@ -21,6 +21,7 @@ import purchaseRecordApi from "../../api/purchaseRecordApi";
 import { toNullableNumber } from "../../utils/numberUtils";
 import { purchaseRecordFieldLabels as fieldLabels } from "../../constants/recordFieldLabels";
 import { validationMessages } from "../../constants/validationMessages";
+import { getBackendErrorMessage } from "../../utils/errorUtils";
 import PurchaseLinesFieldArray from "./PurchaseLinesFieldArray";
 
 const categoryOptions = [
@@ -144,7 +145,7 @@ export default function PurchaseRecordDialog({
         return;
       }
 
-      setSubmitError(err?.response?.data?.message ?? "保存失败，请稍后重试");
+      setSubmitError(getBackendErrorMessage(err, "保存失败，请稍后重试"));
     }
   };
 
