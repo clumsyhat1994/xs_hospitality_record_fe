@@ -71,7 +71,7 @@ async function fetchEligiblePurchaseLinesByCategory(category, includeLineIds = [
 
   const filters = {
     category,
-    purchaseDateFrom: formatDate(twoYearsAgo),
+    purchaseDateFrom: undefined,
     purchaseDateTo: formatDate(today),
     inStockOnly: true,
   };

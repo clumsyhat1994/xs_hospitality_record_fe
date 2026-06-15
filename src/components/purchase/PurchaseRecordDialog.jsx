@@ -203,7 +203,7 @@ export default function PurchaseRecordDialog({
               </Button>
             </Box>
             {submitError ? (
-              <Alert severity="error" sx={{ width: "100%" }}>
+              <Alert severity="error" sx={{ width: "100%", whiteSpace: "pre-line" }}>
                 {submitError}
               </Alert>
             ) : null}
