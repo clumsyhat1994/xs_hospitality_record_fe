@@ -5,9 +5,9 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  Box,
   Grid,
   Alert,
-  Stack,
 } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import RHFTextField from "../form/RHFTextField";
@@ -20,6 +20,7 @@ import masterDataApi from "../../api/masterDataApi";
 import usageRecordApi from "../../api/usageRecordApi";
 import { toNullableNumber } from "../../utils/numberUtils";
 import { UsageRecordBEErrorFieldToFEFormFieldMap } from "../../constants/BEErrorFieldToFEFormFieldMap";
+import { validationMessages } from "../../constants/validationMessages";
 import { initialUsedByPurchaseLineIdFromUsageLines } from "../../utils/giftUsageLineFormUtils";
 import UsageItemLinesFieldArray from "./UsageItemLinesFieldArray";
 
@@ -130,9 +131,10 @@ export default function UsageRecordDialog({
           // Backend may return array paths like giftInventoryLines[0].quantity,
           // while react-hook-form setError expects dot paths (giftInventoryLines.0.quantity).
           const normalizedPath = rawField.replace(/\[(\d+)\]/g, ".$1");
+          const mappedField = UsageRecordBEErrorFieldToFEFormFieldMap[normalizedPath];
           const fieldName =
-            UsageRecordBEErrorFieldToFEFormFieldMap[normalizedPath] ?? normalizedPath;
-          const message = e?.message ?? "提交失败";
+            mappedField ?? (normalizedPath && !normalizedPath.includes(".") ? normalizedPath : "");
+          const message = validationMessages[e?.code] ?? e?.message ?? "提交失败";
 
           if (fieldName) {
             setError(fieldName, { type: "server", message });
@@ -159,11 +161,6 @@ export default function UsageRecordDialog({
             {isEditMode ? "编辑领用记录" : "新建领用记录"}
           </DialogTitle>
           <DialogContent dividers>
-            {submitError && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {submitError}
-              </Alert>
-            )}
             <Grid container spacing={2} sx={{ mt: 0.5 }}>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <RHFTextField name="usageDate" label="领用日期" type="date" />
@@ -206,15 +203,22 @@ export default function UsageRecordDialog({
               initialUsedByPurchaseLineId={initialUsedByPurchaseLineId}
             />
           </DialogContent>
-          <DialogActions>
-            <Button onClick={onClose}>取消</Button>
-            <Button
-              variant="contained"
-              disabled={isSubmitting}
-              onClick={handleSubmit(submit)}
-            >
-              {isSubmitting ? "保存中..." : isEditMode ? "更新" : "保存"}
-            </Button>
+          <DialogActions sx={{ flexDirection: "column", alignItems: "stretch", px: 3, pb: 2 }}>
+            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, width: "100%" }}>
+              <Button onClick={onClose}>取消</Button>
+              <Button
+                variant="contained"
+                disabled={isSubmitting}
+                onClick={handleSubmit(submit)}
+              >
+                {isSubmitting ? "保存中..." : isEditMode ? "更新" : "保存"}
+              </Button>
+            </Box>
+            {submitError ? (
+              <Alert severity="error" sx={{ width: "100%" }}>
+                {submitError}
+              </Alert>
+            ) : null}
           </DialogActions>
         </Dialog>
       </FormProvider>

@@ -8,7 +8,7 @@ export const BEErrorFieldToFEFormFieldMap = {
 
 /** Standalone usage record create/update: backend field → react-hook-form field. */
 export const UsageRecordBEErrorFieldToFEFormFieldMap = {
-  department: "departmentCode",
+  department: "departmentId",
   counterparty: "counterpartyId",
   recipient: "recipientId",
   inventoryGiftLines: "giftInventoryLines",
