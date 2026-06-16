@@ -69,7 +69,10 @@ async function fetchEligiblePurchaseLinesByCategory(category, includeLineIds = [
     purchaseDateTo: formatDate(today),
     inStockOnly: true,
   };
-  const listOptions = includeLineIds.length > 0 ? { includeLineIds } : {};
+  const listOptions = {
+    ...(includeLineIds.length > 0 ? { includeLineIds } : {}),
+    sort: ["purchaseDate,asc", "id,asc"],
+  };
 
   while (categoryRecords.length < totalElements) {
     const res = await purchaseRecordApi.filteredList(

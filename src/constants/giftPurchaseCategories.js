@@ -16,6 +16,3 @@ export const GIFT_PURCHASE_CATEGORY_LABELS = {
 export const GIFT_PURCHASE_CATEGORY_OPTIONS = Object.entries(
   GIFT_PURCHASE_CATEGORY_LABELS,
 ).map(([value, label]) => ({ value, label }));
-
-console.log("GIFT_PURCHASE_CATEGORY_LABELS:",Object.entries(GIFT_PURCHASE_CATEGORY_LABELS));
-console.log("GIFT_PURCHASE_CATEGORY_OPTIONS:",GIFT_PURCHASE_CATEGORY_OPTIONS);

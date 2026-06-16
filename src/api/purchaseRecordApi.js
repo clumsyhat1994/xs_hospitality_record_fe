@@ -7,10 +7,10 @@ const purchaseRecordApi = {
   get: (id) => api.get(`${endpoint}/${id}`),
   /**
    * @param {Record<string, unknown>} filters
-   * @param {{ signal?: AbortSignal; includeLineIds?: number[] }} [options]
+   * @param {{ signal?: AbortSignal; includeLineIds?: number[]; sort?: string|string[] }} [options]
    */
   filteredList: (page = 0, size = 10, filters = {}, options = {}) => {
-    const { signal, includeLineIds } = options;
+    const { signal, includeLineIds, sort } = options;
     const params = new URLSearchParams();
     params.set("page", String(page));
     params.set("size", String(size));
@@ -34,6 +34,13 @@ const purchaseRecordApi = {
       for (const id of includeLineIds) {
         if (id == null || String(id).trim() === "") continue;
         params.append("includePurchaseLineIds", String(id));
+      }
+    }
+    if (sort != null) {
+      const sortValues = Array.isArray(sort) ? sort : [sort];
+      for (const item of sortValues) {
+        if (item == null || String(item).trim() === "") continue;
+        params.append("sort", String(item));
       }
     }
     return api.get(endpoint, { params, signal });
