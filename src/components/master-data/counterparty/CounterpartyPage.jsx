@@ -240,7 +240,7 @@ export default function CounterpartyPage() {
               arrow
               placement="bottom"
               title={
-                <Stack spacing={1} sx={{ maxWidth: 320 }}>
+                <Stack spacing={1.5} sx={{ maxWidth: 520 }}>
                   <Typography variant="body2">Excel导入格式如图</Typography>
                   <img
                     src="/images/counterparty-import-example.png"
@@ -253,7 +253,8 @@ export default function CounterpartyPage() {
                   />
 
                   <Typography variant="caption">
-                    角色必填（客户/供应商）；归属地支持分隔符：, ， ; ； 、
+                    角色必填（客户/供应商）；多个角色或归属地可用分隔符：
+                    , ， ; ； 、 /
                     <br />
                     “是否启用”可为空，默认启用
                   </Typography>
@@ -262,7 +263,8 @@ export default function CounterpartyPage() {
               slotProps={{
                 tooltip: {
                   sx: {
-                    p: 1.5,
+                    p: 2,
+                    maxWidth: 560,
                   },
                 },
               }}
