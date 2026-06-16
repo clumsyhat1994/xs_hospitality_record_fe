@@ -20,13 +20,7 @@ import {
 } from "../../utils/giftUsageLineFormUtils";
 import RHFCellTextField from "../form/RHFCellTextField";
 import RHFAutocomplete from "../form/RHFAutocomplete";
-
-const categoryOptions = [
-  { value: "BEVERAGE", label: "酒水" },
-  { value: "BUSINESS_GIFT", label: "商务礼品" },
-  { value: "TEA", label: "茶叶" },
-  { value: "FRUIT", label: "水果" },
-];
+import { GIFT_PURCHASE_CATEGORY_OPTIONS } from "../../constants/giftPurchaseCategories";
 
 function formatDate(date) {
   return date.toISOString().slice(0, 10);
@@ -107,6 +101,7 @@ function GiftInventoryLineRow({
   loadingCategoryLines,
   initialUsedByPurchaseLineId,
   allGiftInventoryLines,
+  categoryOptions,
 }) {
   const { setValue } = useFormContext();
   const line = allGiftInventoryLines?.[index];
@@ -295,6 +290,7 @@ export default function UsageItemLinesFieldArray({
   errors,
   clearErrors,
   initialUsedByPurchaseLineId = {},
+  allowedCategories,
 }) {
   const { fields, append, remove } = useFieldArray({
     control,
@@ -307,9 +303,20 @@ export default function UsageItemLinesFieldArray({
     name: "giftInventoryLines",
   });
 
+  const categoryOptions = useMemo(() => {
+    if (!allowedCategories?.length) return GIFT_PURCHASE_CATEGORY_OPTIONS;
+    const allowed = new Set(allowedCategories);
+    return GIFT_PURCHASE_CATEGORY_OPTIONS.filter((opt) =>
+      allowed.has(opt.value),
+    );
+  }, [allowedCategories]);
+
+  const defaultCategory =
+    categoryOptions.length === 1 ? categoryOptions[0].value : "";
+
   const handleAdd = () => {
     append({
-      category: "",
+      category: defaultCategory,
       purchaseLineId: "",
       quantity: "",
       unitPrice: "",
@@ -363,6 +370,7 @@ export default function UsageItemLinesFieldArray({
                 loadingCategoryLines={loadingByCategory}
                 initialUsedByPurchaseLineId={initialUsedByPurchaseLineId}
                 allGiftInventoryLines={giftInventoryLines}
+                categoryOptions={categoryOptions}
               />
             ))}
           </TableBody>

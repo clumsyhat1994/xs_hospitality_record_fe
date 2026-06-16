@@ -33,6 +33,7 @@ import MasterDataDialog from "../master-data/MasterDataDialog";
 import RHFAutocomplete from "../form/RHFAutocomplete";
 import { toNullableNumber } from "../../utils/numberUtils";
 import { initialUsedByPurchaseLineIdFromUsageLines } from "../../utils/giftUsageLineFormUtils";
+import { GIFT_PURCHASE_CATEGORIES } from "../../constants/giftPurchaseCategories";
 
 const DEPTWITHQUOTA = ["SCYWB", "QCCZB"];
 
@@ -443,6 +444,7 @@ export default function HospitalityRecordDialog({
                 errors={errors}
                 clearErrors={clearErrors}
                 initialUsedByPurchaseLineId={initialUsedByPurchaseLineId}
+                allowedCategories={[GIFT_PURCHASE_CATEGORIES.BEVERAGE]}
               />
             )}
           </DialogContent>
