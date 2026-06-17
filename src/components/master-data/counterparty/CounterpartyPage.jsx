@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
-import { Box, Button, Paper, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Paper, Typography } from "@mui/material";
+import ImageTooltip from "../../common/ImageTooltip";
 import BaseSelect from "../../form/BaseSelect";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import Chip from "@mui/material/Chip";
@@ -236,38 +237,22 @@ export default function CounterpartyPage() {
           onCreate={handleCreate}
           onExport={handleExport}
           extraActions={
-            <Tooltip
+            <ImageTooltip
               arrow
               placement="bottom"
-              title={
-                <Stack spacing={1.5} sx={{ maxWidth: 520 }}>
-                  <Typography variant="body2">Excel导入格式如图</Typography>
-                  <img
-                    src="/images/counterparty-import-example.png"
-                    alt="导入示例"
-                    style={{
-                      width: "100%",
-                      borderRadius: 6,
-                      border: "1px solid #eee",
-                    }}
-                  />
-
-                  <Typography variant="caption">
-                    角色必填（客户/供应商）；多个角色或归属地可用分隔符：
-                    , ， ; ； 、 /
-                    <br />
-                    “是否启用”可为空，默认启用
-                  </Typography>
-                </Stack>
+              imageSrc="/images/counterparty-import-example.png"
+              imageAlt="导入示例"
+              header={
+                <Typography variant="body2">Excel导入格式如图</Typography>
               }
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    p: 2,
-                    maxWidth: 560,
-                  },
-                },
-              }}
+              footer={
+                <Typography variant="caption">
+                  角色必填（客户/供应商）；多个角色或归属地可用分隔符：
+                  , ， ; ； 、 /
+                  <br />
+                  “是否启用”可为空，默认启用
+                </Typography>
+              }
             >
               <Button
                 variant="outlined"
@@ -276,7 +261,7 @@ export default function CounterpartyPage() {
               >
                 {buttonLabels.importExcel}
               </Button>
-            </Tooltip>
+            </ImageTooltip>
           }
         />
 
