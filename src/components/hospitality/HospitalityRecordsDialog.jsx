@@ -318,6 +318,7 @@ export default function HospitalityRecordDialog({
                   name="invoiceDate"
                   label={fieldLabels.invoiceDate}
                   type="date"
+                  required={false}
                 />
               </Grid>
 

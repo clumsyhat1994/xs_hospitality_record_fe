@@ -258,7 +258,7 @@ export default function HospitalityRecordsTable({
                       {formatDisplayAmount(record.totalAmount)}
                     </TableCell>
                     <TableCell>{record.invoiceNumberString}</TableCell>
-                    <TableCell>{record.invoiceDate}</TableCell>
+                    <TableCell>{formatDisplayDate(record.invoiceDate)}</TableCell>
                     <TableCell>
                       {formatDisplayDate(record.deptHeadApprovalDate)}
                     </TableCell>
