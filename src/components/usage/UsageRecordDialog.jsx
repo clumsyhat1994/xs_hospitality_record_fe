@@ -21,8 +21,15 @@ import usageRecordApi from "../../api/usageRecordApi";
 import { toNullableNumber } from "../../utils/numberUtils";
 import { UsageRecordBEErrorFieldToFEFormFieldMap } from "../../constants/BEErrorFieldToFEFormFieldMap";
 import { validationMessages } from "../../constants/validationMessages";
+import { GIFT_PURCHASE_CATEGORIES } from "../../constants/giftPurchaseCategories";
 import { initialUsedByPurchaseLineIdFromUsageLines } from "../../utils/giftUsageLineFormUtils";
 import UsageItemLinesFieldArray from "./UsageItemLinesFieldArray";
+
+const usageRecordCategoryOptions = [
+  GIFT_PURCHASE_CATEGORIES.BUSINESS_GIFT,
+  GIFT_PURCHASE_CATEGORIES.TEA,
+  GIFT_PURCHASE_CATEGORIES.FRUIT,
+];
 
 function toDialogDefaultValues(record) {
   if (!record) {
@@ -201,6 +208,7 @@ export default function UsageRecordDialog({
               errors={errors}
               clearErrors={clearErrors}
               initialUsedByPurchaseLineId={initialUsedByPurchaseLineId}
+              allowedCategories={usageRecordCategoryOptions}
             />
           </DialogContent>
           <DialogActions sx={{ flexDirection: "column", alignItems: "stretch", px: 3, pb: 2 }}>

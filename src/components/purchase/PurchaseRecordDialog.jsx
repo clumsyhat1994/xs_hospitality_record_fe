@@ -20,16 +20,14 @@ import { FormModeProvider } from "../../context/FormModeContext";
 import purchaseRecordApi from "../../api/purchaseRecordApi";
 import { toNullableNumber } from "../../utils/numberUtils";
 import { purchaseRecordFieldLabels as fieldLabels } from "../../constants/recordFieldLabels";
+import { GIFT_PURCHASE_CATEGORY_OPTIONS } from "../../constants/giftPurchaseCategories";
 import { validationMessages } from "../../constants/validationMessages";
 import { getBackendErrorMessage } from "../../utils/errorUtils";
 import PurchaseLinesFieldArray from "./PurchaseLinesFieldArray";
 
 const categoryOptions = [
   { value: "", label: "请选择类别" },
-  { value: "BEVERAGE", label: "酒水" },
-  { value: "BUSINESS_GIFT", label: "商务礼品" },
-  { value: "TEA", label: "茶叶" },
-  { value: "FRUIT", label: "水果" },
+  ...GIFT_PURCHASE_CATEGORY_OPTIONS,
 ];
 
 function cleanPayload(data) {
