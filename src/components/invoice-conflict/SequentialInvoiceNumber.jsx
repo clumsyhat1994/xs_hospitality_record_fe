@@ -135,7 +135,7 @@ export default function SequentialInvoiceNumber() {
           {rows.length === 0 && loading === false && (
             <TableRow>
               <TableCell colSpan={3} align="left">
-                找不到任何连号发票，也许它们只是都市传说？！
+                找不到任何连号发票，也许它们只是都市传说！
               </TableCell>
             </TableRow>
           )}

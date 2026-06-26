@@ -227,7 +227,13 @@ export default function HospitalityRecords() {
   const handleSaveAttachments = useCallback(
     async (
       record,
-      { invoiceFiles, formFiles, removeInvoicePaths, removeFormPaths },
+      {
+        invoiceFiles,
+        formFiles,
+        removeInvoicePaths,
+        removeFormPaths,
+        applyInvoiceFields,
+      },
     ) => {
       const inv = invoiceFiles ?? [];
       const frm = formFiles ?? [];
@@ -237,12 +243,22 @@ export default function HospitalityRecords() {
         inv.length === 0 &&
         frm.length === 0 &&
         removedInv.length === 0 &&
-        removedFrm.length === 0
+        removedFrm.length === 0 &&
+        !applyInvoiceFields
       )
         return;
       const params = new URLSearchParams();
       removedInv.forEach((p) => params.append("removeInvoicePaths", p));
       removedFrm.forEach((p) => params.append("removeFormPaths", p));
+      if (applyInvoiceFields?.invoiceDate) {
+        params.append("applyInvoiceDate", applyInvoiceFields.invoiceDate);
+      }
+      if (applyInvoiceFields?.invoiceNumberString) {
+        params.append("applyInvoiceNumberString", applyInvoiceFields.invoiceNumberString);
+      }
+      if (applyInvoiceFields?.invoiceAmount != null && applyInvoiceFields.invoiceAmount !== "") {
+        params.append("applyInvoiceAmount", String(applyInvoiceFields.invoiceAmount));
+      }
       const fd = new FormData();
       inv.forEach((f) => fd.append("invoiceImages", f));
       frm.forEach((f) => fd.append("hospitalityFormImages", f));

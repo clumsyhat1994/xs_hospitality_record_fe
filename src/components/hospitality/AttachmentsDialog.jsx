@@ -6,10 +6,15 @@ import {
   Button,
   Box,
   Typography,
-  Divider,
+  Checkbox,
+  FormControlLabel,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import hospitalityApi from "../../api/hospitalityApi";
+import ocrApi from "../../api/ocrApi";
+import { INVOICE_OCR_SOURCE_LABELS } from "../../constants/invoiceOcrSource";
 
 function formatBytes(bytes) {
   if (bytes === null || bytes === undefined || Number.isNaN(bytes)) return "";
@@ -58,6 +63,23 @@ function isAllowedAttachmentFile(file) {
   );
 }
 
+function formatOcrAmount(value) {
+  if (value == null || value === "") return "—";
+  const n = Number(value);
+  if (!Number.isFinite(n)) return String(value);
+  return n.toFixed(2);
+}
+
+function isOcrResultComplete(result) {
+  if (!result) return false;
+  return Boolean(
+    result.invoiceNumberString &&
+      result.invoiceDate &&
+      result.invoiceAmount != null &&
+      result.invoiceAmount !== "",
+  );
+}
+
 async function openProtectedImage(relativePath) {
   const res = await hospitalityApi.fetchAttachmentBlob(relativePath);
   if (!res?.data) return;
@@ -72,16 +94,37 @@ export function AttachmentsDialog({
   onClose,
   onSave,
 }) {
-  const invoiceInputRef = useRef(null);
-  const formInputRef = useRef(null);
   const [invoiceFiles, setInvoiceFiles] = useState([]);
   const [formFiles, setFormFiles] = useState([]);
   const [removedInvoicePaths, setRemovedInvoicePaths] = useState([]);
   const [removedFormPaths, setRemovedFormPaths] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [ocrScanning, setOcrScanning] = useState(false);
+  const [ocrResult, setOcrResult] = useState(null);
+  const [ocrError, setOcrError] = useState("");
+  const [applyOcrResult, setApplyOcrResult] = useState(false);
   // UI-only state for showing which drop zone is currently highlighted.
   const [activeDropSection, setActiveDropSection] = useState(null);
+
+  const scanInvoiceFile = useCallback(async (file) => {
+    if (!file) return;
+    setOcrScanning(true);
+    setOcrError("");
+    setOcrResult(null);
+    try {
+      const res = await ocrApi.scanVatInvoice(file);
+      const data = res?.data ?? null;
+      setOcrResult(data);
+      setApplyOcrResult(isOcrResultComplete(data));
+    } catch {
+      setOcrResult(null);
+      setApplyOcrResult(false);
+      setOcrError("发票识别失败，仍可上传附件");
+    } finally {
+      setOcrScanning(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -90,6 +133,10 @@ export function AttachmentsDialog({
     setRemovedInvoicePaths([]);
     setRemovedFormPaths([]);
     setSaveError("");
+    setOcrScanning(false);
+    setOcrResult(null);
+    setOcrError("");
+    setApplyOcrResult(false);
   }, [open, record?.id]);
 
   const toggleInvoiceRemoved = (path) => {
@@ -106,25 +153,49 @@ export function AttachmentsDialog({
     );
   };
 
-  const appendDedupedFiles = (setFiles, nextFiles) => {
+  const appendDedupedFiles = (setFiles, nextFiles, { onAdded } = {}) => {
     const normalizedNext = Array.from(nextFiles || []).filter(isAllowedAttachmentFile);
     if (!normalizedNext.length) return;
     setFiles((prev) => {
       const current = prev ?? [];
       const existingKeys = new Set(current.map(fileKey));
       const filteredNext = normalizedNext.filter((f) => !existingKeys.has(fileKey(f)));
+      if (filteredNext.length > 0 && onAdded) {
+        onAdded(filteredNext[0]);
+      }
       return [...current, ...filteredNext];
     });
   };
 
-  const removeSelectedFile = (setFiles, inputRef, index) => {
-    setFiles((prev) => (prev ?? []).filter((_, i) => i !== index));
-    if (inputRef.current) inputRef.current.value = "";
+  // Wraps appendDedupedFiles for invoice attachments; triggers OCR/QR on the first newly added file.
+  const appendInvoiceFiles = (nextFiles) => {
+    appendDedupedFiles(setInvoiceFiles, nextFiles, {
+      onAdded: (file) => {
+        scanInvoiceFile(file);
+      },
+    });
   };
 
-  const clearSelectedFiles = (setFiles, inputRef) => {
+  const removeSelectedFile = (setFiles, index, { onClear } = {}) => {
+    setFiles((prev) => {
+      const next = (prev ?? []).filter((_, i) => i !== index);
+      if (next.length === 0 && onClear) {
+        onClear();
+      }
+      return next;
+    });
+  };
+
+  const clearSelectedFiles = (setFiles, { onClear } = {}) => {
     setFiles([]);
-    if (inputRef.current) inputRef.current.value = "";
+    if (onClear) onClear();
+  };
+
+  const clearOcrState = () => {
+    setOcrResult(null);
+    setOcrError("");
+    setApplyOcrResult(false);
+    setOcrScanning(false);
   };
 
   const renderAttachmentSection = ({
@@ -134,13 +205,15 @@ export function AttachmentsDialog({
     existingLabel,
     existingNamePrefix,
     selectedFiles,
-    setSelectedFiles,
-    inputRef,
     existingEntries,
     removedPaths,
     toggleRemoved,
     dropKey,
-  }) => (
+    onAppendFiles,
+    onRemoveFile,
+    onClearFiles,
+  }) => {
+    return (
     <Box sx={{ py: 0.5 }}>
       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 1 }}>
         <Box
@@ -185,19 +258,18 @@ export function AttachmentsDialog({
           onDrop={(e) => {
             e.preventDefault();
             setActiveDropSection((prev) => (prev === dropKey ? null : prev));
-            appendDedupedFiles(setSelectedFiles, e.dataTransfer?.files);
+            onAppendFiles(e.dataTransfer?.files);
           }}
         >
           <Button component="label" variant="outlined" size="small">
             {selectLabel}
             <input
-              ref={inputRef}
               type="file"
               hidden
               multiple
               accept="image/*,.pdf,application/pdf"
               onChange={(e) => {
-                appendDedupedFiles(setSelectedFiles, e.target.files);
+                onAppendFiles(e.target.files);
                 // Allow selecting the same file again to trigger onChange.
                 e.target.value = "";
               }}
@@ -242,7 +314,7 @@ export function AttachmentsDialog({
                   size="small"
                   variant="text"
                   color="error"
-                  onClick={() => removeSelectedFile(setSelectedFiles, inputRef, index)}
+                  onClick={() => onRemoveFile(index)}
                 >
                   移除
                 </Button>
@@ -252,7 +324,7 @@ export function AttachmentsDialog({
           <Button
             size="small"
             variant="text"
-            onClick={() => clearSelectedFiles(setSelectedFiles, inputRef)}
+            onClick={onClearFiles}
             sx={{ mt: 1, alignSelf: "flex-start" }}
           >
             清空选择
@@ -311,7 +383,8 @@ export function AttachmentsDialog({
         </Box>
       )}
     </Box>
-  );
+    );
+  };
 
   const hasPendingChanges =
     (invoiceFiles?.length ?? 0) > 0 ||
@@ -329,6 +402,14 @@ export function AttachmentsDialog({
         formFiles: formFiles ?? [],
         removeInvoicePaths: removedInvoicePaths,
         removeFormPaths: removedFormPaths,
+        applyInvoiceFields:
+          applyOcrResult && ocrResult
+            ? {
+                invoiceDate: ocrResult.invoiceDate ?? null,
+                invoiceNumberString: ocrResult.invoiceNumberString ?? null,
+                invoiceAmount: ocrResult.invoiceAmount ?? null,
+              }
+            : null,
       });
     } catch (e) {
       const serverMessage = e?.response?.data?.message;
@@ -375,16 +456,84 @@ export function AttachmentsDialog({
               existingLabel: "已上传发票：",
               existingNamePrefix: "发票",
               selectedFiles: invoiceFiles,
-              setSelectedFiles: setInvoiceFiles,
-              inputRef: invoiceInputRef,
               existingEntries: record.invoiceImages,
               removedPaths: removedInvoicePaths,
               toggleRemoved: toggleInvoiceRemoved,
               dropKey: "invoice",
+              onAppendFiles: appendInvoiceFiles,
+              onRemoveFile: (index) =>
+                removeSelectedFile(setInvoiceFiles, index, {
+                  onClear: clearOcrState,
+                }),
+              onClearFiles: () =>
+                clearSelectedFiles(setInvoiceFiles, {
+                  onClear: clearOcrState,
+                }),
             })}
 
-           
+            {(ocrScanning || ocrResult || ocrError) && (
+              <Box
+                sx={{
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 1,
+                  p: 1.5,
+                  bgcolor: "grey.50",
+                }}
+              >
+                <Typography variant="subtitle2" gutterBottom>
+                  发票识别结果
+                </Typography>
+                {ocrScanning && (
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <CircularProgress size={18} />
+                    <Typography variant="body2" color="text.secondary">
+                      识别中…
+                    </Typography>
+                  </Box>
+                )}
+                {ocrError && !ocrScanning && (
+                  <Alert severity="warning" sx={{ mb: ocrResult ? 1 : 0 }}>
+                    {ocrError}
+                  </Alert>
+                )}
+                {ocrResult && !ocrScanning && (
+                  <>
+                    {ocrResult.source && (
+                      <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>
+                        来源：{INVOICE_OCR_SOURCE_LABELS[ocrResult.source] ?? ""}
+                      </Typography>
+                    )}
+                    <Typography variant="body2">
+                      发票号：{ocrResult.invoiceNumberString || "—"}
+                    </Typography>
+                    <Typography variant="body2">
+                      开票日期：{ocrResult.invoiceDate ? formatDate(ocrResult.invoiceDate) : "—"}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      发票金额（元）：{formatOcrAmount(ocrResult.invoiceAmount)}
+                    </Typography>
+                    {ocrResult.warnings?.length > 0 && (
+                      <Alert severity="info" sx={{ mb: 1 }}>
+                        {ocrResult.warnings.join("；")}
+                      </Alert>
+                    )}
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={applyOcrResult}
+                          onChange={(e) => setApplyOcrResult(e.target.checked)}
+                          disabled={!isOcrResultComplete(ocrResult)}
+                        />
+                      }
+                      label="应用识别结果到记录"
+                    />
+                  </>
+                )}
+              </Box>
+            )}
 
+           
             {renderAttachmentSection({
               sectionLabel: "业务招待清单附件（可上传多张）",
               selectLabel: "选择业务招待清单",
@@ -392,12 +541,13 @@ export function AttachmentsDialog({
               existingLabel: "已上传业务招待清单：",
               existingNamePrefix: "业务招待清单",
               selectedFiles: formFiles,
-              setSelectedFiles: setFormFiles,
-              inputRef: formInputRef,
               existingEntries: record.formImages,
               removedPaths: removedFormPaths,
               toggleRemoved: toggleFormRemoved,
               dropKey: "form",
+              onAppendFiles: (files) => appendDedupedFiles(setFormFiles, files),
+              onRemoveFile: (index) => removeSelectedFile(setFormFiles, index),
+              onClearFiles: () => clearSelectedFiles(setFormFiles),
             })}
           </Box>
         )}
