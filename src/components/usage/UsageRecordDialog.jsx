@@ -21,8 +21,9 @@ import usageRecordApi from "../../api/usageRecordApi";
 import { toNullableNumber } from "../../utils/numberUtils";
 import { UsageRecordBEErrorFieldToFEFormFieldMap } from "../../constants/BEErrorFieldToFEFormFieldMap";
 import { validationMessages } from "../../constants/validationMessages";
+import { usageRecordFieldLabels as fieldLabels } from "../../constants/recordFieldLabels";
 import { GIFT_PURCHASE_CATEGORIES } from "../../constants/giftPurchaseCategories";
-import { initialUsedByPurchaseLineIdFromUsageLines } from "../../utils/giftUsageLineFormUtils";
+import { initialUsedByPurchaseLineIdFromReceiptLines } from "../../utils/giftReceiptLineFormUtils";
 import UsageItemLinesFieldArray from "./UsageItemLinesFieldArray";
 
 const usageRecordCategoryOptions = [
@@ -37,24 +38,24 @@ function toDialogDefaultValues(record) {
       usageDate: "",
       departmentId: null,
       counterpartyId: null,
-      recipientId: null,
       remark: "",
-      giftInventoryLines: [],
+      giftReceiptLines: [],
     };
   }
   return {
     usageDate: record.usageDate ?? "",
     departmentId: record.departmentId ?? null,
     counterpartyId: record.counterpartyId ?? null,
-    recipientId: record.recipientId ?? null,
     remark: record.remark ?? "",
-    giftInventoryLines: (record.usageLines ?? [])
+    giftReceiptLines: (record.receiptLines ?? [])
       .filter(Boolean)
       .map((a) => ({
         category: a.category ?? "",
         purchaseLineId: a.purchaseLineId,
         quantity: a.quantity,
         unitPrice: a.unitPrice != null && a.unitPrice !== "" ? a.unitPrice : "",
+        recipientId: a.recipientId ?? null,
+        receiptDate: a.receiptDate ?? "",
       })),
   };
 }
@@ -68,8 +69,8 @@ export default function UsageRecordDialog({
   const isEditMode = !!editingRecord?.id;
   const initialUsedByPurchaseLineId = useMemo(
     () =>
-      initialUsedByPurchaseLineIdFromUsageLines(
-        editingRecord?.usageLines,
+      initialUsedByPurchaseLineIdFromReceiptLines(
+        editingRecord?.receiptLines,
       ),
     [editingRecord],
   );
@@ -107,9 +108,11 @@ export default function UsageRecordDialog({
 
     const payload = {
       ...data,
-      giftInventoryLines: data.giftInventoryLines.map((line) => ({
+      giftReceiptLines: data.giftReceiptLines.map((line) => ({
         purchaseLineId: toNullableNumber(line?.purchaseLineId, { integer: true }),
         quantity: toNullableNumber(line?.quantity, { integer: true }),
+        recipientId: toNullableNumber(line?.recipientId, { integer: true }),
+        receiptDate: line?.receiptDate || null,
       })),
     };
 
@@ -117,8 +120,8 @@ export default function UsageRecordDialog({
       if (isEditMode) {
         await usageRecordApi.update(editingRecord.id, payload);
       } else {
-        if (!payload.giftInventoryLines?.length) {
-          setError("giftInventoryLines", {
+        if (!payload.giftReceiptLines?.length) {
+          setError("giftReceiptLines", {
             type: "manual",
             message: "至少添加一条领用物品",
           });
@@ -170,7 +173,7 @@ export default function UsageRecordDialog({
           <DialogContent dividers>
             <Grid container spacing={2} sx={{ mt: 0.5 }}>
               <Grid size={{ xs: 12, sm: 6 }}>
-                <RHFTextField name="usageDate" label="领用日期" type="date" />
+                <RHFTextField name="usageDate" label={fieldLabels.usageDate} type="date" />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <RHFAutocomplete
@@ -187,13 +190,6 @@ export default function UsageRecordDialog({
                 setOptions={setCustomers}
                 fetchOptions={masterDataApi.searchCustomers}
               />
-              <RHFComboBox
-                name="recipientId"
-                label="领用人"
-                options={handlers ?? []}
-                setOptions={setHandlers}
-                fetchOptions={masterDataApi.searchHandlers}
-              />
               <RHFTextareaField
                 name="remark"
                 label="备注"
@@ -209,6 +205,9 @@ export default function UsageRecordDialog({
               clearErrors={clearErrors}
               initialUsedByPurchaseLineId={initialUsedByPurchaseLineId}
               allowedCategories={usageRecordCategoryOptions}
+              handlers={handlers}
+              setHandlers={setHandlers}
+              defaultReceiptDate={editingRecord?.usageDate ?? ""}
             />
           </DialogContent>
           <DialogActions sx={{ flexDirection: "column", alignItems: "stretch", px: 3, pb: 2 }}>

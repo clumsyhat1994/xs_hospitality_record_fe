@@ -1,26 +1,53 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
+  Box,
   IconButton,
   Button,
   Alert,
   Divider,
-  Typography,
+  Stack,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import purchaseRecordApi from "../../api/purchaseRecordApi";
-import {
-  flattenPurchaseRecordsToLines,
-} from "../../utils/giftUsageLineFormUtils";
+import masterDataApi from "../../api/masterDataApi";
+import { flattenPurchaseRecordsToLines } from "../../utils/giftReceiptLineFormUtils";
 import RHFCellTextField from "../form/RHFCellTextField";
 import RHFAutocomplete from "../form/RHFAutocomplete";
+import RHFComboBox from "../form/RHFComboBox";
 import { GIFT_PURCHASE_CATEGORY_OPTIONS } from "../../constants/giftPurchaseCategories";
+import { usageRecordFieldLabels as fieldLabels } from "../../constants/recordFieldLabels";
+
+const lineGridSx = {
+  display: "grid",
+  gridTemplateColumns: "32px repeat(12, minmax(0, 1fr)) 48px",
+  gridTemplateRows: "auto auto",
+  columnGap: 0.5,
+  rowGap: 3,
+  alignItems: "start",
+  pt: 3,
+  pb: 1,
+  px: 0.5,
+  border: 1,
+  borderColor: "divider",
+  borderRadius: 1,
+  bgcolor: (theme) =>
+    theme.palette.mode === "dark"
+      ? "action.selected"
+      : "grey.50",
+};
+
+const lineFieldSx = { px: 0.5, minWidth: 0 };
+
+const lineSideColumnSx = {
+  gridRow: "1 / 3",
+  alignSelf: "stretch",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  transform: "translateY(-8px)",
+};
 
 function formatDate(date) {
   return date.toISOString().slice(0, 10);
@@ -95,7 +122,7 @@ async function fetchEligiblePurchaseLinesByCategory(category, includeLineIds = [
   return flattenPurchaseRecordsToLines(categoryRecords);
 }
 
-function GiftInventoryLineRow({
+function GiftReceiptLineRow({
   fieldId,
   index,
   onRemove,
@@ -103,11 +130,13 @@ function GiftInventoryLineRow({
   loadCategoryLines,
   loadingCategoryLines,
   initialUsedByPurchaseLineId,
-  allGiftInventoryLines,
+  allGiftReceiptLines,
   categoryOptions,
+  handlers,
+  setHandlers,
 }) {
   const { setValue } = useFormContext();
-  const line = allGiftInventoryLines?.[index];
+  const line = allGiftReceiptLines?.[index];
   const selectedCategory = line?.category;
   const selectedPurchaseLineId = line?.purchaseLineId;
   const categoryPurchaseLines = selectedCategory
@@ -126,14 +155,14 @@ function GiftInventoryLineRow({
 
   const purchaseLineIdsTakenByOtherRows = useMemo(() => {
     const taken = new Set();
-    (allGiftInventoryLines ?? []).forEach((row, i) => {
+    (allGiftReceiptLines ?? []).forEach((row, i) => {
       if (i === index) return;
       const pid = row?.purchaseLineId;
       if (pid == null || String(pid).trim() === "") return;
       taken.add(String(pid));
     });
     return taken;
-  }, [allGiftInventoryLines, index]);
+  }, [allGiftReceiptLines, index]);
 
   const purchaseLineOptionsForRow = useMemo(
     () =>
@@ -153,10 +182,6 @@ function GiftInventoryLineRow({
     categoryPurchaseLinesWithRemaining.find(
       (purchaseLine) => String(purchaseLine.id) === String(selectedPurchaseLineId ?? ""),
     ) ?? null;
-  const selectedPurchaseLineLabel =
-    !selectedPurchaseLineId || !selectedPurchaseLineOption
-      ? ""
-      : getPurchaseLineLabel(selectedPurchaseLineOption);
   const maxAllowedQuantity = Math.max(
     0,
     selectedPurchaseLineOption != null
@@ -171,111 +196,64 @@ function GiftInventoryLineRow({
   }, [loadCategoryLines, selectedCategory]);
 
   return (
-    <TableRow
-      key={fieldId}
-      sx={{
-        "& > .MuiTableCell-root": {
-          borderBottom: "none",
-          verticalAlign: "top",
-        },
-      }}
-    >
-      <TableCell
-        align="center"
+    <Box key={fieldId} sx={lineGridSx}>
+      <Box
         sx={{
-          width: "40px",
-          pt: 0.8,
-          pb: 0,
-          pl: 0,
-          pr: 1,
+          ...lineSideColumnSx,
+          gridColumn: 1,
           color: "text.secondary",
         }}
       >
         {index + 1}
-      </TableCell>
-      <TableCell sx={{ width: "170px", pt: 0.8, pb: 0, px: 1 }}>
+      </Box>
+
+      <Box sx={{ ...lineFieldSx, gridRow: 1, gridColumn: "2 / 5" }}>
         <RHFAutocomplete
-          name={`giftInventoryLines.${index}.category`}
+          name={`giftReceiptLines.${index}.category`}
           label="礼品类型"
           options={categoryOptions}
           getOptionLabel={(option) => option.label}
           getOptionValue={(option) => option.value}
           rules={{ required: "请选择礼品类型" }}
           afterFieldValueChange={() => {
-            setValue(`giftInventoryLines.${index}.purchaseLineId`, "");
-            setValue(`giftInventoryLines.${index}.quantity`, "");
-            setValue(`giftInventoryLines.${index}.unitPrice`, "");
+            setValue(`giftReceiptLines.${index}.purchaseLineId`, "");
+            setValue(`giftReceiptLines.${index}.quantity`, "");
+            setValue(`giftReceiptLines.${index}.unitPrice`, "");
           }}
           required={false}
         />
-      </TableCell>
+      </Box>
 
-      <TableCell sx={{ width: "420px", pt: 0.8, pb: 0, px: 1 }}>
-        {selectedCategory && (
-          <RHFAutocomplete
-            name={`giftInventoryLines.${index}.purchaseLineId`}
-            label="采购明细"
-            options={purchaseLineOptionsForRow}
-            loading={Boolean(
-              selectedCategory && loadingCategoryLines[selectedCategory],
-            )}
-            getOptionValue={(option) => option.id}
-            getOptionLabel={getPurchaseLineLabel}
-            rules={{ required: "请选择采购明细" }}
-            afterFieldValueChange={(next) => {
-              setValue(`giftInventoryLines.${index}.quantity`, "");
-              const price =
-                next != null && next.unitPrice != null && next.unitPrice !== ""
-                  ? next.unitPrice
-                  : "";
-              setValue(`giftInventoryLines.${index}.unitPrice`, price);
-            }}
-            required={false}
-          />
-        )}
-        {selectedPurchaseLineLabel && (
-          <Typography
-            variant="caption"
-            sx={{ mt: 0.5, display: "block", color: "text.secondary" }}
-          >
-            {selectedPurchaseLineLabel}
-          </Typography>
-        )}
-      </TableCell>
+      <Box sx={{ ...lineFieldSx, gridRow: 1, gridColumn: "5 / 14" }}>
+        <RHFAutocomplete
+          name={`giftReceiptLines.${index}.purchaseLineId`}
+          label="采购明细"
+          options={purchaseLineOptionsForRow}
+          loading={Boolean(
+            selectedCategory && loadingCategoryLines[selectedCategory],
+          )}
+          getOptionValue={(option) => option.id}
+          getOptionLabel={getPurchaseLineLabel}
+          rules={{
+            validate: (value) => {
+              if (!selectedCategory) return true;
+              return value ? true : "请选择采购明细";
+            },
+          }}
+          afterFieldValueChange={(next) => {
+            setValue(`giftReceiptLines.${index}.quantity`, "");
+            const price =
+              next != null && next.unitPrice != null && next.unitPrice !== ""
+                ? next.unitPrice
+                : "";
+            setValue(`giftReceiptLines.${index}.unitPrice`, price);
+          }}
+          autocompleteProps={{ disabled: !selectedCategory }}
+          required={false}
+        />
+      </Box>
 
-      <TableCell sx={{ pt: 0.8, pb: 0, px: 1 }}>
-        {selectedPurchaseLineId && (
-          <RHFCellTextField
-            name={`giftInventoryLines.${index}.quantity`}
-            label="领用数量"
-            type="number"
-            rules={{
-              required: "请输入领用数量",
-              min: { value: 1, message: "数量至少为 1" },
-              validate: (value) => {
-                const quantity = Number(value);
-                if (!Number.isFinite(quantity)) return "请输入有效数量";
-                if (quantity > maxAllowedQuantity) {
-                  return `数量不能超过剩余库存 ${maxAllowedQuantity}`;
-                }
-                return true;
-              },
-            }}
-            slotProps={{
-              htmlInput: {
-                min: 1,
-                max: maxAllowedQuantity,
-              },
-            }}
-            helperText={`可领用上限：${maxAllowedQuantity}`}
-          />
-        )}
-      </TableCell>
-
-      <TableCell
-        align="center"
-        sx={{ width: "64px", pt: 0.8, pb: 0, pl: 1, pr: 0 }}
-      >
+      <Box sx={{ ...lineSideColumnSx, gridColumn: 14 }}>
         <IconButton
           color="error"
           onClick={() => onRemove(index)}
@@ -283,8 +261,62 @@ function GiftInventoryLineRow({
         >
           <DeleteIcon />
         </IconButton>
-      </TableCell>
-    </TableRow>
+      </Box>
+
+      <Box sx={{ ...lineFieldSx, gridRow: 2, gridColumn: "2 / 6" }}>
+        <RHFComboBox
+          name={`giftReceiptLines.${index}.recipientId`}
+          label={fieldLabels.recipient}
+          options={handlers ?? []}
+          setOptions={setHandlers}
+          fetchOptions={masterDataApi.searchHandlers}
+          rules={{ required: "请选择领用人" }}
+        />
+      </Box>
+
+      <Box sx={{ ...lineFieldSx, gridRow: 2, gridColumn: "6 / 10" }}>
+        <RHFCellTextField
+          name={`giftReceiptLines.${index}.receiptDate`}
+          label={fieldLabels.receiptDate}
+          type="date"
+          rules={{ required: "请选择领用日期" }}
+        />
+      </Box>
+
+      <Box sx={{ ...lineFieldSx, gridRow: 2, gridColumn: "10 / 14" }}>
+        <RHFCellTextField
+          name={`giftReceiptLines.${index}.quantity`}
+          label="领用数量"
+          type="number"
+          disabled={!selectedPurchaseLineId}
+          rules={{
+            validate: (value) => {
+              if (!selectedPurchaseLineId) return true;
+              if (value === "" || value == null) return "请输入领用数量";
+              const quantity = Number(value);
+              if (!Number.isFinite(quantity)) return "请输入有效数量";
+              if (quantity < 1) return "数量至少为 1";
+              if (quantity > maxAllowedQuantity) {
+                return `数量不能超过剩余库存 ${maxAllowedQuantity}`;
+              }
+              return true;
+            },
+          }}
+          slotProps={{
+            htmlInput: {
+              min: 1,
+              max: maxAllowedQuantity,
+            },
+          }}
+          helperText={
+            selectedPurchaseLineId
+              ? `可领用上限：${maxAllowedQuantity}`
+              : undefined
+          }
+          required={false}
+        />
+      </Box>
+    </Box>
   );
 }
 
@@ -294,16 +326,19 @@ export default function UsageItemLinesFieldArray({
   clearErrors,
   initialUsedByPurchaseLineId = {},
   allowedCategories,
+  handlers = [],
+  setHandlers,
+  defaultReceiptDate = "",
 }) {
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "giftInventoryLines",
+    name: "giftReceiptLines",
   });
   const [purchaseLinesByCategory, setPurchaseLinesByCategory] = useState({});
   const [loadingByCategory, setLoadingByCategory] = useState({});
-  const giftInventoryLines = useWatch({
+  const giftReceiptLines = useWatch({
     control,
-    name: "giftInventoryLines",
+    name: "giftReceiptLines",
   });
 
   const categoryOptions = useMemo(() => {
@@ -323,13 +358,15 @@ export default function UsageItemLinesFieldArray({
       purchaseLineId: "",
       quantity: "",
       unitPrice: "",
+      recipientId: null,
+      receiptDate: defaultReceiptDate,
     });
-    clearErrors("giftInventoryLines");
+    clearErrors("giftReceiptLines");
   };
 
   const handleRemove = (index) => {
     remove(index);
-    clearErrors("giftInventoryLines");
+    clearErrors("giftReceiptLines");
   };
 
   const loadCategoryLines = async (category) => {
@@ -359,26 +396,24 @@ export default function UsageItemLinesFieldArray({
   return (
     <>
       <Divider sx={{ mt: 2, mb: 2, fontSize: 13 }}>领用物品</Divider>
-      <TableContainer sx={{ mt: 0.5 }}>
-        <Table size="small" sx={{ width: "100%", tableLayout: "fixed" }}>
-          <TableBody>
-            {fields.map((field, index) => (
-              <GiftInventoryLineRow
-                key={field.id}
-                fieldId={field.id}
-                index={index}
-                onRemove={handleRemove}
-                purchaseLinesByCategory={purchaseLinesByCategory}
-                loadCategoryLines={loadCategoryLines}
-                loadingCategoryLines={loadingByCategory}
-                initialUsedByPurchaseLineId={initialUsedByPurchaseLineId}
-                allGiftInventoryLines={giftInventoryLines}
-                categoryOptions={categoryOptions}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <Stack spacing={1} sx={{ mt: 0.5 }}>
+        {fields.map((field, index) => (
+          <GiftReceiptLineRow
+            key={field.id}
+            fieldId={field.id}
+            index={index}
+            onRemove={handleRemove}
+            purchaseLinesByCategory={purchaseLinesByCategory}
+            loadCategoryLines={loadCategoryLines}
+            loadingCategoryLines={loadingByCategory}
+            initialUsedByPurchaseLineId={initialUsedByPurchaseLineId}
+            allGiftReceiptLines={giftReceiptLines}
+            categoryOptions={categoryOptions}
+            handlers={handlers}
+            setHandlers={setHandlers}
+          />
+        ))}
+      </Stack>
       <Button
         sx={{ mt: 1, minHeight: 40 }}
         size="small"
@@ -389,9 +424,9 @@ export default function UsageItemLinesFieldArray({
         <AddIcon fontSize="small" />
         点击添加物品
       </Button>
-      {errors?.giftInventoryLines?.message && (
+      {errors?.giftReceiptLines?.message && (
         <Alert sx={{ mt: 1 }} severity="error">
-          {errors.giftInventoryLines.message}
+          {errors.giftReceiptLines.message}
         </Alert>
       )}
     </>

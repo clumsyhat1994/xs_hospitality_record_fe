@@ -33,11 +33,12 @@ export const hospitalityRecordFieldLabels = {
 
 export const usageRecordFieldLabels = {
   ...sharedRecordFieldLabels,
-  usageDate: "领用日期",
+  usageDate: "使用日期",
   department: "部门",
   counterparty: "招待对象",
   recipient: "领用人",
-  usageLines: "领用明细",
+  receiptDate: "领用日期",
+  receiptLines: "领用明细",
   usedQuantity: "领用数量",
   hospitalityRecordId: "招待记录",
   createdAt: "创建时间",

@@ -22,9 +22,9 @@ import {
   purchaseRecordFieldLabels as purchaseLabels,
 } from "../../constants/recordFieldLabels";
 
-function usageLinesForPurchaseLine(usage, purchaseLineId) {
+function receiptLinesForPurchaseLine(usage, purchaseLineId) {
   if (!purchaseLineId) return [];
-  return (usage.usageLines ?? []).filter(
+  return (usage.receiptLines ?? []).filter(
     (line) => line.purchaseLineId === purchaseLineId,
   );
 }
@@ -117,10 +117,10 @@ export default function PurchaseRelatedUsagesDialog({
             <Table size="small" stickyHeader>
               <TableHead>
                 <TableRow>
-                  <TableCell>{usageLabels.usageDate}</TableCell>
+                  <TableCell>{usageLabels.receiptDate}</TableCell>
+                  <TableCell>{usageLabels.recipient}</TableCell>
                   <TableCell>{usageLabels.department}</TableCell>
                   <TableCell>{usageLabels.counterparty}</TableCell>
-                  <TableCell>{usageLabels.recipient}</TableCell>
                   <TableCell>{purchaseLabels.productName}</TableCell>
                   <TableCell>{purchaseLabels.specification}</TableCell>
                   <TableCell align="right">{usageLabels.usedQuantity}</TableCell>
@@ -129,42 +129,46 @@ export default function PurchaseRelatedUsagesDialog({
               </TableHead>
               <TableBody>
                 {usages.flatMap((usage) => {
-                  const lines = usageLinesForPurchaseLine(usage, purchaseLineId);
+                  const lines = receiptLinesForPurchaseLine(usage, purchaseLineId);
                   if (!lines.length) return [];
                   return lines.map((line, lineIndex) => (
                     <TableRow
-                      key={`${usage.id}-${line.purchaseLineId ?? lineIndex}`}
+                      key={`${usage.id}-${line.purchaseLineId ?? lineIndex}-${line.recipientId ?? lineIndex}`}
                       hover
                     >
                       <TableCell>
-                        {lineIndex === 0
-                          ? formatDisplayDate(usage.usageDate)
-                          : ""}
+                        {formatDisplayDate(line.receiptDate)}
                       </TableCell>
                       <TableCell>
-                        {lineIndex === 0 ? (usage.departmentName ?? "—") : ""}
+                        {line.recipientName ?? "—"}
                       </TableCell>
-                      <TableCell>
-                        {lineIndex === 0 ? (usage.counterpartyName ?? "—") : ""}
-                      </TableCell>
-                      <TableCell>
-                        {lineIndex === 0 ? (usage.recipientName ?? "—") : ""}
-                      </TableCell>
+                      {lineIndex === 0 && (
+                        <>
+                          <TableCell rowSpan={lines.length}>
+                            {usage.departmentName ?? "—"}
+                          </TableCell>
+                          <TableCell rowSpan={lines.length}>
+                            {usage.counterpartyName ?? "—"}
+                          </TableCell>
+                        </>
+                      )}
                       <TableCell>{line.productName ?? "—"}</TableCell>
                       <TableCell>{line.specification ?? "—"}</TableCell>
                       <TableCell align="right">
                         {line.quantity ?? "—"}
                       </TableCell>
-                      <TableCell>
-                        {lineIndex === 0 ? (usage.remark ?? "") : ""}
-                      </TableCell>
+                      {lineIndex === 0 && (
+                        <TableCell rowSpan={lines.length}>
+                          {usage.remark ?? ""}
+                        </TableCell>
+                      )}
                     </TableRow>
                   ));
                 })}
                 {!loading &&
                   usages.every(
                     (u) =>
-                      usageLinesForPurchaseLine(u, purchaseLineId).length === 0,
+                      receiptLinesForPurchaseLine(u, purchaseLineId).length === 0,
                   ) && (
                     <TableRow>
                       <TableCell colSpan={8} align="center">

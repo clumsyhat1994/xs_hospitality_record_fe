@@ -85,7 +85,6 @@ function RecordLeadingCells({ record, rowSpan, onEditRow, onDeleteRow }) {
       </TableCell>
       <TableCell rowSpan={rowSpan}>{record.departmentName}</TableCell>
       <TableCell rowSpan={rowSpan}>{record.counterpartyName}</TableCell>
-      <TableCell rowSpan={rowSpan}>{record.recipientName}</TableCell>
     </>
   );
 }
@@ -106,6 +105,12 @@ function RecordTrailingCells({ record, rowSpan }) {
 function UsageLineCells({ line }) {
   return (
     <>
+      <TableCell sx={{ ...usageLineCellSx, whiteSpace: "nowrap" }}>
+        {formatPurchaseDateForSlice(line.receiptDate)}
+      </TableCell>
+      <TableCell sx={{ ...usageLineCellSx, whiteSpace: "nowrap" }}>
+        {line.recipientName ?? "—"}
+      </TableCell>
       <TableCell sx={{ ...usageLineCellSx, wordBreak: "break-word" }}>
         {line.productName ?? "—"}
       </TableCell>
@@ -174,11 +179,8 @@ export default function UsageRecordsTable({
             <TableCell sx={{ minWidth: 160 }}>
               {fieldLabels.counterparty}
             </TableCell>
-            <TableCell sx={{ minWidth: 100 }}>
-              {fieldLabels.recipient}
-            </TableCell>
-            <TableCell colSpan={5} align="center" sx={{ minWidth: 360 }}>
-              {fieldLabels.usageLines}
+            <TableCell colSpan={7} align="center" sx={{ minWidth: 480 }}>
+              {fieldLabels.receiptLines}
             </TableCell>
             <TableCell align="center" sx={{ minWidth: 200 }}>
               {fieldLabels.remark}
@@ -203,7 +205,13 @@ export default function UsageRecordsTable({
               },
             }}
           >
-            <TableCell colSpan={5} sx={{ p: 0, border: 0 }} />
+            <TableCell colSpan={4} sx={{ p: 0, border: 0 }} />
+            <TableCell sx={{ minWidth: 100 }}>
+              {fieldLabels.receiptDate}
+            </TableCell>
+            <TableCell sx={{ minWidth: 100 }}>
+              {fieldLabels.recipient}
+            </TableCell>
             <TableCell sx={{ minWidth: 100 }}>
               {purchaseLabels.productName}
             </TableCell>
@@ -227,7 +235,7 @@ export default function UsageRecordsTable({
           {loading ? (
             Array.from({ length: 10 }).map((_, index) => (
               <TableRow key={index}>
-                {Array.from({ length: 12 }).map((__, i) => (
+                {Array.from({ length: 14 }).map((__, i) => (
                   <TableCell key={i}>
                     <Skeleton height={26} />
                   </TableCell>
@@ -237,7 +245,7 @@ export default function UsageRecordsTable({
           ) : (
             <>
               {records.flatMap((record) => {
-                const lines = record.usageLines ?? [];
+                const lines = record.receiptLines ?? [];
 
                 if (!lines.length) {
                   return [
@@ -248,7 +256,7 @@ export default function UsageRecordsTable({
                         onEditRow={onEditRow}
                         onDeleteRow={onDeleteRow}
                       />
-                      <TableCell colSpan={5} align="center">
+                      <TableCell colSpan={7} align="center">
                         —
                       </TableCell>
                       <RecordTrailingCells record={record} rowSpan={1} />
@@ -282,7 +290,7 @@ export default function UsageRecordsTable({
 
               {records.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={12} align="left">
+                  <TableCell colSpan={14} align="left">
                     暂无领用记录
                   </TableCell>
                 </TableRow>

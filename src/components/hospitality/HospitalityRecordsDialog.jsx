@@ -32,7 +32,7 @@ import RHFTextareaField from "../form/RHFTextareaField";
 import MasterDataDialog from "../master-data/MasterDataDialog";
 import RHFAutocomplete from "../form/RHFAutocomplete";
 import { toNullableNumber } from "../../utils/numberUtils";
-import { initialUsedByPurchaseLineIdFromUsageLines } from "../../utils/giftUsageLineFormUtils";
+import { initialUsedByPurchaseLineIdFromReceiptLines } from "../../utils/giftReceiptLineFormUtils";
 import { GIFT_PURCHASE_CATEGORIES } from "../../constants/giftPurchaseCategories";
 
 const DEPTWITHQUOTA = ["SCYWB", "QCCZB"];
@@ -42,32 +42,32 @@ const DEPTWITHQUOTA = ["SCYWB", "QCCZB"];
 /**
  * Gift usage: API read model vs form write field.
  *
- * - {@code giftUsageLines}: returned by the backend on hospitality records (resolved usage lines for display).
- * - {@code giftInventoryLines}: react-hook-form field for the same lines in the UI. When opening the dialog we
- *   copy {@code giftUsageLines} into {@code giftInventoryLines} (see {@link toHospitalityFormDefaults}) so
- *   {@code UsageItemLinesFieldArray} can edit them. Each line keeps {@code category}, {@code purchaseLineId},
- *   {@code quantity}, and client-only {@code unitPrice} for totals.
- * - On save, the client sends {@code giftInventoryLines} as {@code GiftInventoryLineDTO} ({@code purchaseLineId}, {@code quantity}).
+ * - {@code giftReceiptLines}: returned by the backend on hospitality records (resolved receipt lines for display).
+ * - Form field {@code giftReceiptLines}: when opening the dialog we copy API {@code giftReceiptLines} into the
+ *   form (see {@link toHospitalityFormDefaults}) so {@code UsageItemLinesFieldArray} can edit them.
+ * - On save, the client sends {@code giftReceiptLines} as {@code GiftReceiptLineInputDTO}.
  */
 
-/** Seeds form {@code giftInventoryLines} from API {@code giftUsageLines} when opening. */
+/** Seeds form {@code giftReceiptLines} from API {@code giftReceiptLines} when opening. */
 function toHospitalityFormDefaults(values) {
   if (!values) return values;
-  const alloc = values.giftUsageLines;
+  const alloc = values.giftReceiptLines;
   if (Array.isArray(alloc) && alloc.length > 0) {
     return {
       ...values,
-      giftInventoryLines: alloc.filter(Boolean).map((a) => ({
+      giftReceiptLines: alloc.filter(Boolean).map((a) => ({
         category: a.category ?? "",
         purchaseLineId: a.purchaseLineId,
         quantity: a.quantity,
         unitPrice: a.unitPrice != null && a.unitPrice !== "" ? a.unitPrice : "",
+        recipientId: a.recipientId ?? null,
+        receiptDate: a.receiptDate ?? "",
       })),
     };
   }
   return {
     ...values,
-    giftInventoryLines: [],
+    giftReceiptLines: [],
   };
 }
 
@@ -86,8 +86,8 @@ export default function HospitalityRecordDialog({
 
   const initialUsedByPurchaseLineId = useMemo(
     () =>
-      initialUsedByPurchaseLineIdFromUsageLines(
-        initialValues?.giftUsageLines,
+      initialUsedByPurchaseLineIdFromReceiptLines(
+        initialValues?.giftReceiptLines,
       ),
     [initialValues],
   );
@@ -161,8 +161,8 @@ export default function HospitalityRecordDialog({
               quantity: toNullableNumber(item?.quantity, { integer: true }),
             }))
           : data.items,
-        giftInventoryLines: Array.isArray(data.giftInventoryLines)
-          ? data.giftInventoryLines
+        giftReceiptLines: Array.isArray(data.giftReceiptLines)
+          ? data.giftReceiptLines
               .map((line) => {
                 const purchaseLineId = toNullableNumber(line?.purchaseLineId, {
                   integer: true,
@@ -170,15 +170,19 @@ export default function HospitalityRecordDialog({
                 const quantity = toNullableNumber(line?.quantity, {
                   integer: true,
                 });
-                if (!purchaseLineId || !quantity || quantity < 1) return null;
+                const recipientId = toNullableNumber(line?.recipientId, {
+                  integer: true,
+                });
+                if (!purchaseLineId || !quantity || quantity < 1 || !recipientId) return null;
                 return {
-                  id: toNullableNumber(line?.id, { integer: true }),
                   purchaseLineId,
                   quantity,
+                  recipientId,
+                  receiptDate: line?.receiptDate || null,
                 };
               })
               .filter(Boolean)
-          : data.giftInventoryLines,
+          : data.giftReceiptLines,
       };
       data = cleanData(normalized);
       if (isEditMode) {
@@ -188,7 +192,7 @@ export default function HospitalityRecordDialog({
         // create
         const createPayload = {
           ...data,
-          giftInventoryLines: data.giftInventoryLines ?? [],
+          giftReceiptLines: data.giftReceiptLines ?? [],
         };
         res = await hospitalityApi.create(createPayload, confirm);
       }
@@ -348,7 +352,7 @@ export default function HospitalityRecordDialog({
                     (sum, item) => sum + (Number(item?.lineTotal) || 0),
                     0,
                   );
-                  const giftLines = values?.giftInventoryLines ?? [];
+                  const giftLines = values?.giftReceiptLines ?? [];
 
                   const giftLinesTotal = giftLines.reduce((sum, line) => {
                     const q = Number(line?.quantity);
@@ -446,6 +450,8 @@ export default function HospitalityRecordDialog({
                 clearErrors={clearErrors}
                 initialUsedByPurchaseLineId={initialUsedByPurchaseLineId}
                 allowedCategories={[GIFT_PURCHASE_CATEGORIES.BEVERAGE]}
+                handlers={handlers}
+                setHandlers={setHandlers}
               />
             )}
           </DialogContent>

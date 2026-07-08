@@ -1,14 +1,14 @@
 /**
- * Sum saved usage quantities per purchase line id (includePurchaseLineIds / remaining ceiling baselines).
+ * Sum saved receipt quantities per purchase line id (includePurchaseLineIds / remaining ceiling baselines).
  *
- * @param {unknown[]|undefined|null} usageLines
+ * @param {unknown[]|undefined|null} receiptLines
  * @returns {Record<string, number>}
  */
-export function initialUsedByPurchaseLineIdFromUsageLines(usageLines) {
-  if (!Array.isArray(usageLines) || usageLines.length === 0) {
+export function initialUsedByPurchaseLineIdFromReceiptLines(receiptLines) {
+  if (!Array.isArray(receiptLines) || receiptLines.length === 0) {
     return {};
   }
-  return usageLines.filter(Boolean).reduce((acc, line) => {
+  return receiptLines.filter(Boolean).reduce((acc, line) => {
     const purchaseLineId = line?.purchaseLineId;
     const quantity = Number(line?.quantity);
     if (!purchaseLineId || !Number.isFinite(quantity) || quantity <= 0) return acc;
@@ -18,7 +18,7 @@ export function initialUsedByPurchaseLineIdFromUsageLines(usageLines) {
   }, {});
 }
 
-/** Flatten purchase records into selectable purchase lines for gift usage forms. */
+/** Flatten purchase records into selectable purchase lines for gift receipt forms. */
 export function flattenPurchaseRecordsToLines(records) {
   if (!Array.isArray(records)) return [];
   const out = [];
