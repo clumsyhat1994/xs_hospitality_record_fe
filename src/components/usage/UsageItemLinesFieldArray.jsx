@@ -29,13 +29,9 @@ const lineGridSx = {
   pt: 3,
   pb: 1,
   px: 0.5,
-  border: 1,
-  borderColor: "divider",
+  border: "1px dashed",
+  borderColor: "primary.light",
   borderRadius: 1,
-  bgcolor: (theme) =>
-    theme.palette.mode === "dark"
-      ? "action.selected"
-      : "grey.50",
 };
 
 const lineFieldSx = { px: 0.5, minWidth: 0 };
@@ -73,6 +69,17 @@ function purchaseLineRemainingCeiling(line, initialUsedByPurchaseLineId) {
   const baseline =
     Number(initialUsedByPurchaseLineId[String(line.id)] ?? 0) || 0;
   return Number(line.remainingQuantity ?? 0) + baseline;
+}
+
+function quantityAllocatedInOtherRows(allLines, rowIndex, purchaseLineId) {
+  if (purchaseLineId == null || String(purchaseLineId).trim() === "") return 0;
+  const targetId = String(purchaseLineId);
+  return (allLines ?? []).reduce((sum, row, i) => {
+    if (i === rowIndex) return sum;
+    if (String(row?.purchaseLineId ?? "") !== targetId) return sum;
+    const quantity = Number(row?.quantity);
+    return sum + (Number.isFinite(quantity) && quantity > 0 ? quantity : 0);
+  }, 0);
 }
 
 function buildIncludePurchaseLineIdsForUsage(initialUsedByPurchaseLineId) {
@@ -142,51 +149,51 @@ function GiftReceiptLineRow({
   const categoryPurchaseLines = selectedCategory
     ? (purchaseLinesByCategory[selectedCategory] ?? [])
     : [];
-  const categoryPurchaseLinesWithRemaining = categoryPurchaseLines.map((purchaseLine) => {
-    const ceiling = purchaseLineRemainingCeiling(
-      purchaseLine,
-      initialUsedByPurchaseLineId,
-    );
-    return {
-      ...purchaseLine,
-      effectiveRemainingQuantity: Math.max(0, ceiling),
-    };
-  });
-
-  const purchaseLineIdsTakenByOtherRows = useMemo(() => {
-    const taken = new Set();
-    (allGiftReceiptLines ?? []).forEach((row, i) => {
-      if (i === index) return;
-      const pid = row?.purchaseLineId;
-      if (pid == null || String(pid).trim() === "") return;
-      taken.add(String(pid));
-    });
-    return taken;
-  }, [allGiftReceiptLines, index]);
-
-  const purchaseLineOptionsForRow = useMemo(
+  const categoryPurchaseLinesWithRemaining = useMemo(
     () =>
-      categoryPurchaseLinesWithRemaining.filter(
-        (r) =>
-          !purchaseLineIdsTakenByOtherRows.has(String(r.id)) ||
-          String(r.id) === String(selectedPurchaseLineId ?? ""),
-      ),
+      categoryPurchaseLines.map((purchaseLine) => {
+        const ceiling = purchaseLineRemainingCeiling(
+          purchaseLine,
+          initialUsedByPurchaseLineId,
+        );
+        const allocatedElsewhere = quantityAllocatedInOtherRows(
+          allGiftReceiptLines,
+          index,
+          purchaseLine.id,
+        );
+        return {
+          ...purchaseLine,
+          effectiveRemainingQuantity: Math.max(0, ceiling - allocatedElsewhere),
+        };
+      }),
     [
-      categoryPurchaseLinesWithRemaining,
-      purchaseLineIdsTakenByOtherRows,
-      selectedPurchaseLineId,
+      categoryPurchaseLines,
+      initialUsedByPurchaseLineId,
+      allGiftReceiptLines,
+      index,
     ],
   );
+
+  const purchaseLineOptionsForRow = categoryPurchaseLinesWithRemaining;
 
   const selectedPurchaseLineOption =
     categoryPurchaseLinesWithRemaining.find(
       (purchaseLine) => String(purchaseLine.id) === String(selectedPurchaseLineId ?? ""),
     ) ?? null;
+    
   const maxAllowedQuantity = Math.max(
     0,
     selectedPurchaseLineOption != null
       ? Number(selectedPurchaseLineOption.effectiveRemainingQuantity ?? 0)
-      : initialUsedByPurchaseLineId[String(selectedPurchaseLineId ?? "")] || 0,
+      : Math.max(
+          0,
+          (initialUsedByPurchaseLineId[String(selectedPurchaseLineId ?? "")] || 0) -
+            quantityAllocatedInOtherRows(
+              allGiftReceiptLines,
+              index,
+              selectedPurchaseLineId,
+            ),
+        ),
   );
 
   useEffect(() => {
@@ -340,6 +347,16 @@ export default function UsageItemLinesFieldArray({
     control,
     name: "giftReceiptLines",
   });
+  const { getFieldState } = useFormContext();
+
+  // Backend errors attach to giftReceiptLines (array root), not nested paths like
+  // giftReceiptLines.0.receiptDate — clear the root server error when lines change
+  // so handleSubmit is not blocked after the user fixes a line.
+  useEffect(() => {
+    if (getFieldState("giftReceiptLines").error?.type === "server") {
+      clearErrors("giftReceiptLines");
+    }
+  }, [giftReceiptLines, clearErrors, getFieldState]);
 
   const categoryOptions = useMemo(() => {
     if (!allowedCategories?.length) return GIFT_PURCHASE_CATEGORY_OPTIONS;
@@ -425,7 +442,11 @@ export default function UsageItemLinesFieldArray({
         点击添加物品
       </Button>
       {errors?.giftReceiptLines?.message && (
-        <Alert sx={{ mt: 1 }} severity="error">
+        <Alert
+          id="gift-receipt-lines-error"
+          sx={{ mt: 1, whiteSpace: "pre-line" }}
+          severity="error"
+        >
           {errors.giftReceiptLines.message}
         </Alert>
       )}

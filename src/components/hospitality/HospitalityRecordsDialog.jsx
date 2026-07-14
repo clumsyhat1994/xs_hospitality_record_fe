@@ -9,6 +9,8 @@ import {
   TextField,
   IconButton,
   Tooltip,
+  Alert,
+  Box,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { useForm, useWatch, FormProvider } from "react-hook-form";
@@ -33,6 +35,7 @@ import MasterDataDialog from "../master-data/MasterDataDialog";
 import RHFAutocomplete from "../form/RHFAutocomplete";
 import { toNullableNumber } from "../../utils/numberUtils";
 import { initialUsedByPurchaseLineIdFromReceiptLines } from "../../utils/giftReceiptLineFormUtils";
+import { notifyFormValidationBlocked } from "../../utils/formValidationUtils";
 import { GIFT_PURCHASE_CATEGORIES } from "../../constants/giftPurchaseCategories";
 
 const DEPTWITHQUOTA = ["SCYWB", "QCCZB"];
@@ -121,10 +124,12 @@ export default function HospitalityRecordDialog({
   } = useMasterData();
 
   const [softErrors, setSoftErrors] = useState([]);
+  const [validationHint, setValidationHint] = useState("");
   const { departmentCode: userDepartmentCode, isAdmin, user } = useAuth();
 
   useEffect(() => {
     if (!open) return;
+    setValidationHint("");
     reset(toHospitalityFormDefaults(initialValues));
     if (!isAdmin) setValue("departmentCode", userDepartmentCode);
   }, [initialValues, isAdmin, open, reset, setValue, userDepartmentCode]);
@@ -146,6 +151,7 @@ export default function HospitalityRecordDialog({
   };
 
   const submit = async (data, confirm = false) => {
+    setValidationHint("");
     try {
       let res;
 
@@ -225,7 +231,14 @@ export default function HospitalityRecordDialog({
             existingErrorMessage + (validationMessages[e.code] ?? e.message),
         });
       });
+      if (hasHardErrors) {
+        notifyFormValidationBlocked(methods.formState.errors, setValidationHint);
+      }
     }
+  };
+
+  const onValidationFailed = (formErrors) => {
+    notifyFormValidationBlocked(formErrors, setValidationHint);
   };
 
   return (
@@ -456,15 +469,22 @@ export default function HospitalityRecordDialog({
             )}
           </DialogContent>
 
-          <DialogActions>
-            <Button onClick={onClose}>取消</Button>
-            <Button
-              variant="contained"
-              disabled={isSubmitting}
-              onClick={handleSubmit((data) => submit(data))}
-            >
-              {isSubmitting ? "保存中..." : "保存"}
-            </Button>
+          <DialogActions sx={{ flexDirection: "column", alignItems: "stretch", px: 3, pb: 2 }}>
+            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, width: "100%" }}>
+              <Button onClick={onClose}>取消</Button>
+              <Button
+                variant="contained"
+                disabled={isSubmitting}
+                onClick={handleSubmit((data) => submit(data), onValidationFailed)}
+              >
+                {isSubmitting ? "保存中..." : "保存"}
+              </Button>
+            </Box>
+            {validationHint ? (
+              <Alert severity="warning" sx={{ width: "100%" }}>
+                {validationHint}
+              </Alert>
+            ) : null}
           </DialogActions>
         </Dialog>
 

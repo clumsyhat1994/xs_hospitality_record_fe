@@ -9,7 +9,7 @@ import {
   Grid,
   Alert,
 } from "@mui/material";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import RHFTextField from "../form/RHFTextField";
 import RHFComboBox from "../form/RHFComboBox";
 import RHFAutocomplete from "../form/RHFAutocomplete";
@@ -24,6 +24,7 @@ import { validationMessages } from "../../constants/validationMessages";
 import { usageRecordFieldLabels as fieldLabels } from "../../constants/recordFieldLabels";
 import { GIFT_PURCHASE_CATEGORIES } from "../../constants/giftPurchaseCategories";
 import { initialUsedByPurchaseLineIdFromReceiptLines } from "../../utils/giftReceiptLineFormUtils";
+import { notifyFormValidationBlocked } from "../../utils/formValidationUtils";
 import UsageItemLinesFieldArray from "./UsageItemLinesFieldArray";
 
 const usageRecordCategoryOptions = [
@@ -75,6 +76,7 @@ export default function UsageRecordDialog({
     [editingRecord],
   );
   const [submitError, setSubmitError] = useState("");
+  const [validationHint, setValidationHint] = useState("");
   const methods = useForm({
     mode: "onChange",
     reValidateMode: "onChange",
@@ -86,8 +88,10 @@ export default function UsageRecordDialog({
     handleSubmit,
     setError,
     clearErrors,
+    getFieldState,
     formState: { isSubmitting, errors },
   } = methods;
+  const usageDate = useWatch({ control, name: "usageDate" });
 
   const {
     departments,
@@ -100,11 +104,17 @@ export default function UsageRecordDialog({
   useEffect(() => {
     if (!open) return;
     setSubmitError("");
+    setValidationHint("");
     reset(toDialogDefaultValues(editingRecord));
   }, [open, reset, editingRecord]);
 
+  const onValidationFailed = (formErrors) => {
+    notifyFormValidationBlocked(formErrors, setValidationHint);
+  };
+
   const submit = async (data) => {
     setSubmitError("");
+    setValidationHint("");
 
     const payload = {
       ...data,
@@ -121,10 +131,15 @@ export default function UsageRecordDialog({
         await usageRecordApi.update(editingRecord.id, payload);
       } else {
         if (!payload.giftReceiptLines?.length) {
+          const message = "至少添加一条领用物品";
           setError("giftReceiptLines", {
             type: "manual",
-            message: "至少添加一条领用物品",
+            message,
           });
+          notifyFormValidationBlocked(
+            { giftReceiptLines: { message } },
+            setValidationHint,
+          );
           return;
         }
         await usageRecordApi.create(payload);
@@ -147,7 +162,14 @@ export default function UsageRecordDialog({
           const message = validationMessages[e?.code] ?? e?.message ?? "提交失败";
 
           if (fieldName) {
-            setError(fieldName, { type: "server", message });
+            const fieldState = getFieldState(fieldName);
+            const existingErrorMessage = fieldState.error
+              ? `${fieldState.error.message}\n`
+              : "";
+            setError(fieldName, {
+              type: "server",
+              message: existingErrorMessage + message,
+            });
           } else {
             globalMessages.push(message);
           }
@@ -156,6 +178,7 @@ export default function UsageRecordDialog({
         if (globalMessages.length > 0) {
           setSubmitError(globalMessages.join("；"));
         }
+        notifyFormValidationBlocked(methods.formState.errors, setValidationHint);
         return;
       }
 
@@ -207,7 +230,7 @@ export default function UsageRecordDialog({
               allowedCategories={usageRecordCategoryOptions}
               handlers={handlers}
               setHandlers={setHandlers}
-              defaultReceiptDate={editingRecord?.usageDate ?? ""}
+              defaultReceiptDate={usageDate ?? ""}
             />
           </DialogContent>
           <DialogActions sx={{ flexDirection: "column", alignItems: "stretch", px: 3, pb: 2 }}>
@@ -216,11 +239,16 @@ export default function UsageRecordDialog({
               <Button
                 variant="contained"
                 disabled={isSubmitting}
-                onClick={handleSubmit(submit)}
+                onClick={handleSubmit(submit, onValidationFailed)}
               >
                 {isSubmitting ? "保存中..." : isEditMode ? "更新" : "保存"}
               </Button>
             </Box>
+            {validationHint ? (
+              <Alert severity="warning" sx={{ width: "100%" }}>
+                {validationHint}
+              </Alert>
+            ) : null}
             {submitError ? (
               <Alert severity="error" sx={{ width: "100%" }}>
                 {submitError}

@@ -45,7 +45,6 @@ export default function PurchaseRecordsTable({
   const handleChangeRowsPerPage = (event) => {
     const newSize = parseInt(event.target.value, 10);
     setSize(newSize);
-    setPage(0);
   };
 
   return (

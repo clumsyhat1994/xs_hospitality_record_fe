@@ -271,7 +271,7 @@ export default function HospitalityRecords() {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
       next.set("page", String(newPage));
-      next.set("size", String(size));
+      if (!next.get("size")?.trim()) next.set("size", "10");
       return next;
     });
   };
