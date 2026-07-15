@@ -28,6 +28,7 @@ import { notifyFormValidationBlocked } from "../../utils/formValidationUtils";
 import UsageItemLinesFieldArray from "./UsageItemLinesFieldArray";
 
 const usageRecordCategoryOptions = [
+  GIFT_PURCHASE_CATEGORIES.BEVERAGE,
   GIFT_PURCHASE_CATEGORIES.BUSINESS_GIFT,
   GIFT_PURCHASE_CATEGORIES.TEA,
   GIFT_PURCHASE_CATEGORIES.FRUIT,
