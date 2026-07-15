@@ -455,18 +455,18 @@ export default function HospitalityRecordDialog({
               </Grid>
               <RHFTextareaField name={"remark"} label={fieldLabels.remark} />
             </Grid>
-            <HospitalityItemsFieldArray control={control} name="items" />
             {isAdmin && (
-              <UsageItemLinesFieldArray
-                control={control}
-                errors={errors}
-                clearErrors={clearErrors}
-                initialUsedByPurchaseLineId={initialUsedByPurchaseLineId}
-                allowedCategories={[GIFT_PURCHASE_CATEGORIES.BEVERAGE]}
-                handlers={handlers}
-                setHandlers={setHandlers}
-              />
+              <HospitalityItemsFieldArray control={control} name="items" />
             )}
+            <UsageItemLinesFieldArray
+              control={control}
+              errors={errors}
+              clearErrors={clearErrors}
+              initialUsedByPurchaseLineId={initialUsedByPurchaseLineId}
+              allowedCategories={[GIFT_PURCHASE_CATEGORIES.BEVERAGE]}
+              handlers={handlers}
+              setHandlers={setHandlers}
+            />
           </DialogContent>
 
           <DialogActions sx={{ flexDirection: "column", alignItems: "stretch", px: 3, pb: 2 }}>
