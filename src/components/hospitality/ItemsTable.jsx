@@ -1,24 +1,23 @@
-import { useState, Fragment } from "react";
 import {
   TableRow,
   TableCell,
-  IconButton,
-  Collapse,
-  Box,
   Table,
   TableHead,
   TableBody,
   Typography,
 } from "@mui/material";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import { hospitalityRecordFieldLabels as fieldLabels } from "../../constants/recordFieldLabels";
+import {
+  hospitalityRecordFieldLabels as fieldLabels,
+  purchaseRecordFieldLabels as purchaseLabels,
+  usageRecordFieldLabels as usageLabels,
+} from "../../constants/recordFieldLabels";
+import { formatDisplayAmount, formatDisplayDate } from "../../utils/formatters";
 
-export default function ItemsTable({ items = [] }) {
-  if (!items.length) {
+export default function ItemsTable({ receiptLines = [] }) {
+  if (!receiptLines.length) {
     return (
       <Typography variant="body2" sx={{ p: 1 }}>
-        没有领用物品~
+        没有领用明细~
       </Typography>
     );
   }
@@ -27,21 +26,27 @@ export default function ItemsTable({ items = [] }) {
     <Table size="small" stickyHeader>
       <TableHead>
         <TableRow>
-          <TableCell>{fieldLabels.itemName}</TableCell>
-          <TableCell align="right">{fieldLabels.itemQuantity}</TableCell>
-          <TableCell align="right">{fieldLabels.itemUnitPrice}</TableCell>
-          <TableCell>{fieldLabels.itemSpecification}</TableCell>
-          <TableCell align="right">{fieldLabels.itemLineTotal}</TableCell>
+          <TableCell>{fieldLabels.receiptProductName}</TableCell>
+          <TableCell>{purchaseLabels.specification}</TableCell>
+          <TableCell align="right">{purchaseLabels.unitPrice}</TableCell>
+          <TableCell align="right">{usageLabels.usedQuantity}</TableCell>
+          <TableCell>{usageLabels.receiptDate}</TableCell>
+          <TableCell>{usageLabels.recipient}</TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
-        {items.map((it) => (
-          <TableRow key={it.id ?? `${it.name}-${it.amount}-${it.qty}`}>
-            <TableCell>{it.itemName}</TableCell>
-            <TableCell align="right">{it.quantity}</TableCell>
-            <TableCell align="right">{it.unitPrice}</TableCell>
-            <TableCell>{it.specification}</TableCell>
-            <TableCell align="right">{it.lineTotal}</TableCell>
+        {receiptLines.map((line, index) => (
+          <TableRow
+            key={line.purchaseLineId ?? `${line.productName}-${index}`}
+          >
+            <TableCell>{line.productName ?? "—"}</TableCell>
+            <TableCell>{line.specification ?? "—"}</TableCell>
+            <TableCell align="right">
+              {formatDisplayAmount(line.unitPrice)}
+            </TableCell>
+            <TableCell align="right">{line.quantity ?? "—"}</TableCell>
+            <TableCell>{formatDisplayDate(line.receiptDate)}</TableCell>
+            <TableCell>{line.recipientName ?? "—"}</TableCell>
           </TableRow>
         ))}
       </TableBody>

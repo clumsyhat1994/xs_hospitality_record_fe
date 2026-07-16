@@ -29,6 +29,8 @@ export const hospitalityRecordFieldLabels = {
   itemLineTotal: "物品总价(元)",
   itemSpecification: "规格",
   items: "领用物品明细",
+  receiptLines: "领用明细",
+  receiptProductName: "领用品名",
 };
 
 export const usageRecordFieldLabels = {

@@ -94,7 +94,7 @@ export default function HospitalityRecordsTable({
               {fieldLabels.hospitalityType}
             </TableCell>
             <TableCell sx={{ minWidth: 100 }}>{fieldLabels.location}</TableCell>
-            <TableCell sx={{ minWidth: 100 }}>{fieldLabels.items}</TableCell>
+            <TableCell sx={{ minWidth: 100 }}>{fieldLabels.receiptLines}</TableCell>
             <TableCell align="right" sx={{ minWidth: 110 }}>
               {fieldLabels.invoiceAmount}
             </TableCell>
@@ -248,7 +248,9 @@ export default function HospitalityRecordsTable({
                     <TableCell>{record.hospitalityTypeName}</TableCell>
                     <TableCell>{record.location}</TableCell>
                     <TableCell>
-                      <ItemsPopperCell items={record.items} />
+                      <ItemsPopperCell
+                        receiptLines={record.giftReceiptLines ?? []}
+                      />
                     </TableCell>
                     <TableCell align="right">
                       {formatDisplayAmount(record.invoiceAmount)}

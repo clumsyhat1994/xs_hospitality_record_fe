@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   IconButton,
   Paper,
@@ -9,6 +9,7 @@ import {
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import ItemsTable from "./ItemsTable";
 import { estimateItemTableHeight } from "../../utils/estimateItemsTableHeight";
+import { hospitalityRecordFieldLabels as fieldLabels } from "../../constants/recordFieldLabels";
 
 function useSmartPlacement(anchorEl, estimatedHeight) {
   return useMemo(() => {
@@ -22,13 +23,13 @@ function useSmartPlacement(anchorEl, estimatedHeight) {
   }, [anchorEl, estimatedHeight]);
 }
 
-export function ItemsPopperCell({ items = [] }) {
+export function ItemsPopperCell({ receiptLines = [] }) {
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
 
   const estimatedHeight = useMemo(
-    () => estimateItemTableHeight({ rowCount: items.length }),
-    [items.length]
+    () => estimateItemTableHeight({ rowCount: receiptLines.length }),
+    [receiptLines.length],
   );
   const placement = useSmartPlacement(anchorEl, estimatedHeight);
 
@@ -53,10 +54,12 @@ export function ItemsPopperCell({ items = [] }) {
         <ClickAwayListener onClickAway={() => setOpen(false)}>
           <Paper
             elevation={6}
-            sx={{ width: 520, maxHeight: 280, overflow: "auto", p: 1 }}
+            sx={{ width: 680, maxHeight: 280, overflow: "auto", p: 1 }}
           >
-            <Box sx={{ px: 1, py: 0.5, fontWeight: 600 }}>招待明细</Box>
-            <ItemsTable items={items} />
+            <Box sx={{ px: 1, py: 0.5, fontWeight: 600 }}>
+              {fieldLabels.receiptLines}
+            </Box>
+            <ItemsTable receiptLines={receiptLines} />
           </Paper>
         </ClickAwayListener>
       </Popper>
