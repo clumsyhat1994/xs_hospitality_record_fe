@@ -33,7 +33,7 @@ const hospitalityApi = {
   /**
    * Add/remove attachments; files are stored only when this succeeds.
    * formData: invoiceImages / hospitalityFormImages file parts
-   * query: URLSearchParams with removeInvoicePaths/removeFormPaths
+   * query: URLSearchParams (remove paths, apply-invoice fields, confirm)
    */
   patchAttachments: (id, formData, query) => {
     const q = query && query.toString ? query.toString() : "";

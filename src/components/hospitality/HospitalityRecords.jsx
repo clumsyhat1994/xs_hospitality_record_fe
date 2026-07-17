@@ -232,6 +232,7 @@ export default function HospitalityRecords() {
         removeInvoicePaths,
         removeFormPaths,
         applyInvoiceFields,
+        confirm = false,
       },
     ) => {
       const inv = invoiceFiles ?? [];
@@ -258,6 +259,7 @@ export default function HospitalityRecords() {
       if (applyInvoiceFields?.invoiceAmount != null && applyInvoiceFields.invoiceAmount !== "") {
         params.append("applyInvoiceAmount", String(applyInvoiceFields.invoiceAmount));
       }
+      if (confirm) params.set("confirm", "true");
       const fd = new FormData();
       inv.forEach((f) => fd.append("invoiceImages", f));
       frm.forEach((f) => fd.append("hospitalityFormImages", f));

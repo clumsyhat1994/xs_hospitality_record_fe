@@ -15,6 +15,8 @@ import { useEffect, useState, useCallback } from "react";
 import hospitalityApi from "../../api/hospitalityApi";
 import ocrApi from "../../api/ocrApi";
 import { INVOICE_OCR_SOURCE_LABELS } from "../../constants/invoiceOcrSource";
+import { validationMessages } from "../../constants/validationMessages";
+import { analyzeBackendErrors, SOFT_CODES } from "../../utils/errorUtils";
 
 function formatBytes(bytes) {
   if (bytes === null || bytes === undefined || Number.isNaN(bytes)) return "";
@@ -100,6 +102,8 @@ export function AttachmentsDialog({
   const [removedFormPaths, setRemovedFormPaths] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [softConfirmDialogOpen, setSoftConfirmDialogOpen] = useState(false);
+  const [softErrors, setSoftErrors] = useState([]);
   const [ocrScanning, setOcrScanning] = useState(false);
   const [ocrResult, setOcrResult] = useState(null);
   const [ocrError, setOcrError] = useState("");
@@ -133,6 +137,8 @@ export function AttachmentsDialog({
     setRemovedInvoicePaths([]);
     setRemovedFormPaths([]);
     setSaveError("");
+    setSoftConfirmDialogOpen(false);
+    setSoftErrors([]);
     setOcrScanning(false);
     setOcrResult(null);
     setOcrError("");
@@ -392,7 +398,7 @@ export function AttachmentsDialog({
     removedInvoicePaths.length > 0 ||
     removedFormPaths.length > 0;
 
-  const handleSave = async () => {
+  const handleSave = async (confirm = false) => {
     if (!hasPendingChanges || isSaving) return;
     try {
       setIsSaving(true);
@@ -410,9 +416,30 @@ export function AttachmentsDialog({
                 invoiceAmount: ocrResult.invoiceAmount ?? null,
               }
             : null,
+        confirm,
       });
+      setSoftConfirmDialogOpen(false);
     } catch (e) {
-      const serverMessage = e?.response?.data?.message;
+      let errorData = e?.response?.data;
+
+      if (Array.isArray(errorData) && errorData.length > 0) {
+        const { hasHardErrors } = analyzeBackendErrors(errorData);
+
+        if (hasHardErrors) {
+          errorData = errorData.filter((err) => !SOFT_CODES.includes(err.code));
+          const messages = errorData.map(
+            (err) => validationMessages[err.code] ?? err.message ?? "提交失败",
+          );
+          setSaveError(messages.filter(Boolean).join("；"));
+          setSoftConfirmDialogOpen(false);
+        } else {
+          setSoftConfirmDialogOpen(true);
+          setSoftErrors(errorData);
+        }
+        return;
+      }
+
+      const serverMessage = errorData?.message;
       const message =
         (typeof serverMessage === "string" && serverMessage.trim()) ||
         e?.message ||
@@ -424,6 +451,7 @@ export function AttachmentsDialog({
   };
 
   return (
+    <>
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle
         sx={{
@@ -561,13 +589,35 @@ export function AttachmentsDialog({
         <Button onClick={onClose}>取消</Button>
         <Button
           variant="contained"
-          onClick={handleSave}
+          onClick={() => handleSave(false)}
           disabled={!hasPendingChanges || isSaving}
         >
-          保存
+          {isSaving ? "保存中" : "保存"}
         </Button>
       </DialogActions>
     </Dialog>
+
+    <Dialog maxWidth="md" open={softConfirmDialogOpen}>
+      <DialogTitle>您确定要提交吗？</DialogTitle>
+      <DialogContent>
+        {softErrors.map((e) => (
+          <div key={e.code}>
+            - {validationMessages[e.code] ?? e.message}
+          </div>
+        ))}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setSoftConfirmDialogOpen(false)}>取消</Button>
+        <Button
+          variant="contained"
+          disabled={isSaving}
+          onClick={() => handleSave(true)}
+        >
+          {isSaving ? "提交中" : "确认提交"}
+        </Button>
+      </DialogActions>
+    </Dialog>
+    </>
   );
 }
 
