@@ -31,7 +31,6 @@ const emptyRecord = {
   ourCount: null,
   ourHostPositionId: null,
   theirHostPositionId: null,
-  items: [],
   giftReceiptLines: [],
 };
 

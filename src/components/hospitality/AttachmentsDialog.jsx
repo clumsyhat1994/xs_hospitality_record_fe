@@ -119,6 +119,12 @@ export function AttachmentsDialog({
     try {
       const res = await ocrApi.scanVatInvoice(file);
       const data = res?.data ?? null;
+      if (data?.source) {
+        console.log(
+          "发票识别来源：",
+          INVOICE_OCR_SOURCE_LABELS[data.source] ?? data.source,
+        );
+      }
       setOcrResult(data);
       setApplyOcrResult(isOcrResultComplete(data));
     } catch {
@@ -527,11 +533,6 @@ export function AttachmentsDialog({
                 )}
                 {ocrResult && !ocrScanning && (
                   <>
-                    {ocrResult.source && (
-                      <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>
-                        来源：{INVOICE_OCR_SOURCE_LABELS[ocrResult.source] ?? ""}
-                      </Typography>
-                    )}
                     <Typography variant="body2">
                       发票号：{ocrResult.invoiceNumberString || "—"}
                     </Typography>

@@ -18,6 +18,7 @@ import RHFAutocomplete from "../form/RHFAutocomplete";
 import RHFComboBox from "../form/RHFComboBox";
 import { GIFT_PURCHASE_CATEGORY_OPTIONS } from "../../constants/giftPurchaseCategories";
 import { usageRecordFieldLabels as fieldLabels } from "../../constants/recordFieldLabels";
+import { formatDisplayAmount } from "../../utils/formatters";
 
 const lineGridSx = {
   display: "grid",
@@ -56,12 +57,12 @@ function getDateYearsAgo(baseDate, years) {
 }
 
 function getPurchaseLineLabel(option) {
+  const unitPrice = formatDisplayAmount(option?.unitPrice);
   return `${option?.productName ?? "-"} | 规格: ${
     option?.specification ?? "-"
-  } | 采购日期: ${option?.purchaseDate ?? "-"} | 剩余: ${Math.max(
-    0,
-    Number(option?.effectiveRemainingQuantity ?? 0),
-  )}`;
+  } | 单价: ${unitPrice || "-"} | 采购日期: ${
+    option?.purchaseDate ?? "-"
+  } | 剩余: ${Math.max(0, Number(option?.effectiveRemainingQuantity ?? 0))}`;
 }
 
 function purchaseLineRemainingCeiling(line, initialUsedByPurchaseLineId) {

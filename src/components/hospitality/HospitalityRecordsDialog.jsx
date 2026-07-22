@@ -18,7 +18,6 @@ import RHFTextField from "../form/RHFTextField";
 import RHFSelect from "../form/RHFSelect";
 import RHFCalculatedField from "../form/RHFCalculatedField";
 
-import HospitalityItemsFieldArray from "./HospitalityItemsFieldArray";
 import UsageItemLinesFieldArray from "../usage/UsageItemLinesFieldArray";
 import { hospitalityRecordFieldLabels as fieldLabels } from "../../constants/recordFieldLabels";
 import hospitalityApi from "../../api/hospitalityApi";
@@ -160,13 +159,6 @@ export default function HospitalityRecordDialog({
         invoiceAmount: toNullableNumber(data.invoiceAmount),
         theirCount: toNullableNumber(data.theirCount, { integer: true }),
         ourCount: toNullableNumber(data.ourCount, { integer: true }),
-        items: Array.isArray(data.items)
-          ? data.items.map((item) => ({
-              ...item,
-              unitPrice: toNullableNumber(item?.unitPrice),
-              quantity: toNullableNumber(item?.quantity, { integer: true }),
-            }))
-          : data.items,
         giftReceiptLines: Array.isArray(data.giftReceiptLines)
           ? data.giftReceiptLines
               .map((line) => {
@@ -360,11 +352,6 @@ export default function HospitalityRecordDialog({
                 label={fieldLabels.totalAmount}
                 name="totalAmount"
                 computeValue={(values) => {
-                  const items = values?.items ?? [];
-                  const itemsTotal = items.reduce(
-                    (sum, item) => sum + (Number(item?.lineTotal) || 0),
-                    0,
-                  );
                   const giftLines = values?.giftReceiptLines ?? [];
 
                   const giftLinesTotal = giftLines.reduce((sum, line) => {
@@ -380,11 +367,7 @@ export default function HospitalityRecordDialog({
                     }
                     return sum + q * p;
                   }, 0);
-                  return (
-                    itemsTotal +
-                    Number(values?.invoiceAmount || 0) +
-                    giftLinesTotal
-                  );
+                  return Number(values?.invoiceAmount || 0) + giftLinesTotal;
                 }}
               />
 
@@ -455,9 +438,6 @@ export default function HospitalityRecordDialog({
               </Grid>
               <RHFTextareaField name={"remark"} label={fieldLabels.remark} />
             </Grid>
-            {isAdmin && (
-              <HospitalityItemsFieldArray control={control} name="items" />
-            )}
             <UsageItemLinesFieldArray
               control={control}
               errors={errors}

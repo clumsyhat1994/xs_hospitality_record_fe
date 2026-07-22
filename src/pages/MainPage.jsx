@@ -17,8 +17,32 @@ export default function MainLayout() {
   const navigate = useNavigate();
 
   const handleOpenModule = (module) => {
+    setTabs((prev) => {
+      const exists = prev.some((t) => t.key === module.key);
+      return exists ? prev : [...prev, module];
+    });
+    setActiveTab(module.key);
     const path = moduleRoutes[module.key];
     if (path) navigate(path);
+  };
+
+  const handleCloseTab = (tabKey) => {
+    const index = tabs.findIndex((t) => t.key === tabKey);
+    if (index === -1) return;
+
+    const nextTabs = tabs.filter((t) => t.key !== tabKey);
+    setTabs(nextTabs);
+
+    if (activeTab !== tabKey) return;
+
+    if (nextTabs.length === 0) {
+      setActiveTab(null);
+      return;
+    }
+
+    const nextTab = nextTabs[Math.min(index, nextTabs.length - 1)];
+    setActiveTab(nextTab.key);
+    navigate(moduleRoutes[nextTab.key]);
   };
 
   useEffect(() => {
@@ -49,6 +73,7 @@ export default function MainLayout() {
           tabs={tabs}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
+          onCloseTab={handleCloseTab}
         />
       </Box>
     </Box>

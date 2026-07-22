@@ -23,12 +23,6 @@ export const hospitalityRecordFieldLabels = {
   theirHostPosition: "对方主持人员职务",
   deptHeadApprovalDate: "部门负责人审批日期",
   partySecretaryApprovalDate: " 党总支书记（分管领导）审批日期",
-  itemName: "物品名称",
-  itemUnitPrice: "物品单价(元)",
-  itemQuantity: "物品数量",
-  itemLineTotal: "物品总价(元)",
-  itemSpecification: "规格",
-  items: "领用物品明细",
   receiptLines: "领用明细",
   receiptProductName: "领用品名",
 };
