@@ -115,7 +115,6 @@ export default function HospitalityRecordDialog({
     hospitalityTypes,
     setHospitalityTypes,
     ourHostPositions,
-    setOurHostPositions,
     customers,
     setCustomers,
     handlers,
@@ -407,13 +406,13 @@ export default function HospitalityRecordDialog({
                 }}
               />
 
-              <RHFComboBox
-                name="ourHostPositionId"
-                options={ourHostPositions ?? []}
-                setOptions={setOurHostPositions}
-                label={fieldLabels.ourHostPosition}
-                fetchOptions={masterDataApi.searchPositions}
-              />
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <RHFAutocomplete
+                  name="ourHostPositionId"
+                  options={ourHostPositions ?? []}
+                  label={fieldLabels.ourHostPosition}
+                />
+              </Grid>
 
               <Grid size={{ xs: 12, sm: 6 }}>
                 <RHFTextField

@@ -30,38 +30,36 @@ export default function TabArea({ tabs, activeTab, setActiveTab, onCloseTab }) {
     onCloseTab(tabKey);
   };
 
-  if (tabs.length === 0) {
-    return null;
-  }
-
   return (
     <>
-      <Tabs
-        value={activeTab} //which tab is currently selected
-        onChange={handleTabChange}
-        aria-label="module tabs" //for accessibility
-      >
-        {tabs.map((tab) => (
-          <Tab
-            key={tab.key}
-            value={tab.key}
-            label={
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                {tab.label}
-                <IconButton
-                  component="span"
-                  size="small"
-                  aria-label={`关闭 ${tab.label}`}
-                  onClick={(e) => handleCloseTab(e, tab.key)}
-                  sx={{ p: 0.25, ml: 0.5 }}
-                >
-                  <CloseIcon sx={{ fontSize: 16 }} />
-                </IconButton>
-              </Box>
-            }
-          />
-        ))}
-      </Tabs>
+      {tabs.length > 0 && (
+        <Tabs
+          value={activeTab} //which tab is currently selected
+          onChange={handleTabChange}
+          aria-label="module tabs" //for accessibility
+        >
+          {tabs.map((tab) => (
+            <Tab
+              key={tab.key}
+              value={tab.key}
+              label={
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  {tab.label}
+                  <IconButton
+                    component="span"
+                    size="small"
+                    aria-label={`关闭 ${tab.label}`}
+                    onClick={(e) => handleCloseTab(e, tab.key)}
+                    sx={{ p: 0.25, ml: 0.5 }}
+                  >
+                    <CloseIcon sx={{ fontSize: 16 }} />
+                  </IconButton>
+                </Box>
+              }
+            />
+          ))}
+        </Tabs>
+      )}
       <MasterDataProvider>
         <Outlet />
       </MasterDataProvider>

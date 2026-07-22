@@ -18,11 +18,15 @@ import {
 } from "@mui/material";
 import endpoints from "../constants/Endpoints";
 import { useAuth } from "../context/AuthProvider";
+import moduleRoutes from "../constants/moduleRoutes";
 
 const AuthenticationPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from ?? "/";
+  const rawFrom = location.state?.from;
+  const from =
+    (typeof rawFrom === "string" ? rawFrom : rawFrom?.pathname) ||
+    moduleRoutes.HOSPITALITY_RECORDS;
 
   //const LOGIN_URL = getEndpoint("LOGIN");
   const LOGIN_URL = endpoints.LOGIN;

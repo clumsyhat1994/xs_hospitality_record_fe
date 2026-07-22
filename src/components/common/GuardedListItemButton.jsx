@@ -28,7 +28,7 @@ export function GuardedListItemButton({
         }}
         disableHoverListener={allowed}
       >
-        <span style={{ display: "inline-flex" }}>
+        <span style={{ display: "block", width: "100%" }}>
           <ListItemButton
             {...props}
             disabled={!allowed}

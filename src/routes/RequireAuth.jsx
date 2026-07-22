@@ -1,5 +1,5 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
 const checkTokenValidity = () => {
@@ -18,7 +18,12 @@ const checkTokenValidity = () => {
 };
 
 const RequireAuth = ({ children }) => {
-  return checkTokenValidity() ? children : <Navigate to="/login" />;
+  const location = useLocation();
+  return checkTokenValidity() ? (
+    children
+  ) : (
+    <Navigate to="/login" replace state={{ from: location.pathname }} />
+  );
 };
 
 export default RequireAuth;

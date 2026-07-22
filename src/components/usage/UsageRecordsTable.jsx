@@ -163,12 +163,15 @@ export default function UsageRecordsTable({
           <TableRow
             sx={{
               "& .MuiTableCell-root": {
-                py: 3,
+                pt: 3,
+                pb: 0.5,
                 borderBottom: 0,
               },
             }}
           >
-            <TableCell sx={{ minWidth: 90 }}>{fieldLabels.actions}</TableCell>
+            <TableCell align="center" sx={{ minWidth: 90 }}>
+              {fieldLabels.actions}
+            </TableCell>
             <TableCell sx={{ minWidth: 110 }}>
               {fieldLabels.usageDate}
             </TableCell>

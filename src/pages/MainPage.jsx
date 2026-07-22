@@ -2,21 +2,33 @@ import { useEffect, useState } from "react";
 import Sidebar, { APP_SIDEBAR_WIDTH_PX } from "../components/layout/Sidebar";
 import TabArea from "../components/layout/TabArea";
 import Box from "@mui/material/Box";
-import { Outlet, useLocation, Link, useNavigate } from "react-router-dom";
-import menuLables from "../constants/moduleLables";
+import { useLocation, useNavigate } from "react-router-dom";
 import moduleRoutes from "../constants/moduleRoutes";
 import routeToModule from "../constants/routeToModule";
+import { isAdminOnlyModule } from "../constants/adminOnlyModuleKeys";
+import { useAuth } from "../context/AuthProvider";
+
+function resolveAccessibleModule(pathname, isAdmin) {
+  const module = routeToModule[pathname] ?? null;
+  if (!module) return null;
+  if (isAdminOnlyModule(module.key) && !isAdmin) return null;
+  return module;
+}
+
 export default function MainLayout() {
   const location = useLocation();
-  const initialModule = routeToModule[location.pathname] ?? null;
+  const { isAdmin, loading: authLoading } = useAuth();
+  const initialModule = resolveAccessibleModule(location.pathname, isAdmin);
   const [tabs, setTabs] = useState(() =>
-    initialModule ? [initialModule] : []
+    initialModule ? [initialModule] : [],
   );
   const [activeTab, setActiveTab] = useState(() => initialModule?.key ?? null);
 
   const navigate = useNavigate();
 
   const handleOpenModule = (module) => {
+    if (isAdminOnlyModule(module.key) && !isAdmin) return;
+
     setTabs((prev) => {
       const exists = prev.some((t) => t.key === module.key);
       return exists ? prev : [...prev, module];
@@ -46,7 +58,9 @@ export default function MainLayout() {
   };
 
   useEffect(() => {
-    const module = routeToModule[location.pathname];
+    if (authLoading) return;
+
+    const module = resolveAccessibleModule(location.pathname, isAdmin);
     if (!module) return;
 
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -56,7 +70,7 @@ export default function MainLayout() {
     });
 
     setActiveTab((prev) => (prev === module.key ? prev : module.key));
-  }, [location.pathname]);
+  }, [location.pathname, isAdmin, authLoading]);
 
   return (
     <Box sx={{ display: "flex", flex: 1 }}>

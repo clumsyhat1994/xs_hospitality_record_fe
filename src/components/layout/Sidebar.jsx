@@ -2,10 +2,17 @@ import { Collapse, Divider } from "@mui/material";
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import LogoutIcon from "@mui/icons-material/Logout";
+import RestaurantIcon from "@mui/icons-material/Restaurant";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import Inventory2Icon from "@mui/icons-material/Inventory2";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import DatasetIcon from "@mui/icons-material/Dataset";
+import PeopleIcon from "@mui/icons-material/People";
 import { useState } from "react";
 import menuLables from "../../constants/moduleLables";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +23,8 @@ import { APP_FOOTER_HEIGHT_PX } from "./AppFooter";
 
 /** Fixed sidebar width — keep in sync with main content `marginLeft` in `MainPage`. */
 export const APP_SIDEBAR_WIDTH_PX = 200;
+
+const listItemIconSx = { minWidth: 36 };
 
 export default function Sidebar({ onOpenModule }) {
   const [masterOpen, setMasterOpen] = useState(true);
@@ -58,6 +67,9 @@ export default function Sidebar({ onOpenModule }) {
               })
             }
           >
+            <ListItemIcon sx={listItemIconSx}>
+              <RestaurantIcon fontSize="small" />
+            </ListItemIcon>
             <ListItemText primary={menuLables.HOSPITALITY_RECORDS} />
           </ListItemButton>
           <GuardedListItemButton
@@ -69,6 +81,9 @@ export default function Sidebar({ onOpenModule }) {
               })
             }
           >
+            <ListItemIcon sx={listItemIconSx}>
+              <ShoppingCartIcon fontSize="small" />
+            </ListItemIcon>
             <ListItemText primary={menuLables.PURCHASE_RECORDS} />
           </GuardedListItemButton>
           <GuardedListItemButton
@@ -80,6 +95,9 @@ export default function Sidebar({ onOpenModule }) {
               })
             }
           >
+            <ListItemIcon sx={listItemIconSx}>
+              <Inventory2Icon fontSize="small" />
+            </ListItemIcon>
             <ListItemText primary={menuLables.USAGE_RECORDS} />
           </GuardedListItemButton>
 
@@ -92,9 +110,15 @@ export default function Sidebar({ onOpenModule }) {
               })
             }
           >
+            <ListItemIcon sx={listItemIconSx}>
+              <ReceiptLongIcon fontSize="small" />
+            </ListItemIcon>
             <ListItemText primary={menuLables.INVOICE_CONFLICT} />
           </GuardedListItemButton>
           <GuardedListItemButton onClick={toggleMaster} allowed={isAdmin}>
+            <ListItemIcon sx={listItemIconSx}>
+              <DatasetIcon fontSize="small" />
+            </ListItemIcon>
             <ListItemText primary={menuLables.MASTER_DATA} />
             {masterOpen ? <ExpandLess /> : <ExpandMore />}
           </GuardedListItemButton>
@@ -103,6 +127,7 @@ export default function Sidebar({ onOpenModule }) {
             <List component="div" disablePadding>
               <GuardedListItemButton
                 allowed={isAdmin}
+                sx={{ pl: 3 }}
                 onClick={() =>
                   onOpenModule({
                     key: moduleTabKeys.COUNTERPARTY,
@@ -110,10 +135,10 @@ export default function Sidebar({ onOpenModule }) {
                   })
                 }
               >
-                <ListItemText
-                  primary={menuLables.COUNTERPARTY}
-                  sx={{ pl: 2 }}
-                />
+                <ListItemIcon sx={listItemIconSx}>
+                  <PeopleIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary={menuLables.COUNTERPARTY} />
               </GuardedListItemButton>
             </List>
           </Collapse>
@@ -122,7 +147,9 @@ export default function Sidebar({ onOpenModule }) {
       <Divider />
       <Box sx={{ p: 1 }}>
         <ListItemButton onClick={handleLogout}>
-          <LogoutIcon sx={{ mr: 1 }} color="error" />
+          <ListItemIcon sx={{ ...listItemIconSx, color: "error.main" }}>
+            <LogoutIcon fontSize="small" />
+          </ListItemIcon>
           <ListItemText
             primary="退出登录"
             slotProps={{ primary: { sx: { color: "error.main" } } }}

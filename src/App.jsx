@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import MainPage from "./pages/MainPage";
 import AuthenticationPage from "./pages/Authentication";
 import RequireAuth from "./routes/RequireAuth";
+import RequireAdmin from "./routes/RequireAdmin";
 import "./App.css";
 import HospitalityRecords from "./components/hospitality/HospitalityRecords";
 import PurchaseRecords from "./components/purchase/PurchaseRecords";
@@ -10,7 +11,6 @@ import SequentialInvoiceNumber from "./components/invoice-conflict/SequentialInv
 import CounterpartyPage from "./components/master-data/counterparty/CounterpartyPage";
 import moduleRoutes from "./constants/moduleRoutes";
 import AppShell from "./AppShell";
-//import Department from "./components/master_data/Department";
 
 function App() {
   return (
@@ -34,19 +34,35 @@ function App() {
             />
             <Route
               path={moduleRoutes.PURCHASE_RECORDS}
-              element={<PurchaseRecords />}
+              element={
+                <RequireAdmin>
+                  <PurchaseRecords />
+                </RequireAdmin>
+              }
             />
             <Route
               path={moduleRoutes.USAGE_RECORDS}
-              element={<UsageRecords />}
+              element={
+                <RequireAdmin>
+                  <UsageRecords />
+                </RequireAdmin>
+              }
             />
             <Route
               path={moduleRoutes.INVOICE_CONFLICT}
-              element={<SequentialInvoiceNumber />}
+              element={
+                <RequireAdmin>
+                  <SequentialInvoiceNumber />
+                </RequireAdmin>
+              }
             />
             <Route
               path={moduleRoutes.COUNTERPARTY}
-              element={<CounterpartyPage />}
+              element={
+                <RequireAdmin>
+                  <CounterpartyPage />
+                </RequireAdmin>
+              }
             />
             {/* <Route path={moduleRoutes.DEPARTMENT} element={<Department />} /> */}
           </Route>
