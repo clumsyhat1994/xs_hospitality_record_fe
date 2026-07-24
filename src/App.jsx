@@ -9,6 +9,7 @@ import PurchaseRecords from "./components/purchase/PurchaseRecords";
 import UsageRecords from "./components/usage/UsageRecords";
 import SequentialInvoiceNumber from "./components/invoice-conflict/SequentialInvoiceNumber";
 import CounterpartyPage from "./components/master-data/counterparty/CounterpartyPage";
+import UsersPage from "./components/master-data/users/UsersPage";
 import moduleRoutes from "./constants/moduleRoutes";
 import AppShell from "./AppShell";
 
@@ -61,6 +62,14 @@ function App() {
               element={
                 <RequireAdmin>
                   <CounterpartyPage />
+                </RequireAdmin>
+              }
+            />
+            <Route
+              path={moduleRoutes.USERS}
+              element={
+                <RequireAdmin>
+                  <UsersPage />
                 </RequireAdmin>
               }
             />

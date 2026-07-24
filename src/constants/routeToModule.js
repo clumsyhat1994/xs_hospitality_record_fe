@@ -27,6 +27,10 @@ const routeToModule = {
     key: moduleKeys.COUNTERPARTY,
     label: menuLables.COUNTERPARTY,
   },
+  [moduleRoutes.USERS]: {
+    key: moduleKeys.USERS,
+    label: menuLables.USERS,
+  },
   [moduleRoutes.POSITION]: {
     key: moduleKeys.POSITION,
     label: menuLables.POSITION,

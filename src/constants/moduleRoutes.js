@@ -4,6 +4,7 @@ const moduleRoutes = {
   USAGE_RECORDS: "/usage-records",
   INVOICE_CONFLICT: "/invoice-conflict",
   COUNTERPARTY: "/master-data/counterparty",
+  USERS: "/master-data/users",
   DEPARTMENT: "/master-data/department",
   POSITION: "/master-data/position",
   GRADE: "/master-data/position-grade",

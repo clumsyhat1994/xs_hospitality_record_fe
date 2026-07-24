@@ -1,6 +1,5 @@
 import { Controller, useFormContext } from "react-hook-form";
 import { TextField, Tooltip } from "@mui/material";
-import { useFormMode } from "../../context/FormModeContext";
 
 export default function RHFCellTextField({
   name,
@@ -14,12 +13,11 @@ export default function RHFCellTextField({
   ...rest
 }) {
   const { clearErrors, control, getFieldState } = useFormContext();
-  const { isEditMode } = useFormMode();
   return (
     <Controller
       name={name}
       control={control}
-      rules={required && !isEditMode ? { required: "不能为空", ...rules } : rules}
+      rules={required ? { required: "不能为空", ...rules } : rules}
       render={({ field, fieldState: { error } }) => {
         const textField = (
           <TextField

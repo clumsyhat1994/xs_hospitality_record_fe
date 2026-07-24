@@ -15,7 +15,7 @@ import masterDataApi from "../../api/masterDataApi";
 import { flattenPurchaseRecordsToLines } from "../../utils/giftReceiptLineFormUtils";
 import RHFCellTextField from "../form/RHFCellTextField";
 import RHFAutocomplete from "../form/RHFAutocomplete";
-import RHFComboBox from "../form/RHFComboBox";
+import RHFAsyncAutocomplete from "../form/RHFAsyncAutocomplete";
 import { GIFT_PURCHASE_CATEGORY_OPTIONS } from "../../constants/giftPurchaseCategories";
 import { usageRecordFieldLabels as fieldLabels } from "../../constants/recordFieldLabels";
 import { formatDisplayAmount } from "../../utils/formatters";
@@ -272,7 +272,7 @@ function GiftReceiptLineRow({
       </Box>
 
       <Box sx={{ ...lineFieldSx, gridRow: 2, gridColumn: "2 / 6" }}>
-        <RHFComboBox
+        <RHFAsyncAutocomplete
           name={`giftReceiptLines.${index}.recipientId`}
           label={fieldLabels.recipient}
           options={handlers ?? []}

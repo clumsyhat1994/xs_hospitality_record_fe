@@ -199,7 +199,7 @@ export default function CounterpartyPage() {
       label: "归属地",
       options: counterpartyTypes,
       sm: 6,
-      rules: { required: false },
+      required: false,
     },
   ];
 

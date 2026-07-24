@@ -11,10 +11,9 @@ import {
 } from "@mui/material";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import RHFTextField from "../form/RHFTextField";
-import RHFComboBox from "../form/RHFComboBox";
+import RHFAsyncAutocomplete from "../form/RHFAsyncAutocomplete";
 import RHFAutocomplete from "../form/RHFAutocomplete";
 import RHFTextareaField from "../form/RHFTextareaField";
-import { FormModeProvider } from "../../context/FormModeContext";
 import { useMasterData } from "../../context/MasterDataContext";
 import masterDataApi from "../../api/masterDataApi";
 import usageRecordApi from "../../api/usageRecordApi";
@@ -188,32 +187,34 @@ export default function UsageRecordDialog({
   };
 
   return (
-    <FormModeProvider isEditMode={isEditMode}>
-      <FormProvider {...methods}>
-        <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-          <DialogTitle>
-            {isEditMode ? "编辑领用记录" : "新建领用记录"}
-          </DialogTitle>
-          <DialogContent dividers>
-            <Grid container spacing={2} sx={{ mt: 0.5 }}>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <RHFTextField name="usageDate" label={fieldLabels.usageDate} type="date" />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <RHFAutocomplete
-                  name="departmentId"
-                  label="领用部门"
-                  options={departments ?? []}
-                  getOptionLabel={(opt) => opt?.name ?? ""}
-                />
-              </Grid>
-              <RHFComboBox
+    <FormProvider {...methods}>
+      <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+        <DialogTitle>
+          {isEditMode ? "编辑领用记录" : "新建领用记录"}
+        </DialogTitle>
+        <DialogContent dividers>
+          <Grid container spacing={2} sx={{ mt: 0.5 }}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <RHFTextField name="usageDate" label={fieldLabels.usageDate} type="date" />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <RHFAutocomplete
+                name="departmentId"
+                label="领用部门"
+                options={departments ?? []}
+                getOptionLabel={(opt) => opt?.name ?? ""}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <RHFAsyncAutocomplete
                 name="counterpartyId"
                 label="招待对象"
                 options={customers ?? []}
                 setOptions={setCustomers}
                 fetchOptions={masterDataApi.searchCustomers}
               />
+            </Grid>
+            <Grid size={{ xs: 12 }}>
               <RHFTextareaField
                 name="remark"
                 label="备注"
@@ -223,41 +224,41 @@ export default function UsageRecordDialog({
                 }}
               />
             </Grid>
-            <UsageItemLinesFieldArray
-              control={control}
-              errors={errors}
-              clearErrors={clearErrors}
-              initialUsedByPurchaseLineId={initialUsedByPurchaseLineId}
-              allowedCategories={usageRecordCategoryOptions}
-              handlers={handlers}
-              setHandlers={setHandlers}
-              defaultReceiptDate={usageDate ?? ""}
-            />
-          </DialogContent>
-          <DialogActions sx={{ flexDirection: "column", alignItems: "stretch", px: 3, pb: 2 }}>
-            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, width: "100%" }}>
-              <Button onClick={onClose}>取消</Button>
-              <Button
-                variant="contained"
-                disabled={isSubmitting}
-                onClick={handleSubmit(submit, onValidationFailed)}
-              >
-                {isSubmitting ? "保存中..." : isEditMode ? "更新" : "保存"}
-              </Button>
-            </Box>
-            {validationHint ? (
-              <Alert severity="warning" sx={{ width: "100%" }}>
-                {validationHint}
-              </Alert>
-            ) : null}
-            {submitError ? (
-              <Alert severity="error" sx={{ width: "100%" }}>
-                {submitError}
-              </Alert>
-            ) : null}
-          </DialogActions>
-        </Dialog>
-      </FormProvider>
-    </FormModeProvider>
+          </Grid>
+          <UsageItemLinesFieldArray
+            control={control}
+            errors={errors}
+            clearErrors={clearErrors}
+            initialUsedByPurchaseLineId={initialUsedByPurchaseLineId}
+            allowedCategories={usageRecordCategoryOptions}
+            handlers={handlers}
+            setHandlers={setHandlers}
+            defaultReceiptDate={usageDate ?? ""}
+          />
+        </DialogContent>
+        <DialogActions sx={{ flexDirection: "column", alignItems: "stretch", px: 3, pb: 2 }}>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, width: "100%" }}>
+            <Button onClick={onClose}>取消</Button>
+            <Button
+              variant="contained"
+              disabled={isSubmitting}
+              onClick={handleSubmit(submit, onValidationFailed)}
+            >
+              {isSubmitting ? "保存中..." : isEditMode ? "更新" : "保存"}
+            </Button>
+          </Box>
+          {validationHint ? (
+            <Alert severity="warning" sx={{ width: "100%" }}>
+              {validationHint}
+            </Alert>
+          ) : null}
+          {submitError ? (
+            <Alert severity="error" sx={{ width: "100%" }}>
+              {submitError}
+            </Alert>
+          ) : null}
+        </DialogActions>
+      </Dialog>
+    </FormProvider>
   );
 }

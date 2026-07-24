@@ -1,6 +1,5 @@
 import { Controller } from "react-hook-form";
-import { Autocomplete, TextField, Chip } from "@mui/material";
-import { useFormMode } from "../../context/FormModeContext";
+import { Autocomplete, TextField } from "@mui/material";
 
 export default function RHFMultiAutocomplete({
   name,
@@ -11,16 +10,17 @@ export default function RHFMultiAutocomplete({
   getOptionLabel = (opt) => opt?.name ?? String(opt),
   getOptionValue = (opt) => opt?.id ?? opt,
   rules = {},
+  required = true,
 }) {
   return (
     <Controller
       name={name}
       control={control}
-      rules={{ required: "不能为空", ...rules }}
+      rules={required ? { required: "不能为空", ...rules } : rules}
       defaultValue={[]}
       render={({ field, fieldState }) => {
         const selectedObjects = options.filter((o) =>
-          field.value?.includes(getOptionValue(o))
+          field.value?.includes(getOptionValue(o)),
         );
 
         return (

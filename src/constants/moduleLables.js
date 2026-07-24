@@ -4,6 +4,7 @@ const moduleLables = {
   USAGE_RECORDS: "物品领用台账",
   INVOICE_CONFLICT: "连号发票",
   COUNTERPARTY: "招待对象",
+  USERS: "用户管理",
   MASTER_DATA: "字段数据",
   DEPARTMENT: "部门",
   POSITION: "职务",

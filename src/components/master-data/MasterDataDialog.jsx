@@ -8,11 +8,9 @@ import {
   Grid,
 } from "@mui/material";
 import { useEffect } from "react";
-import { useForm, Controller, FormProvider } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form";
 import RHFTextField from "../form/RHFTextField";
 import RHFMultiAutocomplete from "../form/RHFMultiAutocomplete";
-
-import { FormModeProvider } from "../../context/FormModeContext";
 
 export default function MasterDataDialog({
   open,
@@ -62,60 +60,60 @@ export default function MasterDataDialog({
   };
 
   return (
-    <FormModeProvider isEditMode={isEditMode}>
-      <FormProvider {...form}>
-        <Dialog
-          open={open}
-          onClose={onClose}
-          slotProps={{
-            paper: {
-              sx: { width },
-            },
-          }}
-          maxWidth="sm"
-        >
-          <DialogTitle>{isEditMode ? editTitle : createTitle}</DialogTitle>
-          <DialogContent sx={{ mt: 1 }}>
-            <Grid container spacing={2} pt={1}>
-              {textFields.map((field) => (
-                <Grid key={field.fieldName} size={{ xs: 12, sm: field.sm ?? 6 }}>
-                  <RHFTextField
-                    name={field.fieldName}
-                    control={control}
-                    label={field.label}
-                    chineseOnly={field.chineseOnly}
-                  />
-                </Grid>
-              ))}
-              {multiAutoCompleteFields.map((field) => (
-                <Grid key={field.fieldName} size={{ sm: field.sm ?? 6 }}>
-                  <RHFMultiAutocomplete
-                    name={field.fieldName}
-                    control={control}
-                    label={field.label}
-                    options={field.options}
-                    getOptionLabel={field.getOptionLabel}
-                    rules={field.rules}
-                    sm={field.sm ?? 6}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={onClose} disabled={isSubmitting}>
-              取消
-            </Button>
-            <Button
-              onClick={handleSubmit(onSubmit)}
-              variant="contained"
-              disabled={isSubmitting}
-            >
-              保存
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </FormProvider>
-    </FormModeProvider>
+    <FormProvider {...form}>
+      <Dialog
+        open={open}
+        onClose={onClose}
+        slotProps={{
+          paper: {
+            sx: { width },
+          },
+        }}
+        maxWidth="sm"
+      >
+        <DialogTitle>{isEditMode ? editTitle : createTitle}</DialogTitle>
+        <DialogContent sx={{ mt: 1 }}>
+          <Grid container spacing={2} pt={1}>
+            {textFields.map((field) => (
+              <Grid key={field.fieldName} size={{ xs: 12, sm: field.sm ?? 6 }}>
+                <RHFTextField
+                  name={field.fieldName}
+                  control={control}
+                  label={field.label}
+                  chineseOnly={field.chineseOnly}
+                  required={field.required !== false}
+                />
+              </Grid>
+            ))}
+            {multiAutoCompleteFields.map((field) => (
+              <Grid key={field.fieldName} size={{ sm: field.sm ?? 6 }}>
+                <RHFMultiAutocomplete
+                  name={field.fieldName}
+                  control={control}
+                  label={field.label}
+                  options={field.options}
+                  getOptionLabel={field.getOptionLabel}
+                  required={field.required !== false}
+                  rules={field.rules}
+                  sm={field.sm ?? 6}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onClose} disabled={isSubmitting}>
+            取消
+          </Button>
+          <Button
+            onClick={handleSubmit(onSubmit)}
+            variant="contained"
+            disabled={isSubmitting}
+          >
+            保存
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </FormProvider>
   );
 }

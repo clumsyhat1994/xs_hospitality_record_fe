@@ -15,8 +15,7 @@ import {
 import { FormProvider, useForm } from "react-hook-form";
 import RHFTextField from "../form/RHFTextField";
 import RHFSelect from "../form/RHFSelect";
-import RHFComboBox from "../form/RHFComboBox";
-import { FormModeProvider } from "../../context/FormModeContext";
+import RHFAsyncAutocomplete from "../form/RHFAsyncAutocomplete";
 import purchaseRecordApi from "../../api/purchaseRecordApi";
 import { toNullableNumber } from "../../utils/numberUtils";
 import { purchaseRecordFieldLabels as fieldLabels } from "../../constants/recordFieldLabels";
@@ -148,12 +147,12 @@ export default function PurchaseRecordDialog({
   };
 
   return (
-    <FormModeProvider isEditMode={isEditMode}>
-      <FormProvider {...methods}>
-        <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-          <DialogTitle>{isEditMode ? "修改采购记录" : "新建采购记录"}</DialogTitle>
-          <DialogContent dividers>
-            <Grid container spacing={2} sx={{ mt: 0.5 }}>
+    <FormProvider {...methods}>
+      <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+        <DialogTitle>{isEditMode ? "修改采购记录" : "新建采购记录"}</DialogTitle>
+        <DialogContent dividers>
+          <Grid container spacing={2} sx={{ mt: 0.5 }}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <RHFSelect
                 name="category"
                 label={fieldLabels.purchaseCategory}
@@ -161,53 +160,54 @@ export default function PurchaseRecordDialog({
                 getOptionLabel={(opt) => opt.label}
                 getOptionValue={(opt) => opt.value}
               />
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <RHFTextField
-                  name="applicationDate"
-                  label={fieldLabels.applicationDate}
-                  type="date"
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <RHFTextField name="purchaseDate" label={fieldLabels.purchaseDate} type="date" />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <RHFTextField name="invoiceDate" label={fieldLabels.invoiceDate} type="date" />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <RHFTextField name="invoiceNumber" label={fieldLabels.invoiceNumberString} />
-              </Grid>
-              <RHFComboBox
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <RHFTextField
+                name="applicationDate"
+                label={fieldLabels.applicationDate}
+                type="date"
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <RHFTextField name="purchaseDate" label={fieldLabels.purchaseDate} type="date" />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <RHFTextField name="invoiceDate" label={fieldLabels.invoiceDate} type="date" />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <RHFTextField name="invoiceNumber" label={fieldLabels.invoiceNumberString} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <RHFAsyncAutocomplete
                 name="supplierId"
                 label={fieldLabels.supplier}
                 options={suppliers}
                 setOptions={setSuppliers}
                 fetchOptions={masterDataApi.searchSuppliers}
-                sm={6}
               />
-              <Grid size={12}>
-                <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                  采购明细
-                </Typography>
-                <PurchaseLinesFieldArray />
-              </Grid>
             </Grid>
-          </DialogContent>
-          <DialogActions sx={{ flexDirection: "column", alignItems: "stretch", px: 3, pb: 2 }}>
-            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, width: "100%" }}>
-              <Button onClick={onClose}>取消</Button>
-              <Button variant="contained" disabled={isSubmitting} onClick={handleSubmit(submit)}>
-                {isSubmitting ? "保存中..." : "保存"}
-              </Button>
-            </Box>
-            {submitError ? (
-              <Alert severity="error" sx={{ width: "100%", whiteSpace: "pre-line" }}>
-                {submitError}
-              </Alert>
-            ) : null}
-          </DialogActions>
-        </Dialog>
-      </FormProvider>
-    </FormModeProvider>
+            <Grid size={12}>
+              <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                采购明细
+              </Typography>
+              <PurchaseLinesFieldArray />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions sx={{ flexDirection: "column", alignItems: "stretch", px: 3, pb: 2 }}>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, width: "100%" }}>
+            <Button onClick={onClose}>取消</Button>
+            <Button variant="contained" disabled={isSubmitting} onClick={handleSubmit(submit)}>
+              {isSubmitting ? "保存中..." : "保存"}
+            </Button>
+          </Box>
+          {submitError ? (
+            <Alert severity="error" sx={{ width: "100%", whiteSpace: "pre-line" }}>
+              {submitError}
+            </Alert>
+          ) : null}
+        </DialogActions>
+      </Dialog>
+    </FormProvider>
   );
 }

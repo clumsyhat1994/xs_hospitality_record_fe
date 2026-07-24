@@ -1,6 +1,9 @@
 import { Controller, useFormContext } from "react-hook-form";
 import { TextField } from "@mui/material";
-import { useFormMode } from "../../context/FormModeContext";
+
+const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const DIGIT_REGEX = /^\d*$/;
+const CHINESE_REGEX = /^[\u4E00-\u9FFF·・]*$/;
 
 export default function RHFTextField({
   name,
@@ -13,19 +16,15 @@ export default function RHFTextField({
   minWidth = 0,
   ...rest
 }) {
-  const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-  const DIGIT_REGEX = /^\d*$/;
-  const CHINESE_REGEX = /^[\u4E00-\u9FFF·・]*$/;
   const { clearErrors, control } = useFormContext();
-  const { isEditMode } = useFormMode();
 
   return (
     <Controller
       name={name}
       control={control}
       rules={{
-        ...(required && !isEditMode ? { required: "不能为空" } : {}),
-        ...(required && !isEditMode
+        ...(required ? { required: "不能为空" } : {}),
+        ...(required
           ? {
               validate: (v) => v?.trim() !== "" || "不能为空",
             }
@@ -35,7 +34,7 @@ export default function RHFTextField({
           ? {
               validate: (v) => {
                 const s = (v ?? "").trim();
-                if (s === "") return true;
+                if (s === "") return required ? "不能为空" : true;
                 return CHINESE_REGEX.test(s) || "只能输入中文（可含·/・）";
               },
             }

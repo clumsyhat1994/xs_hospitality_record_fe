@@ -14,7 +14,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import DownloadIcon from "@mui/icons-material/Download";
-import BaseComboBox from "../form/BaseComboBox";
+import BaseAsyncAutocomplete from "../form/BaseAsyncAutocomplete";
 import { useMasterData } from "../../context/MasterDataContext";
 import masterDataApi from "../../api/masterDataApi";
 import { useState } from "react";
@@ -126,18 +126,18 @@ export default function HospitalityRecordsToolbar({
           />
         </Grid>
 
-        <BaseComboBox
-          label={fieldLabels.handlerName}
-          xs={6}
-          sm={2}
-          fieldValue={draftFilters.handlerId}
-          onChange={(v) => {
-            onDraftFilterChange("handlerId", v);
-          }}
-          options={handlers}
-          setOptions={setHandlers}
-          fetchOptions={masterDataApi.searchHandlers}
-        />
+        <Grid size={{ xs: 6, sm: 2 }}>
+          <BaseAsyncAutocomplete
+            label={fieldLabels.handlerName}
+            fieldValue={draftFilters.handlerId}
+            onChange={(v) => {
+              onDraftFilterChange("handlerId", v);
+            }}
+            options={handlers}
+            setOptions={setHandlers}
+            fetchOptions={masterDataApi.searchHandlers}
+          />
+        </Grid>
 
         <Grid
           size={{ xs: 6, sm: "auto" }}
@@ -165,18 +165,18 @@ export default function HospitalityRecordsToolbar({
           <Stack spacing={advancedSearchOpen ? 2 : 0}>
             <Collapse in={advancedSearchOpen} timeout={60} collapsedSize={0}>
               <Grid container spacing={2} sx={{ pt: 0 }}>
-                <BaseComboBox
-                  label={fieldLabels.counterparty}
-                  xs={8}
-                  sm={4}
-                  fieldValue={draftFilters.counterpartyId}
-                  onChange={(v) => {
-                    onDraftFilterChange("counterpartyId", v);
-                  }}
-                  options={customers}
-                  setOptions={setCustomers}
-                  fetchOptions={masterDataApi.searchCustomers}
-                />
+                <Grid size={{ xs: 8, sm: 4 }}>
+                  <BaseAsyncAutocomplete
+                    label={fieldLabels.counterparty}
+                    fieldValue={draftFilters.counterpartyId}
+                    onChange={(v) => {
+                      onDraftFilterChange("counterpartyId", v);
+                    }}
+                    options={customers}
+                    setOptions={setCustomers}
+                    fetchOptions={masterDataApi.searchCustomers}
+                  />
+                </Grid>
 
                 {isAdmin && (
                   <Grid size={{ xs: 6, sm: 2 }}>

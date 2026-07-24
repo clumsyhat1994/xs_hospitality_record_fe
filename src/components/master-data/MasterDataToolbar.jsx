@@ -60,27 +60,29 @@ export default function MasterDataToolbar({
           {buttonLabels.create}
         </Button>
         {extraActions}
-        <Tooltip
-          title={`导出所有${title}为Excel`}
-          slotProps={{
-            tooltip: {
-              sx: {
-                maxWidth: "200px",
-                width: "auto",
-                fontSize: "0.8rem",
-                padding: "12px 16px",
+        {onExport && (
+          <Tooltip
+            title={`导出所有${title}为Excel`}
+            slotProps={{
+              tooltip: {
+                sx: {
+                  maxWidth: "200px",
+                  width: "auto",
+                  fontSize: "0.8rem",
+                  padding: "12px 16px",
+                },
               },
-            },
-          }}
-        >
-          <Button
-            variant="outlined"
-            startIcon={<DownloadIcon />}
-            onClick={onExport}
+            }}
           >
-            {buttonLabels.exportExcel}
-          </Button>
-        </Tooltip>
+            <Button
+              variant="outlined"
+              startIcon={<DownloadIcon />}
+              onClick={onExport}
+            >
+              {buttonLabels.exportExcel}
+            </Button>
+          </Tooltip>
+        )}
       </Stack>
     </Toolbar>
   );

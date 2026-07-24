@@ -23,9 +23,8 @@ import { hospitalityRecordFieldLabels as fieldLabels } from "../../constants/rec
 import hospitalityApi from "../../api/hospitalityApi";
 import { validationMessages } from "../../constants/validationMessages";
 import { BEErrorFieldToFEFormFieldMap } from "../../constants/BEErrorFieldToFEFormFieldMap";
-import { FormModeProvider } from "../../context/FormModeContext";
 import { analyzeBackendErrors, SOFT_CODES } from "../../utils/errorUtils";
-import RHFComboBox from "../form/RHFComboBox";
+import RHFAsyncAutocomplete from "../form/RHFAsyncAutocomplete";
 import { useMasterData } from "../../context/MasterDataContext";
 import masterDataApi from "../../api/masterDataApi";
 import { useAuth } from "../../context/AuthProvider";
@@ -233,16 +232,15 @@ export default function HospitalityRecordDialog({
   };
 
   return (
-    <FormModeProvider isEditMode={isEditMode}>
-      <FormProvider {...methods}>
-        <Dialog
-          //keepMounted
-          open={open}
-          onClose={onClose}
-          fullWidth
-          maxWidth="md"
-        >
-          <DialogTitle>{isEditMode ? "修改记录" : "新建记录"}</DialogTitle>
+    <FormProvider {...methods}>
+      <Dialog
+        //keepMounted
+        open={open}
+        onClose={onClose}
+        fullWidth
+        maxWidth="md"
+      >
+        <DialogTitle>{isEditMode ? "修改记录" : "新建记录"}</DialogTitle>
           <DialogContent dividers>
             <Grid container spacing={2} sx={{ mt: 0.5 }} alignItems="stretch">
               <Grid size={{ xs: 12, sm: 4 }}>
@@ -253,15 +251,16 @@ export default function HospitalityRecordDialog({
                 />
               </Grid>
 
-              <RHFComboBox
-                name="counterpartyId"
-                //control={control}
-                options={customers ?? []}
-                setOptions={setCustomers}
-                label={fieldLabels.counterparty}
-                fetchOptions={masterDataApi.searchCustomers}
-                sm={8}
-              />
+              <Grid size={{ xs: 12, sm: 8 }}>
+                <RHFAsyncAutocomplete
+                  name="counterpartyId"
+                  //control={control}
+                  options={customers ?? []}
+                  setOptions={setCustomers}
+                  label={fieldLabels.counterparty}
+                  fetchOptions={masterDataApi.searchCustomers}
+                />
+              </Grid>
 
               <Grid size={{ xs: 12, sm: "grow" }}>
                 <RHFAutocomplete
@@ -274,28 +273,30 @@ export default function HospitalityRecordDialog({
               </Grid>
 
               {DEPTWITHQUOTA.includes(formDepartmentCode) && (
-                <RHFSelect
-                  name="usesDeptQuota"
-                  label="是否使用部门额度"
-                  options={[
-                    { value: "true", label: "是" },
-                    { value: "false", label: "否" },
-                  ]}
-                  getOptionLabel={(opt) => opt.label ?? String(opt)}
-                  getOptionValue={(opt) => opt.value ?? opt}
-                  required
-                  sm={2}
-                />
+                <Grid size={{ xs: 12, sm: 2 }}>
+                  <RHFSelect
+                    name="usesDeptQuota"
+                    label="是否使用部门额度"
+                    options={[
+                      { value: "true", label: "是" },
+                      { value: "false", label: "否" },
+                    ]}
+                    getOptionLabel={(opt) => opt.label ?? String(opt)}
+                    getOptionValue={(opt) => opt.value ?? opt}
+                    required
+                  />
+                </Grid>
               )}
 
-              <RHFComboBox
-                name="handlerId"
-                options={handlers ?? []}
-                setOptions={setHandlers}
-                label={fieldLabels.handlerName}
-                fetchOptions={masterDataApi.searchHandlers}
-                sm={5}
-              />
+              <Grid size={{ xs: 12, sm: 5 }}>
+                <RHFAsyncAutocomplete
+                  name="handlerId"
+                  options={handlers ?? []}
+                  setOptions={setHandlers}
+                  label={fieldLabels.handlerName}
+                  fetchOptions={masterDataApi.searchHandlers}
+                />
+              </Grid>
 
               <Grid size={{ sm: 1 }}>
                 <Tooltip
@@ -435,7 +436,9 @@ export default function HospitalityRecordDialog({
                   type="date"
                 />
               </Grid>
-              <RHFTextareaField name={"remark"} label={fieldLabels.remark} />
+              <Grid size={{ xs: 12 }}>
+                <RHFTextareaField name={"remark"} label={fieldLabels.remark} />
+              </Grid>
             </Grid>
             <UsageItemLinesFieldArray
               control={control}
@@ -509,6 +512,5 @@ export default function HospitalityRecordDialog({
           </DialogActions>
         </Dialog>
       </FormProvider>
-    </FormModeProvider>
   );
 }

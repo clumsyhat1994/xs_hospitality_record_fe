@@ -1,8 +1,5 @@
-import { Box, MenuItem, TextField, Tooltip } from "@mui/material";
-import { useFormContext } from "react-hook-form";
-import { useFormMode } from "../../context/FormModeContext";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { useAuth } from "../../context/AuthProvider";
+import { Box, MenuItem, TextField } from "@mui/material";
+
 export default function BaseSelect({
   label,
   onChange,
@@ -14,7 +11,6 @@ export default function BaseSelect({
   getOptionValue = (opt) => opt.id ?? opt,
   ...rest
 }) {
-
   return (
     <TextField
       {...field}
@@ -24,9 +20,7 @@ export default function BaseSelect({
       fullWidth
       size="small"
       label={
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          {label}
-        </Box>
+        <Box sx={{ display: "flex", alignItems: "center" }}>{label}</Box>
       }
       error={!!error}
       helperText={error?.message}

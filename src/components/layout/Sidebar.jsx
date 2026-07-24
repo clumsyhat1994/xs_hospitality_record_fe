@@ -13,6 +13,7 @@ import Inventory2Icon from "@mui/icons-material/Inventory2";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import DatasetIcon from "@mui/icons-material/Dataset";
 import PeopleIcon from "@mui/icons-material/People";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import { useState } from "react";
 import menuLables from "../../constants/moduleLables";
 import { useNavigate } from "react-router-dom";
@@ -139,6 +140,21 @@ export default function Sidebar({ onOpenModule }) {
                   <PeopleIcon fontSize="small" />
                 </ListItemIcon>
                 <ListItemText primary={menuLables.COUNTERPARTY} />
+              </GuardedListItemButton>
+              <GuardedListItemButton
+                allowed={isAdmin}
+                sx={{ pl: 3 }}
+                onClick={() =>
+                  onOpenModule({
+                    key: moduleTabKeys.USERS,
+                    label: menuLables.USERS,
+                  })
+                }
+              >
+                <ListItemIcon sx={listItemIconSx}>
+                  <ManageAccountsIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary={menuLables.USERS} />
               </GuardedListItemButton>
             </List>
           </Collapse>

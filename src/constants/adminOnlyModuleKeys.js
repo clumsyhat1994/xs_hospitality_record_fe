@@ -6,6 +6,7 @@ const adminOnlyModuleKeys = new Set([
   moduleKeys.USAGE_RECORDS,
   moduleKeys.INVOICE_CONFLICT,
   moduleKeys.COUNTERPARTY,
+  moduleKeys.USERS,
   moduleKeys.DEPARTMENT,
   moduleKeys.POSITION,
   moduleKeys.GRADE,
