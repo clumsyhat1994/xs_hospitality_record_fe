@@ -53,8 +53,8 @@ export default function MasterDataDialog({
       onClose();
     } catch (err) {
       if (err.response?.status === 409) {
-        const data = err.response.data;
-        setError(data?.field, { type: "server", message: data?.detail });
+        const body = err.response.data;
+        setError(body?.field, { type: "server", message: body?.detail });
       }
     }
   };

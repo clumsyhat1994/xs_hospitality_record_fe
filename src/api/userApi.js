@@ -11,7 +11,7 @@ const userApi = {
     }),
   getUser: (id) => api.get(`/api/users/${id}`),
   createUser: (payload) => api.post("/api/users", payload),
-  updateUser: (id, payload) => api.put(`/api/users/${id}`, payload),
+  updateUser: (id, payload) => api.patch(`/api/users/${id}`, payload),
   enableUser: (id) => api.patch(`/api/users/${id}/enable`),
   disableUser: (id) => api.patch(`/api/users/${id}/disable`),
   listRoles: () => api.get("/api/users/roles"),

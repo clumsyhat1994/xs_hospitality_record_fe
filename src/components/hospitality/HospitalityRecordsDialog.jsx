@@ -182,10 +182,8 @@ export default function HospitalityRecordDialog({
       };
       data = cleanData(normalized);
       if (isEditMode) {
-        // update
         res = await hospitalityApi.update(initialValues.id, data, confirm);
       } else {
-        // create
         const createPayload = {
           ...data,
           giftReceiptLines: data.giftReceiptLines ?? [],
