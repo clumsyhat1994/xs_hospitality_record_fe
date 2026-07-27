@@ -39,6 +39,10 @@ const routeToModule = {
     key: moduleKeys.GRADE,
     label: menuLables.GRADE,
   },
+  [moduleRoutes.PER_CAPITA_LIMIT]: {
+    key: moduleKeys.PER_CAPITA_LIMIT,
+    label: menuLables.PER_CAPITA_LIMIT,
+  },
 };
 
 export default routeToModule;

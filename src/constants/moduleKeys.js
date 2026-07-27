@@ -8,5 +8,6 @@ const moduleKeys = {
   DEPARTMENT: "DEPARTMENT",
   POSITION: "POSITION",
   GRADE: "GRADE",
+  PER_CAPITA_LIMIT: "PER_CAPITA_LIMIT",
 };
 export default moduleKeys;

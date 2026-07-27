@@ -1,6 +1,20 @@
 import api from "./api";
 const masterDataApi = {
-  listDepartments: () => api.get("/api/department"),
+  listDepartments: (page = 0, size = 50, keyword) =>
+    api.get("/api/department", {
+      params: {
+        page,
+        size,
+        q: keyword || undefined,
+        sort: "sortOrder,asc",
+      },
+    }),
+  createDepartment: (payload) => api.post("/api/department", payload),
+  updateDepartment: (id, payload) =>
+    api.put(`/api/department/${id}`, payload),
+  activateDepartment: (id) => api.patch(`/api/department/${id}/activate`),
+  deactivateDepartment: (id) =>
+    api.patch(`/api/department/${id}/deactivate`),
   searchDepartments: (keyword, includeId) =>
     api.get("/api/department/search", {
       params: {
@@ -60,12 +74,10 @@ const masterDataApi = {
         includeId: includeId === "" ? undefined : includeId,
       },
     }),
-  activateCounterparty: (id) => {
-    api.patch(`/api/counterparty/${id}/activate`);
-  },
-  deactivateCounterparty: (id) => {
-    api.patch(`/api/counterparty/${id}/deactivate`);
-  },
+  activateCounterparty: (id) =>
+    api.patch(`/api/counterparty/${id}/activate`),
+  deactivateCounterparty: (id) =>
+    api.patch(`/api/counterparty/${id}/deactivate`),
   exportCounterparty: () =>
     api.get(`/api/counterparty/export`, {
       responseType: "blob",
@@ -98,6 +110,17 @@ const masterDataApi = {
         includeId: includeId === "" ? undefined : includeId,
       },
     }),
+
+  listPerCapitaLimits: (page = 0, size = 50) =>
+    api.get("/api/per_capita_limit", {
+      params: { page, size, sort: "type.sortOrder,asc" },
+    }),
+  updatePerCapitaLimit: (id, payload) =>
+    api.put(`/api/per_capita_limit/${id}`, payload),
+  activatePerCapitaLimit: (id) =>
+    api.patch(`/api/per_capita_limit/${id}/activate`),
+  deactivatePerCapitaLimit: (id) =>
+    api.patch(`/api/per_capita_limit/${id}/deactivate`),
 };
 
 export default masterDataApi;

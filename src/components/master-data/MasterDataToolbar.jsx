@@ -41,24 +41,32 @@ export default function MasterDataToolbar({
       <Typography variant="h6">{title}</Typography>
       <Stack direction="row" spacing={2} alignItems="center">
         {extraFilters}
-        <TextField
-          sx={{ padding: 0, flexShrink: 0, ...searchSx }}
-          size="small"
-          label={searchLabel}
-          placeholder={searchPlaceholder}
-          value={searchValue}
-          onChange={(e) => onSearchChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          slotProps={{
-            inputLabel: {
-              shrink: true,
-            },
-          }}
-        />
+        {onSearchChange && (
+          <TextField
+            sx={{ padding: 0, flexShrink: 0, ...searchSx }}
+            size="small"
+            label={searchLabel}
+            placeholder={searchPlaceholder}
+            value={searchValue}
+            onChange={(e) => onSearchChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            slotProps={{
+              inputLabel: {
+                shrink: true,
+              },
+            }}
+          />
+        )}
 
-        <Button variant="contained" startIcon={<AddIcon />} onClick={onCreate}>
-          {buttonLabels.create}
-        </Button>
+        {onCreate && (
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={onCreate}
+          >
+            {buttonLabels.create}
+          </Button>
+        )}
         {extraActions}
         {onExport && (
           <Tooltip

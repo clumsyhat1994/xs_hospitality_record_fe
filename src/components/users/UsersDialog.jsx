@@ -9,10 +9,11 @@ import {
 } from "@mui/material";
 import { useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
-import RHFTextField from "../../form/RHFTextField";
-import RHFSelect from "../../form/RHFSelect";
-import RHFMultiAutocomplete from "../../form/RHFMultiAutocomplete";
-import roleLabels from "../../../constants/roleLabels";
+import RHFTextField from "../form/RHFTextField";
+import RHFSelect from "../form/RHFSelect";
+import RHFMultiAutocomplete from "../form/RHFMultiAutocomplete";
+import roleLabels from "../../constants/roleLabels";
+import { userFieldLabels as fieldLabels } from "../../constants/masterDataFieldLabels";
 
 function rolesEqual(a = [], b = []) {
   const left = [...a].map(String).sort().join(",");
@@ -127,12 +128,12 @@ export default function UsersDialog({
         <DialogContent sx={{ mt: 1 }}>
           <Grid container spacing={2} pt={1}>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <RHFTextField name="username" label="用户名" required />
+              <RHFTextField name="username" label={fieldLabels.username} required />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <RHFTextField
                 name="password"
-                label={isEditMode ? "新密码（留空不改）" : "密码"}
+                label={isEditMode ? fieldLabels.newPassword : fieldLabels.password}
                 type="password"
                 required={!isEditMode}
                 rules={{
@@ -149,7 +150,7 @@ export default function UsersDialog({
             <Grid size={{ xs: 12, sm: 6 }}>
               <RHFSelect
                 name="departmentId"
-                label="部门"
+                label={fieldLabels.department}
                 options={departments}
                 getOptionLabel={(opt) => opt.name}
                 getOptionValue={(opt) => opt.id}
@@ -160,7 +161,7 @@ export default function UsersDialog({
               <RHFMultiAutocomplete
                 name="roles"
                 control={control}
-                label="角色"
+                label={fieldLabels.roles}
                 options={roleOptions}
                 getOptionLabel={(opt) =>
                   roleLabels[opt] || opt?.name || String(opt)

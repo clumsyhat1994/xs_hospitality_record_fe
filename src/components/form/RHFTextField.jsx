@@ -14,6 +14,7 @@ export default function RHFTextField({
   numericOnly = false,
   chineseOnly = false,
   minWidth = 0,
+  slotProps,
   ...rest
 }) {
   const { clearErrors, control } = useFormContext();
@@ -26,7 +27,11 @@ export default function RHFTextField({
         ...(required ? { required: "不能为空" } : {}),
         ...(required
           ? {
-              validate: (v) => v?.trim() !== "" || "不能为空",
+              validate: (v) => {
+                if (v == null || v === "") return "不能为空";
+                if (typeof v === "string" && v.trim() === "") return "不能为空";
+                return true;
+              },
             }
           : {}),
         ...rules,
@@ -59,12 +64,14 @@ export default function RHFTextField({
           error={!!error}
           helperText={error?.message}
           sx={{ minWidth }}
+          {...rest}
           slotProps={{
+            ...slotProps,
             inputLabel: {
-              shrink: type === "date" ? { shrink: true } : {},
+              shrink: true,
+              ...slotProps?.inputLabel,
             },
           }}
-          {...rest}
         />
       )}
     />

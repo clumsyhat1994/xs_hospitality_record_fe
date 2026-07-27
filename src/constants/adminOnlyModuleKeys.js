@@ -10,6 +10,7 @@ const adminOnlyModuleKeys = new Set([
   moduleKeys.DEPARTMENT,
   moduleKeys.POSITION,
   moduleKeys.GRADE,
+  moduleKeys.PER_CAPITA_LIMIT,
 ]);
 
 export function isAdminOnlyModule(key) {

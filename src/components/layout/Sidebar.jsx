@@ -14,6 +14,8 @@ import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import DatasetIcon from "@mui/icons-material/Dataset";
 import PeopleIcon from "@mui/icons-material/People";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import PriceChangeIcon from "@mui/icons-material/PriceChange";
+import BusinessIcon from "@mui/icons-material/Business";
 import { useState } from "react";
 import menuLables from "../../constants/moduleLables";
 import { useNavigate } from "react-router-dom";
@@ -131,6 +133,21 @@ export default function Sidebar({ onOpenModule }) {
                 sx={{ pl: 3 }}
                 onClick={() =>
                   onOpenModule({
+                    key: moduleTabKeys.DEPARTMENT,
+                    label: menuLables.DEPARTMENT,
+                  })
+                }
+              >
+                <ListItemIcon sx={listItemIconSx}>
+                  <BusinessIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary={menuLables.DEPARTMENT} />
+              </GuardedListItemButton>
+              <GuardedListItemButton
+                allowed={isAdmin}
+                sx={{ pl: 3 }}
+                onClick={() =>
+                  onOpenModule({
                     key: moduleTabKeys.COUNTERPARTY,
                     label: menuLables.COUNTERPARTY,
                   })
@@ -146,18 +163,32 @@ export default function Sidebar({ onOpenModule }) {
                 sx={{ pl: 3 }}
                 onClick={() =>
                   onOpenModule({
-                    key: moduleTabKeys.USERS,
-                    label: menuLables.USERS,
+                    key: moduleTabKeys.PER_CAPITA_LIMIT,
+                    label: menuLables.PER_CAPITA_LIMIT,
                   })
                 }
               >
                 <ListItemIcon sx={listItemIconSx}>
-                  <ManageAccountsIcon fontSize="small" />
+                  <PriceChangeIcon fontSize="small" />
                 </ListItemIcon>
-                <ListItemText primary={menuLables.USERS} />
+                <ListItemText primary={menuLables.PER_CAPITA_LIMIT} />
               </GuardedListItemButton>
             </List>
           </Collapse>
+          <GuardedListItemButton
+            allowed={isAdmin}
+            onClick={() =>
+              onOpenModule({
+                key: moduleTabKeys.USERS,
+                label: menuLables.USERS,
+              })
+            }
+          >
+            <ListItemIcon sx={listItemIconSx}>
+              <ManageAccountsIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText primary={menuLables.USERS} />
+          </GuardedListItemButton>
         </List>
       </Box>
       <Divider />

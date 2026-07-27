@@ -9,10 +9,15 @@ import MasterDataTable from "../MasterDataTable";
 import MasterDataDialog from "../MasterDataDialog";
 import masterDataApi from "../../../api/masterDataApi";
 import { useMasterData } from "../../../context/MasterDataContext";
-import { useForm } from "react-hook-form";
 import { downloadBlob } from "../../../utils/downloadBlob";
 import CounterpartyImportDialog from "./CounterpartyImportDialog";
 import { masterDataButtonLabels as buttonLabels } from "../../../constants/buttonLabels";
+import useOptimisticActiveToggle from "../../../hooks/useOptimisticActiveToggle";
+import {
+  counterpartyFieldLabels as fieldLabels,
+  activeStatusLabels,
+} from "../../../constants/masterDataFieldLabels";
+import moduleLables from "../../../constants/moduleLables";
 
 function counterpartyRoleLabel(role) {
   return role?.label || role?.name || "";
@@ -27,12 +32,18 @@ export default function CounterpartyPage() {
   const [keyword, setKeyword] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
   const [loading, setLoading] = useState(false);
-  const [togglingIds, setTogglingIds] = useState(new Set());
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
   const [importOpen, setImportOpen] = useState(false);
   const debounceRef = useRef(null);
   const { counterpartyTypes, counterpartyRoles } = useMasterData();
+  const { togglingIds, handleToggleActive } = useOptimisticActiveToggle(
+    setRows,
+    {
+      activate: masterDataApi.activateCounterparty,
+      deactivate: masterDataApi.deactivateCounterparty,
+    },
+  );
 
   const emptyRow = {
     name: "",
@@ -107,30 +118,6 @@ export default function CounterpartyPage() {
     }, 500);
   };
 
-  const handleToggleActive = async (row) => {
-    const id = row.id;
-    setRows((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, active: !r.active } : r)),
-    );
-    setTogglingIds((prev) => new Set(prev).add(id));
-    try {
-      if (row.active) await masterDataApi.deactivateCounterparty(id);
-      else await masterDataApi.activateCounterparty(id);
-    } catch (err) {
-      // rollback if failed
-      setRows((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, active: row.active } : r)),
-      );
-      console.error(err);
-    } finally {
-      setTogglingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(id);
-        return next;
-      });
-    }
-  };
-
   const handleExport = async () => {
     try {
       const res = await masterDataApi.exportCounterparty();
@@ -146,31 +133,31 @@ export default function CounterpartyPage() {
   };
 
   const columns = [
-    { fieldName: "name", headerName: "公司名称", width: 300 },
+    { fieldName: "name", headerName: fieldLabels.name, width: 300 },
     {
       fieldName: "counterpartyRoles",
       width: 120,
-      headerName: "角色",
+      headerName: fieldLabels.roles,
       renderCell: (value) =>
         (value ?? []).map((o) => counterpartyRoleLabel(o)).join("、"),
     },
     {
       fieldName: "counterpartyTypes",
       width: 250,
-      headerName: "归属地",
+      headerName: fieldLabels.types,
       renderCell: (value) => {
         return (value ?? []).map((o) => o.name).join("、");
       },
     },
     {
       fieldName: "active",
-      headerName: "状态",
+      headerName: fieldLabels.active,
       width: 100,
       renderCell: (value) =>
         value ? (
-          <Chip label="启用" color="success" size="small" />
+          <Chip label={activeStatusLabels.enabled} color="success" size="small" />
         ) : (
-          <Chip label="停用" color="default" size="small" />
+          <Chip label={activeStatusLabels.disabled} color="default" size="small" />
         ),
     },
   ];
@@ -185,18 +172,18 @@ export default function CounterpartyPage() {
     [counterpartyRoles],
   );
 
-  const dialogTextFields = [{ fieldName: "name", label: "公司名称" }];
+  const dialogTextFields = [{ fieldName: "name", label: fieldLabels.name }];
   const dialogMuiltiAutoCompleteFields = [
     {
       fieldName: "counterpartyRoleIds",
-      label: "角色",
+      label: fieldLabels.roles,
       options: counterpartyRoles,
       getOptionLabel: (opt) => counterpartyRoleLabel(opt),
       sm: 6,
     },
     {
       fieldName: "counterpartyTypeIds",
-      label: "归属地",
+      label: fieldLabels.types,
       options: counterpartyTypes,
       sm: 6,
       required: false,
@@ -207,13 +194,13 @@ export default function CounterpartyPage() {
     <Box>
       <Paper elevation={2}>
         <MasterDataToolbar
-          title="往来单位"
+          title={moduleLables.COUNTERPARTY}
           searchPlaceholder="按名称搜索"
           searchSx={{ width: 270 }}
           searchValue={searchName}
           extraFilters={
             <BaseSelect
-              label="角色"
+              label={fieldLabels.roles}
               options={roleFilterOptions}
               fieldValue={roleFilter}
               onChange={(e) => {

@@ -20,6 +20,7 @@ import ToggleOffIcon from "@mui/icons-material/ToggleOff";
 import ToggleOnIcon from "@mui/icons-material/ToggleOn";
 
 import { NumberedTablePagination } from "../common/NumberedTablePagination";
+import { activeStatusLabels } from "../../constants/masterDataFieldLabels";
 
 export default function MasterDataTable({
   rows,
@@ -89,7 +90,13 @@ export default function MasterDataTable({
                       );
                     })}
                     <TableCell align="right">
-                      <Tooltip title={row.active ? "点击停用" : "点击启用"}>
+                      <Tooltip
+                        title={
+                          row.active
+                            ? activeStatusLabels.clickToDisable
+                            : activeStatusLabels.clickToEnable
+                        }
+                      >
                         <span>
                           <Switch
                             size="large"

@@ -9,7 +9,9 @@ import PurchaseRecords from "./components/purchase/PurchaseRecords";
 import UsageRecords from "./components/usage/UsageRecords";
 import SequentialInvoiceNumber from "./components/invoice-conflict/SequentialInvoiceNumber";
 import CounterpartyPage from "./components/master-data/counterparty/CounterpartyPage";
-import UsersPage from "./components/master-data/users/UsersPage";
+import UsersPage from "./components/users/UsersPage";
+import PerCapitaLimitPage from "./components/master-data/per-capita-limit/PerCapitaLimitPage";
+import DepartmentPage from "./components/master-data/department/DepartmentPage";
 import moduleRoutes from "./constants/moduleRoutes";
 import AppShell from "./AppShell";
 
@@ -73,7 +75,22 @@ function App() {
                 </RequireAdmin>
               }
             />
-            {/* <Route path={moduleRoutes.DEPARTMENT} element={<Department />} /> */}
+            <Route
+              path={moduleRoutes.PER_CAPITA_LIMIT}
+              element={
+                <RequireAdmin>
+                  <PerCapitaLimitPage />
+                </RequireAdmin>
+              }
+            />
+            <Route
+              path={moduleRoutes.DEPARTMENT}
+              element={
+                <RequireAdmin>
+                  <DepartmentPage />
+                </RequireAdmin>
+              }
+            />
           </Route>
         </Route>
       </Routes>

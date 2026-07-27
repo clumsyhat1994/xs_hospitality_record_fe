@@ -78,10 +78,13 @@ export default function MasterDataDialog({
               <Grid key={field.fieldName} size={{ xs: 12, sm: field.sm ?? 6 }}>
                 <RHFTextField
                   name={field.fieldName}
-                  control={control}
                   label={field.label}
+                  type={field.type}
                   chineseOnly={field.chineseOnly}
                   required={field.required !== false}
+                  disabled={field.disabled}
+                  rules={field.rules}
+                  slotProps={field.slotProps}
                 />
               </Grid>
             ))}

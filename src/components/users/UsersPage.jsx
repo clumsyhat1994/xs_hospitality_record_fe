@@ -1,17 +1,35 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { Box, Paper, Chip } from "@mui/material";
-import MasterDataToolbar from "../MasterDataToolbar";
-import MasterDataTable from "../MasterDataTable";
+import MasterDataToolbar from "../master-data/MasterDataToolbar";
+import MasterDataTable from "../master-data/MasterDataTable";
 import UsersDialog from "./UsersDialog";
-import userApi from "../../../api/userApi";
-import { useMasterData } from "../../../context/MasterDataContext";
-import roleLabels from "../../../constants/roleLabels";
+import userApi from "../../api/userApi";
+import { useMasterData } from "../../context/MasterDataContext";
+import roleLabels from "../../constants/roleLabels";
+import useOptimisticActiveToggle from "../../hooks/useOptimisticActiveToggle";
+import {
+  userFieldLabels as fieldLabels,
+  activeStatusLabels,
+} from "../../constants/masterDataFieldLabels";
+import moduleLables from "../../constants/moduleLables";
 
 function mapUserRow(user) {
   return {
     ...user,
     active: user.enabled,
   };
+}
+
+function isUserActive(row) {
+  return row.enabled;
+}
+
+function mapUserOptimistic(row) {
+  return { ...row, active: !row.active, enabled: !row.enabled };
+}
+
+function mapUserRollback(row, original) {
+  return { ...row, active: original.active, enabled: original.enabled };
 }
 
 export default function UsersPage() {
@@ -22,12 +40,21 @@ export default function UsersPage() {
   const [searchName, setSearchName] = useState("");
   const [keyword, setKeyword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [togglingIds, setTogglingIds] = useState(new Set());
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
   const [roleOptions, setRoleOptions] = useState(["ADMIN", "USER"]);
   const debounceRef = useRef(null);
   const { departments } = useMasterData();
+  const { togglingIds, handleToggleActive } = useOptimisticActiveToggle(
+    setRows,
+    {
+      activate: userApi.enableUser,
+      deactivate: userApi.disableUser,
+      isActive: isUserActive,
+      mapOptimistic: mapUserOptimistic,
+      mapRollback: mapUserRollback,
+    },
+  );
 
   const emptyRow = {
     username: "",
@@ -101,59 +128,29 @@ export default function UsersPage() {
     }, 500);
   };
 
-  // Optimistic toggle: flip UI first for a snappy switch, roll back if the API fails.
-  const handleToggleActive = async (row) => {
-    const id = row.id;
-    setRows((prev) =>
-      prev.map((r) =>
-        r.id === id ? { ...r, active: !r.active, enabled: !r.enabled } : r,
-      ),
-    );
-    setTogglingIds((prev) => new Set(prev).add(id));
-    try {
-      if (row.enabled) await userApi.disableUser(id);
-      else await userApi.enableUser(id);
-    } catch (err) {
-      setRows((prev) =>
-        prev.map((r) =>
-          r.id === id
-            ? { ...r, active: row.active, enabled: row.enabled }
-            : r,
-        ),
-      );
-      console.error(err);
-    } finally {
-      setTogglingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(id);
-        return next;
-      });
-    }
-  };
-
   const columns = [
-    { fieldName: "username", headerName: "用户名", width: 180 },
+    { fieldName: "username", headerName: fieldLabels.username, width: 180 },
     {
       fieldName: "departmentName",
-      headerName: "部门",
+      headerName: fieldLabels.department,
       width: 180,
     },
     {
       fieldName: "roles",
-      headerName: "角色",
+      headerName: fieldLabels.roles,
       width: 180,
       renderCell: (value) =>
         (value ?? []).map((role) => roleLabels[role] || role).join("、"),
     },
     {
       fieldName: "active",
-      headerName: "状态",
+      headerName: fieldLabels.active,
       width: 100,
       renderCell: (value) =>
         value ? (
-          <Chip label="启用" color="success" size="small" />
+          <Chip label={activeStatusLabels.enabled} color="success" size="small" />
         ) : (
-          <Chip label="停用" color="default" size="small" />
+          <Chip label={activeStatusLabels.disabled} color="default" size="small" />
         ),
     },
   ];
@@ -162,9 +159,9 @@ export default function UsersPage() {
     <Box>
       <Paper elevation={2}>
         <MasterDataToolbar
-          title="用户管理"
+          title={moduleLables.USERS}
           searchPlaceholder="按用户名搜索"
-          searchLabel="用户名"
+          searchLabel={fieldLabels.username}
           searchSx={{ width: 270 }}
           searchValue={searchName}
           onSearchChange={handleSearchChange}
