@@ -142,7 +142,22 @@ export default function UsersDialog({
                     if (!trimmed) {
                       return isEditMode ? true : "不能为空";
                     }
-                    return trimmed.length >= 8 || "密码至少 8 位";
+                    if (trimmed.length < 12) {
+                      return "密码至少 12 位";
+                    }
+                    if (!/[A-Z]/.test(trimmed)) {
+                      return "密码须包含大写字母";
+                    }
+                    if (!/[a-z]/.test(trimmed)) {
+                      return "密码须包含小写字母";
+                    }
+                    if (!/[0-9]/.test(trimmed)) {
+                      return "密码须包含数字";
+                    }
+                    if (!/[^a-zA-Z0-9]/.test(trimmed)) {
+                      return "密码须包含特殊字符";
+                    }
+                    return true;
                   },
                 }}
               />
