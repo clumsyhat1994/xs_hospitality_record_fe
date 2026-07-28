@@ -128,13 +128,19 @@ export default function UsersDialog({
         <DialogContent sx={{ mt: 1 }}>
           <Grid container spacing={2} pt={1}>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <RHFTextField name="username" label={fieldLabels.username} required />
+              <RHFTextField
+                name="username"
+                label={fieldLabels.username}
+                required
+                autoComplete="off"
+              />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <RHFTextField
                 name="password"
                 label={isEditMode ? fieldLabels.newPassword : fieldLabels.password}
                 type="password"
+                autoComplete="new-password"
                 required={!isEditMode}
                 rules={{
                   validate: (v) => {
