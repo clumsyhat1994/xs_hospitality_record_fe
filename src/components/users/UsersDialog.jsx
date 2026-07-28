@@ -6,8 +6,12 @@ import {
   Button,
   Grid,
   Typography,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
-import { useEffect } from "react";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { useEffect, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import RHFTextField from "../form/RHFTextField";
 import RHFSelect from "../form/RHFSelect";
@@ -30,6 +34,7 @@ export default function UsersDialog({
   departments = [],
   roleOptions = [],
 }) {
+  const [showPassword, setShowPassword] = useState(false);
   const form = useForm({
     defaultValues: initialValues,
     mode: "onSubmit",
@@ -49,6 +54,7 @@ export default function UsersDialog({
   useEffect(() => {
     if (open) {
       reset(initialValues);
+      setShowPassword(false);
     }
   }, [open, initialValues, reset]);
 
@@ -139,9 +145,28 @@ export default function UsersDialog({
               <RHFTextField
                 name="password"
                 label={isEditMode ? fieldLabels.newPassword : fieldLabels.password}
-                type="password"
+                type={showPassword ? "text" : "password"}
                 autoComplete="new-password"
                 required={!isEditMode}
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          edge="end"
+                          onClick={() => setShowPassword((v) => !v)}
+                          aria-label={showPassword ? "隐藏密码" : "显示密码"}
+                        >
+                          {showPassword ? (
+                            <Visibility fontSize="small" />
+                          ) : (
+                            <VisibilityOff fontSize="small" />
+                          )}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  },
+                }}
                 rules={{
                   validate: (v) => {
                     const trimmed = (v ?? "").trim();
