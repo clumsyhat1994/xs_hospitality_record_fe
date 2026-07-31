@@ -53,9 +53,15 @@ const DEPTWITHQUOTA = ["SCYWB", "QCCZB"];
 function toHospitalityFormDefaults(values) {
   if (!values) return values;
   const alloc = values.giftReceiptLines;
+  // Select options are "true"/"false" strings; API sends boolean.
+  const base = {
+    ...values,
+    usesDeptQuota:
+      values.usesDeptQuota == null ? "" : String(values.usesDeptQuota),
+  };
   if (Array.isArray(alloc) && alloc.length > 0) {
     return {
-      ...values,
+      ...base,
       giftReceiptLines: alloc.filter(Boolean).map((a) => ({
         category: a.category ?? "",
         purchaseLineId: a.purchaseLineId,
@@ -67,7 +73,7 @@ function toHospitalityFormDefaults(values) {
     };
   }
   return {
-    ...values,
+    ...base,
     giftReceiptLines: [],
   };
 }
@@ -127,15 +133,24 @@ export default function HospitalityRecordDialog({
   useEffect(() => {
     if (!open) return;
     setValidationHint("");
-    reset(toHospitalityFormDefaults(initialValues));
-    if (!isAdmin) setValue("departmentCode", userDepartmentCode);
-  }, [initialValues, isAdmin, open, reset, setValue, userDepartmentCode]);
-
-  useEffect(() => {
-    if (!DEPTWITHQUOTA.includes(formDepartmentCode)) {
-      setValue("usesDeptQuota", null, { shouldValidate: true });
+    const defaults = toHospitalityFormDefaults(initialValues);
+    if (!isAdmin) defaults.departmentCode = userDepartmentCode;
+    if (!DEPTWITHQUOTA.includes(defaults.departmentCode)) {
+      defaults.usesDeptQuota = "";
     }
-  }, [formDepartmentCode, setValue]);
+    reset(defaults);
+  }, [initialValues, isAdmin, open, reset, userDepartmentCode]);
+
+  // Clear quota flag when user switches away from a quota department.
+  // Use getValues (not the watched value alone) so a reset in the effect above
+  // is not overwritten by a stale useWatch value from the previous render.
+  useEffect(() => {
+    if (!open) return;
+    const deptCode = getValues("departmentCode");
+    if (!DEPTWITHQUOTA.includes(deptCode)) {
+      setValue("usesDeptQuota", "", { shouldValidate: false });
+    }
+  }, [formDepartmentCode, getValues, open, setValue]);
 
   const cleanData = (data) => {
     return Object.fromEntries(
@@ -154,6 +169,9 @@ export default function HospitalityRecordDialog({
 
       const normalized = {
         ...data,
+        usesDeptQuota: DEPTWITHQUOTA.includes(data.departmentCode)
+          ? data.usesDeptQuota === "true" || data.usesDeptQuota === true
+          : null,
         invoiceAmount: toNullableNumber(data.invoiceAmount),
         theirCount: toNullableNumber(data.theirCount, { integer: true }),
         ourCount: toNullableNumber(data.ourCount, { integer: true }),
