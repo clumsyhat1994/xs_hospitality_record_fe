@@ -20,8 +20,6 @@ const usageRecordApi = {
   create: (payload) => api.post(endpoint, payload),
   update: (id, payload) => api.put(`${endpoint}/${id}`, payload),
   deleteOne: (id) => api.delete(`${endpoint}/${id}`),
-  deleteUsageLine: (id, purchaseLineId) =>
-    api.delete(`${endpoint}/${id}/usage-lines/${purchaseLineId}`),
 };
 
 export default usageRecordApi;
